@@ -8,7 +8,7 @@ import org.osgl.util.E;
 import java.lang.reflect.Method;
 
 /**
- * Test `invokeXxx` method on {@link Osgl} class
+ * Test `invokeXxx` method on {@link Lang} class
  */
 public class InvokeMethodTest extends TestBase {
 

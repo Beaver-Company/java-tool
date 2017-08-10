@@ -1,6 +1,6 @@
 package org.osgl.util;
 
-import org.osgl.Osgl;
+import org.osgl.Lang;
 import org.osgl.exception.NotAppliedException;
 
 import java.lang.reflect.Field;
@@ -16,8 +16,8 @@ public class ReflectionPropertySetter extends ReflectionPropertyHandler implemen
         setNullValuePolicy(PropertyGetter.NullValuePolicy.CREATE_NEW);
     }
 
-    public ReflectionPropertySetter(Osgl.Function<Class<?>, Object> objectFactory,
-                             Osgl.Func2<String, Class<?>, ?> stringValueResolver,
+    public ReflectionPropertySetter(Lang.Function<Class<?>, Object> objectFactory,
+                             Lang.Func2<String, Class<?>, ?> stringValueResolver,
                              Class entityClass, Method m, Field f) {
         super(objectFactory, stringValueResolver, PropertyGetter.NullValuePolicy.CREATE_NEW, entityClass, m, f);
     }
@@ -27,7 +27,7 @@ public class ReflectionPropertySetter extends ReflectionPropertyHandler implemen
         setProperty(entity, value);
     }
 
-    private void setProperty(Object entity, Object value) throws NotAppliedException, Osgl.Break {
+    private void setProperty(Object entity, Object value) throws NotAppliedException, Lang.Break {
         if (null == entity) {
             return;
         }

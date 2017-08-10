@@ -2,7 +2,7 @@ package org.osgl.util;
 
 import java.util.Iterator;
 
-public class DelegatingIterator<T> extends OsglIteratorBase<T> implements Iterator<T> {
+public class DelegatingIterator<T> extends IteratorBase<T> implements Iterator<T> {
     private final Iterator<? extends T> itr_;
     protected final boolean readOnly;
 

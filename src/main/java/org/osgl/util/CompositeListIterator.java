@@ -2,7 +2,7 @@ package org.osgl.util;
 
 import java.util.ListIterator;
 
-class CompositeListIterator<T> extends OsglIteratorBase<T> implements ListIterator<T> {
+class CompositeListIterator<T> extends IteratorBase<T> implements ListIterator<T> {
     private final ListIterator<T> left_;
     private final ListIterator<T> right_;
     private boolean leftOver_;

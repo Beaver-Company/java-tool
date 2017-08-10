@@ -5,7 +5,7 @@ import org.osgl.$;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-class EnumerationIterator<T> extends OsglIteratorBase<T> implements Iterator<T> {
+class EnumerationIterator<T> extends IteratorBase<T> implements Iterator<T> {
     private Enumeration<? extends T> e;
 
     EnumerationIterator(Enumeration<? extends T> enumeration) {

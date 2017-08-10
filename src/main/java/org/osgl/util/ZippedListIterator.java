@@ -5,7 +5,7 @@ import org.osgl.$;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-public class ZippedListIterator<A, B> extends OsglIteratorBase<$.Binary<A, B>> implements ListIterator<$.Binary<A, B>> {
+public class ZippedListIterator<A, B> extends IteratorBase<$.Binary<A, B>> implements ListIterator<$.Binary<A, B>> {
     private ListIterator<A> a;
     private ListIterator<B> b;
     private $.Option<A> defA = $.none();

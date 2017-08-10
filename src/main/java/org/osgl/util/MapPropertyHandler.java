@@ -1,7 +1,7 @@
 package org.osgl.util;
 
 import org.osgl.$;
-import org.osgl.Osgl;
+import org.osgl.Lang;
 
 class MapPropertyHandler extends PropertyHandlerBase {
 
@@ -21,8 +21,8 @@ class MapPropertyHandler extends PropertyHandlerBase {
         this.valType = $.ensureNotNull(valType);
     }
 
-    public MapPropertyHandler(Osgl.Function<Class<?>, Object> objectFactory,
-                              Osgl.Func2<String, Class<?>, ?> stringValueResolver,
+    public MapPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
+                              Lang.Func2<String, Class<?>, ?> stringValueResolver,
                               Class<?> keyType,
                               Class<?> valType) {
         super(objectFactory, stringValueResolver);
@@ -30,8 +30,8 @@ class MapPropertyHandler extends PropertyHandlerBase {
         this.valType = $.ensureNotNull(valType);
     }
 
-    public MapPropertyHandler(Osgl.Function<Class<?>, Object> objectFactory,
-                              Osgl.Func2<String, Class<?>, ?> stringValueResolver,
+    public MapPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
+                              Lang.Func2<String, Class<?>, ?> stringValueResolver,
                               PropertyGetter.NullValuePolicy nullValuePolicy,
                               Class<?> keyType,
                               Class<?> valType) {

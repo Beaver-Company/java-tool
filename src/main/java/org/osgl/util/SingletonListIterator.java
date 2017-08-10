@@ -3,7 +3,7 @@ package org.osgl.util;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-public class SingletonListIterator<T> extends OsglIteratorBase<T> implements ListIterator<T> {
+public class SingletonListIterator<T> extends IteratorBase<T> implements ListIterator<T> {
     private final T t_;
     private volatile boolean consumed_;
 

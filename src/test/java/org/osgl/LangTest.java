@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.List;
 
-public class OsglTest extends TestBase {
+public class LangTest extends TestBase {
 
     @Test
     public void testToString2() {

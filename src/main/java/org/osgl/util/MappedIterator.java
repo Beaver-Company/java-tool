@@ -4,7 +4,7 @@ import org.osgl.$;
 
 import java.util.Iterator;
 
-class MappedIterator<T, R> extends OsglIteratorBase<R> {
+class MappedIterator<T, R> extends IteratorBase<R> {
 
     private Iterator<? extends T> data;
     private $.F1<? super T, ? extends R> mapper;

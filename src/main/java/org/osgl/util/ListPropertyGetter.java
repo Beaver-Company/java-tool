@@ -1,6 +1,6 @@
 package org.osgl.util;
 
-import org.osgl.Osgl;
+import org.osgl.Lang;
 
 import java.util.List;
 
@@ -17,14 +17,14 @@ public class ListPropertyGetter extends ListPropertyHandler implements PropertyG
         super(nullValuePolicy, itemType);
     }
 
-    public ListPropertyGetter(Osgl.Function<Class<?>, Object> objectFactory,
-                              Osgl.Func2<String, Class<?>, ?> stringValueResolver,
+    public ListPropertyGetter(Lang.Function<Class<?>, Object> objectFactory,
+                              Lang.Func2<String, Class<?>, ?> stringValueResolver,
                               Class<?> itemType) {
         super(objectFactory, stringValueResolver, itemType);
     }
 
-    public ListPropertyGetter(Osgl.Function<Class<?>, Object> objectFactory,
-                              Osgl.Func2<String, Class<?>, ?> stringValueResolver,
+    public ListPropertyGetter(Lang.Function<Class<?>, Object> objectFactory,
+                              Lang.Func2<String, Class<?>, ?> stringValueResolver,
                               PropertyGetter.NullValuePolicy nullValuePolicy,
                               Class<?> itemType) {
         super(objectFactory, stringValueResolver, nullValuePolicy, itemType);

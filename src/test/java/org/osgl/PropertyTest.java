@@ -111,15 +111,15 @@ public class PropertyTest extends TestBase {
     @Test
     public void testGetPropertyWithCache() {
         final C.Map<String, Serializable> map = C.Mutable.Map();
-        Osgl.F1<String, Serializable> getter = new Osgl.F1<String, Serializable>() {
+        Lang.F1<String, Serializable> getter = new Lang.F1<String, Serializable>() {
             @Override
-            public Serializable apply(String s) throws NotAppliedException, Osgl.Break {
+            public Serializable apply(String s) throws NotAppliedException, Lang.Break {
                 return map.get(s);
             }
         };
-        Osgl.F2<String, Serializable, Object> setter = new Osgl.F2<String, Serializable, Object>() {
+        Lang.F2<String, Serializable, Object> setter = new Lang.F2<String, Serializable, Object>() {
             @Override
-            public Object apply(String s, Serializable serializable) throws NotAppliedException, Osgl.Break {
+            public Object apply(String s, Serializable serializable) throws NotAppliedException, Lang.Break {
                 map.put(s, serializable);
                 return null;
             }

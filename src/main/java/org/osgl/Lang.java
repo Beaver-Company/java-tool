@@ -4,6 +4,7 @@ import org.osgl.cache.CacheService;
 import org.osgl.concurrent.ContextLocal;
 import org.osgl.exception.*;
 import org.osgl.util.*;
+import org.osgl.util.converter.TypeConverterRegistry;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -15,26 +16,26 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <code>Osgl</code> is the umbrella namespace aggregates core utilities of OSGL toolkit:
+ * <code>Lang</code> is the umbrella namespace aggregates core utilities of OSGL toolkit:
  * <ul>
  * <li>Function interfaces and base implementations</li>
  * <li>currying utilities </li>
  * <li>Tuple and multi-elements tupbles</li>
  * <li>Option</li>
  * <li>core utilities like ts()</li>
- * <li>predefined functions aggregated in the <code>Osgl.F</code> namespace</li>
+ * <li>predefined functions aggregated in the <code>Lang.F</code> namespace</li>
  * </ul>
  * <p>More about function interface</p>
- * <p>Under <code>Osgl</code>, there are six function interfaces defined, from <code>Osgl.Func0</code>
- * to <code>Osgl.Func5</code>, where the last digit means the number of parameters the function
+ * <p>Under <code>Lang</code>, there are six function interfaces defined, from <code>Lang.Func0</code>
+ * to <code>Lang.Func5</code>, where the last digit means the number of parameters the function
  * is applied to. For example, the <code>apply</code> method of <code>Func0</code> takes
  * no parameter while that of <code>Func2</code> takes two parameters. All these function
  * interfaces are defined with generic type parameters, corresponding to the type of all
  * parameters and that of the return value. For procedure (a function that does not return anything),
  * the user application could use <code>Void</code> as the return value type, and return
  * <code>null</code> in the <code>apply</code> method implementation.</p>
- * <p>For each function interface, OSGL provide a base class, from <code>Osgl.F0</code> to
- * <code>Osgl.F5</code>. Within the base class, OSGL implement several utility methods, including</p>
+ * <p>For each function interface, OSGL provide a base class, from <code>Lang.F0</code> to
+ * <code>Lang.F5</code>. Within the base class, OSGL implement several utility methods, including</p>
  * <ul>
  * <li>currying methods, returns function takes fewer parameter with given parameter specified</li>
  * <li>chain, returns composed function with a function takes the result of this function</li>
@@ -47,28 +48,28 @@ import java.util.concurrent.atomic.AtomicInteger;
  * easy way to convert user's implementation to corresponding base class implementation, here is one
  * example of how to do it:</p>
  * <pre>
- *     void foo(Osgl.Func2&lt;Integer, String&gt; f) {
- *         F2&lt;Integer, String&gt; newF = Osgl.f2(f);
+ *     void foo(Lang.Func2&lt;Integer, String&gt; f) {
+ *         F2&lt;Integer, String&gt; newF = Lang.f2(f);
  *         newF.chain(...);
  *         ...
  *     }
  * </pre>
  * <p>Dumb functions, for certain case where a dumb function is needed, OSGL defines dumb function instances for
- * each function interface, say, from <code>Osgl.F0</code> to <code>Osgl.F5</code>. Note the name of the dumb function
+ * each function interface, say, from <code>Lang.F0</code> to <code>Lang.F5</code>. Note the name of the dumb function
  * instance is the same as the name of the base function class. But they belong to different concept, class and
  * instance, so there is no conflict in the code. For each dumb function instance, a corresponding type safe
- * version is provided, <code>Osgl.f0()</code> to <code>Osgl.f5()</code>, this is the same case of
+ * version is provided, <code>Lang.f0()</code> to <code>Lang.f5()</code>, this is the same case of
  * <code>java.util.Collections.EMPTY_LIST</code> and <code>java.util.Collections.emptyList()</code></p>
  * <p>Utility methods</p>
  *
  * @author Gelin Luo
- * @version 0.8
+ * @version 2.0
  */
-public class Osgl implements Serializable {
+public class Lang implements Serializable {
 
-    public static final Osgl INSTANCE = new Osgl();
+    public static final Lang INSTANCE = new Lang();
 
-    protected Osgl() {
+    protected Lang() {
     }
 
     private Object readResolve() throws ObjectStreamException {
@@ -77,12 +78,12 @@ public class Osgl implements Serializable {
 
     @Override
     public final boolean equals(Object obj) {
-        return obj == this || obj instanceof Osgl;
+        return obj == this || obj instanceof Lang;
     }
 
     @Override
     public final int hashCode() {
-        return Osgl.class.hashCode();
+        return Lang.class.hashCode();
     }
 
     @Override
@@ -121,11 +122,11 @@ public class Osgl implements Serializable {
      * Define a function that apply to no parameter (strictly this is not a function)
      *
      * @param <R> the generic type of the return value, could be <code>Void</code>
-     * @see Osgl.Function
-     * @see Osgl.Func2
-     * @see Osgl.Func3
-     * @see Osgl.Func4
-     * @see Osgl.Func5
+     * @see Lang.Function
+     * @see Lang.Func2
+     * @see Lang.Func3
+     * @see Lang.Func4
+     * @see Lang.Func5
      * @see F0
      * @since 0.2
      */
@@ -141,7 +142,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Default implementation for {@link Osgl.Func0}. Implementation of {@link Osgl.Func0} should
+     * Default implementation for {@link Lang.Func0}. Implementation of {@link Lang.Func0} should
      * (nearly) always extend to this class instead of implement the interface directly
      *
      * @since 0.2
@@ -247,9 +248,9 @@ public class Osgl implements Serializable {
                 @Override
                 public Option<R> apply() {
                     try {
-                        return Osgl.some(me.apply());
+                        return Lang.some(me.apply());
                     } catch (RuntimeException e) {
-                        return Osgl.none();
+                        return Lang.none();
                     }
                 }
             };
@@ -301,7 +302,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * A dumb function for {@link Osgl.Func0} that does nothing and return <code>null</code>
+     * A dumb function for {@link Lang.Func0} that does nothing and return <code>null</code>
      *
      * @see #f0()
      * @since 0.2
@@ -309,7 +310,7 @@ public class Osgl implements Serializable {
     public static final F0 F0 = new DumbF0();
 
     /**
-     * Return a dumb function for {@link Osgl.Func0}. This is the type-safe version of {@link #F0}
+     * Return a dumb function for {@link Lang.Func0}. This is the type-safe version of {@link #F0}
      *
      * @param <T> a generic type that matches whatever type required by the context of applying the function
      * @return A dumb function that always return {@code null}
@@ -321,7 +322,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Convert a general {@link Osgl.Func0} typed function to {@link F0} type
+     * Convert a general {@link Lang.Func0} typed function to {@link F0} type
      *
      * @param f0  a function of type {@link Func0} that returns type R value
      * @param <R> the generic type of the return value when applying function f0
@@ -348,12 +349,12 @@ public class Osgl implements Serializable {
      *
      * @param <T> the type of input parameter
      * @param <U> the type of the return value when this function applied to the parameter(s)
-     * @see Osgl.Func0
-     * @see Osgl.Function
-     * @see Osgl.Func2
-     * @see Osgl.Func3
-     * @see Osgl.Func4
-     * @see Osgl.Func5
+     * @see Lang.Func0
+     * @see Lang.Function
+     * @see Lang.Func2
+     * @see Lang.Func3
+     * @see Lang.Func4
+     * @see Lang.Func5
      * @see F1
      * @since 0.2
      */
@@ -420,9 +421,9 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Base implementation of {@link Osgl.Function} function. User application should
+     * Base implementation of {@link Lang.Function} function. User application should
      * (nearly) always make their implementation extend to this base class
-     * instead of implement {@link Osgl.Function} directly
+     * instead of implement {@link Lang.Function} directly
      *
      * @since 0.2
      */
@@ -684,9 +685,9 @@ public class Osgl implements Serializable {
                 @Override
                 public Option<R> apply(P1 p1) {
                     try {
-                        return Osgl.some(me.apply(p1));
+                        return Lang.some(me.apply(p1));
                     } catch (RuntimeException e) {
-                        return Osgl.none();
+                        return Lang.none();
                     }
                 }
             };
@@ -703,7 +704,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * A dumb {@link Osgl.Function} implementation that does nothing and return null
+     * A dumb {@link Lang.Function} implementation that does nothing and return null
      *
      * @see #f1()
      * @since 0.2
@@ -725,7 +726,7 @@ public class Osgl implements Serializable {
 
 
     /**
-     * Convert a general {@link Osgl.Function} function into a {@link F1} typed
+     * Convert a general {@link Lang.Function} function into a {@link F1} typed
      * function
      *
      * @param f1   the function that consumes {@code P1} and produce {@code R}
@@ -769,7 +770,7 @@ public class Osgl implements Serializable {
 
             @Override
             public F1<Y, X> invert() {
-                return Osgl.f1(f1.invert());
+                return Lang.f1(f1.invert());
             }
 
             @Override
@@ -789,11 +790,11 @@ public class Osgl implements Serializable {
      * @param <P1> the type of first parameter this function applied to
      * @param <P2> the type of second parameter this function applied to
      * @param <R>  the type of the return value when this function applied to the parameter(s)
-     * @see Osgl.Func0
-     * @see Osgl.Function
-     * @see Osgl.Func3
-     * @see Osgl.Func4
-     * @see Osgl.Func5
+     * @see Lang.Func0
+     * @see Lang.Function
+     * @see Lang.Func3
+     * @see Lang.Func4
+     * @see Lang.Func5
      * @see F2
      * @since 0.2
      */
@@ -816,9 +817,9 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Base implementation of {@link Osgl.Func2} function. User application should
+     * Base implementation of {@link Lang.Func2} function. User application should
      * (nearly) always make their implementation extend to this base class
-     * instead of implement {@link Osgl.Func2} directly
+     * instead of implement {@link Lang.Func2} directly
      *
      * @since 0.2
      */
@@ -948,9 +949,9 @@ public class Osgl implements Serializable {
                 @Override
                 public Option<R> apply(P1 p1, P2 p2) {
                     try {
-                        return Osgl.some(me.apply(p1, p2));
+                        return Lang.some(me.apply(p1, p2));
                     } catch (RuntimeException e) {
-                        return Osgl.none();
+                        return Lang.none();
                     }
                 }
             };
@@ -967,7 +968,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * A dumb {@link Osgl.Func2} implementation that does nothing and return null
+     * A dumb {@link Lang.Func2} implementation that does nothing and return null
      *
      * @see #f2()
      * @since 0.2
@@ -990,7 +991,7 @@ public class Osgl implements Serializable {
 
 
     /**
-     * Convert a general {@link Osgl.Func2} function into a {@link F2} typed
+     * Convert a general {@link Lang.Func2} function into a {@link F2} typed
      * function
      *
      * @param f2   the function that takes two arguments and return type {@code R}
@@ -1022,11 +1023,11 @@ public class Osgl implements Serializable {
      * @param <P2> the type of second parameter this function applied to
      * @param <P3> the type of thrid parameter this function applied to
      * @param <R>  the type of the return value when this function applied to the parameter(s)
-     * @see Osgl.Func0
-     * @see Osgl.Function
-     * @see Osgl.Func2
-     * @see Osgl.Func4
-     * @see Osgl.Func5
+     * @see Lang.Func0
+     * @see Lang.Function
+     * @see Lang.Func2
+     * @see Lang.Func4
+     * @see Lang.Func5
      * @since 0.2
      */
     public interface Func3<P1, P2, P3, R> {
@@ -1047,9 +1048,9 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Base implementation of {@link Osgl.Func3} function. User application should
+     * Base implementation of {@link Lang.Func3} function. User application should
      * (nearly) always make their implementation extend to this base class
-     * instead of implement {@link Osgl.Func3} directly
+     * instead of implement {@link Lang.Func3} directly
      *
      * @since 0.2
      */
@@ -1193,9 +1194,9 @@ public class Osgl implements Serializable {
                 @Override
                 public Option<R> apply(P1 p1, P2 p2, P3 p3) {
                     try {
-                        return Osgl.some(me.apply(p1, p2, p3));
+                        return Lang.some(me.apply(p1, p2, p3));
                     } catch (RuntimeException e) {
-                        return Osgl.none();
+                        return Lang.none();
                     }
                 }
             };
@@ -1213,7 +1214,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * A dumb {@link Osgl.Func3} implementation that does nothing and return null
+     * A dumb {@link Lang.Func3} implementation that does nothing and return null
      *
      * @see #f3()
      * @since 0.2
@@ -1237,7 +1238,7 @@ public class Osgl implements Serializable {
 
 
     /**
-     * Convert a general {@link Osgl.Func3} function into a {@link F3} typed
+     * Convert a general {@link Lang.Func3} function into a {@link F3} typed
      * function
      *
      * @param f3   the general function with three params
@@ -1271,11 +1272,11 @@ public class Osgl implements Serializable {
      * @param <P3> the type of thrid parameter this function applied to
      * @param <P4> the type of fourth parameter this function applied to
      * @param <R>  the type of the return value when this function applied to the parameter(s)
-     * @see Osgl.Func0
-     * @see Osgl.Function
-     * @see Osgl.Func2
-     * @see Osgl.Func4
-     * @see Osgl.Func5
+     * @see Lang.Func0
+     * @see Lang.Function
+     * @see Lang.Func2
+     * @see Lang.Func4
+     * @see Lang.Func5
      * @since 0.2
      */
     public interface Func4<P1, P2, P3, P4, R> {
@@ -1298,9 +1299,9 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Base implementation of {@link Osgl.Func4} function. User application should
+     * Base implementation of {@link Lang.Func4} function. User application should
      * (nearly) always make their implementation extend to this base class
-     * instead of implement {@link Osgl.Func4} directly
+     * instead of implement {@link Lang.Func4} directly
      *
      * @since 0.2
      */
@@ -1460,9 +1461,9 @@ public class Osgl implements Serializable {
                 @Override
                 public Option<R> apply(P1 p1, P2 p2, P3 p3, P4 p4) {
                     try {
-                        return Osgl.some(me.apply(p1, p2, p3, p4));
+                        return Lang.some(me.apply(p1, p2, p3, p4));
                     } catch (RuntimeException e) {
-                        return Osgl.none();
+                        return Lang.none();
                     }
                 }
             };
@@ -1480,7 +1481,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * A dumb {@link Osgl.Func4} implementation that does nothing and return null
+     * A dumb {@link Lang.Func4} implementation that does nothing and return null
      *
      * @see #f4()
      * @since 0.2
@@ -1505,7 +1506,7 @@ public class Osgl implements Serializable {
 
 
     /**
-     * Convert a general {@link Osgl.Func4} function into a {@link F4} typed
+     * Convert a general {@link Lang.Func4} function into a {@link F4} typed
      * function
      *
      * @param f4   the function to be converted
@@ -1542,11 +1543,11 @@ public class Osgl implements Serializable {
      * @param <P4> the type of fourth parameter this function applied to
      * @param <P5> the type of fifth parameter this function applied to
      * @param <R>  the type of the return value when this function applied to the parameter(s)
-     * @see Osgl.Func0
-     * @see Osgl.Function
-     * @see Osgl.Func2
-     * @see Osgl.Func3
-     * @see Osgl.Func5
+     * @see Lang.Func0
+     * @see Lang.Function
+     * @see Lang.Func2
+     * @see Lang.Func3
+     * @see Lang.Func5
      * @since 0.2
      */
     public interface Func5<P1, P2, P3, P4, P5, R> {
@@ -1569,9 +1570,9 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Base implementation of {@link Osgl.Func5} function. User application should
+     * Base implementation of {@link Lang.Func5} function. User application should
      * (nearly) always make their implementation extend to this base class
-     * instead of implement {@link Osgl.Func5} directly
+     * instead of implement {@link Lang.Func5} directly
      *
      * @since 0.2
      */
@@ -1741,9 +1742,9 @@ public class Osgl implements Serializable {
                 @Override
                 public Option<R> apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5) {
                     try {
-                        return Osgl.some(me.apply(p1, p2, p3, p4, p5));
+                        return Lang.some(me.apply(p1, p2, p3, p4, p5));
                     } catch (RuntimeException e) {
-                        return Osgl.none();
+                        return Lang.none();
                     }
                 }
             };
@@ -1761,7 +1762,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * A dumb {@link Osgl.Func5} implementation that does nothing and return null
+     * A dumb {@link Lang.Func5} implementation that does nothing and return null
      *
      * @see #f5()
      * @since 0.2
@@ -1787,7 +1788,7 @@ public class Osgl implements Serializable {
 
 
     /**
-     * Convert a general {@link Osgl.Func5} function into a {@link F5} typed
+     * Convert a general {@link Lang.Func5} function into a {@link F5} typed
      * function
      *
      * @param f5   the function to be converted
@@ -1875,7 +1876,7 @@ public class Osgl implements Serializable {
                 Function<? super T, ? extends U> keyExtractor,
                 java.util.Comparator<? super U> keyComparator
         ) {
-            return thenComparing(Osgl.F.comparing(keyExtractor, keyComparator));
+            return thenComparing(Lang.F.comparing(keyExtractor, keyComparator));
         }
 
         /**
@@ -1888,7 +1889,7 @@ public class Osgl implements Serializable {
         public <U extends Comparable<? super U>> Comparator<T> thenComparing(
                 Function<? super T, ? extends U> keyExtractor
         ) {
-            return thenComparing(Osgl.F.comparing(keyExtractor));
+            return thenComparing(Lang.F.comparing(keyExtractor));
         }
 
 
@@ -2020,14 +2021,14 @@ public class Osgl implements Serializable {
      *     }
      *     // good way
      *     void foo(Function&lt;Boolean, MyData&gt; predicate) {
-     *         Predicate&lt;MyData&gt; p = Osgl.predicate(predicate);
+     *         Predicate&lt;MyData&gt; p = Lang.predicate(predicate);
      *         ...
      *     }
      * </pre>
      *
      * @since 0.2
      */
-    public static abstract class Predicate<T> extends Osgl.F1<T, Boolean> {
+    public static abstract class Predicate<T> extends Lang.F1<T, Boolean> {
         @Override
         public final Boolean apply(T t) {
             return test(t);
@@ -2047,7 +2048,7 @@ public class Osgl implements Serializable {
          * @return the negate function
          */
         public Predicate<T> negate() {
-            return Osgl.F.negate(this);
+            return Lang.F.negate(this);
         }
 
         /**
@@ -2122,8 +2123,8 @@ public class Osgl implements Serializable {
             return negate().ifThen(func);
         }
 
-        public static <T> Predicate<T> negate(final Osgl.Function<T, Boolean> predicate) {
-            return new Osgl.Predicate<T>() {
+        public static <T> Predicate<T> negate(final Lang.Function<T, Boolean> predicate) {
+            return new Lang.Predicate<T>() {
                 @Override
                 public boolean test(T t) {
                     return !predicate.apply(t);
@@ -2134,7 +2135,7 @@ public class Osgl implements Serializable {
 
     /**
      * Convert a <code>Function&lt;T, Boolean&gt;</code> typed function to
-     * {@link Osgl.Predicate Predicate&lt;T&gt;} function.
+     * {@link Lang.Predicate Predicate&lt;T&gt;} function.
      * <p>If the function specified is already a {@link Predicate}, then
      * the function itself is returned</p>
      *
@@ -2158,7 +2159,7 @@ public class Osgl implements Serializable {
 
     /**
      * Convert a general <code>Function&lt;T, ?&gt;</code> typed function to
-     * {@link Osgl.Predicate Predicate&lt;T&gt;} function. When the predicate function
+     * {@link Lang.Predicate Predicate&lt;T&gt;} function. When the predicate function
      * returned apply to a param, it will first apply the specified {@code f1} to the
      * param, and they call {@link #bool(java.lang.Object)} to evaluate the boolean
      * value of the return object of the application.
@@ -2189,7 +2190,7 @@ public class Osgl implements Serializable {
      *
      * @param <T> the paramete type
      */
-    public abstract static class Processor<T> extends Osgl.F1<T, T> {
+    public abstract static class Processor<T> extends Lang.F1<T, T> {
 
         @Override
         public T apply(T t) throws NotAppliedException, Break {
@@ -2213,7 +2214,7 @@ public class Osgl implements Serializable {
      *
      * @param <T> the type of the parameter the visitor function applied to
      */
-    public abstract static class Visitor<T> extends Osgl.F1<T, Void> {
+    public abstract static class Visitor<T> extends Lang.F1<T, Void> {
 
         /**
          * Construct a visitor without payload
@@ -2239,6 +2240,7 @@ public class Osgl implements Serializable {
     /**
      * Consumer is special kind of {@link Visitor} that expose `consume(T)` method
      * to replace {@link Visitor#visit(Object)} method
+     *
      * @param <T> the generic type of object to be consumed
      */
     public abstract static class Consumer<T> extends Visitor<T> {
@@ -2254,7 +2256,7 @@ public class Osgl implements Serializable {
     }
 
     @SuppressWarnings("unused")
-    public abstract static class V2<P1, P2> extends Osgl.F2<P1, P2, Void> {
+    public abstract static class V2<P1, P2> extends Lang.F2<P1, P2, Void> {
         @Override
         public final Void apply(P1 p1, P2 p2) throws NotAppliedException, Break {
             visit(p1, p2);
@@ -2265,7 +2267,7 @@ public class Osgl implements Serializable {
     }
 
     @SuppressWarnings("unused")
-    public abstract static class V3<P1, P2, P3> extends Osgl.F3<P1, P2, P3, Void> {
+    public abstract static class V3<P1, P2, P3> extends Lang.F3<P1, P2, P3, Void> {
         @Override
         public final Void apply(P1 p1, P2 p2, P3 p3) throws NotAppliedException, Break {
             visit(p1, p2, p3);
@@ -2276,7 +2278,7 @@ public class Osgl implements Serializable {
     }
 
     @SuppressWarnings("unused")
-    public abstract static class V4<P1, P2, P3, P4> extends Osgl.F4<P1, P2, P3, P4, Void> {
+    public abstract static class V4<P1, P2, P3, P4> extends Lang.F4<P1, P2, P3, P4, Void> {
         @Override
         public final Void apply(P1 p1, P2 p2, P3 p3, P4 p4) throws NotAppliedException, Break {
             visit(p1, p2, p3, p4);
@@ -2287,7 +2289,7 @@ public class Osgl implements Serializable {
     }
 
     @SuppressWarnings("unused")
-    public abstract static class V5<P1, P2, P3, P4, P5> extends Osgl.F5<P1, P2, P3, P4, P5, Void> {
+    public abstract static class V5<P1, P2, P3, P4, P5> extends Lang.F5<P1, P2, P3, P4, P5, Void> {
         @Override
         public final Void apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5) throws NotAppliedException, Break {
             visit(p1, p2, p3, p4, p5);
@@ -2309,7 +2311,7 @@ public class Osgl implements Serializable {
      * @since 0.2
      */
     @SuppressWarnings("unchecked")
-    public static <T> Visitor<T> visitor(final $.Function<? super T, ?> f) {
+    public static <T> Visitor<T> visitor(final Function<? super T, ?> f) {
         if (f instanceof Visitor) {
             return (Visitor<T>) f;
         }
@@ -2330,7 +2332,7 @@ public class Osgl implements Serializable {
      * @return the composed function
      */
     public static <T> Visitor<T>
-    guardedVisitor(final Function<? super T, Boolean> predicate, final $.Visitor<? super T> visitor) {
+    guardedVisitor(final Function<? super T, Boolean> predicate, final Visitor<? super T> visitor) {
         return new Visitor<T>() {
             @Override
             public void visit(T t) throws Break {
@@ -2371,7 +2373,7 @@ public class Osgl implements Serializable {
          * @return the payload
          */
         public <T> T get() {
-            return Osgl.cast(payload);
+            return Lang.cast(payload);
         }
     }
 
@@ -2412,7 +2414,7 @@ public class Osgl implements Serializable {
      * @param <K> the generic type of the key
      * @param <T> the generic type of the value
      */
-    public static abstract class IndexedVisitor<K, T> extends Osgl.F2<K, T, Void> {
+    public static abstract class IndexedVisitor<K, T> extends Lang.F2<K, T, Void> {
 
         protected Map<String, ?> attr = new HashMap<String, Object>();
         protected T any;
@@ -2545,9 +2547,10 @@ public class Osgl implements Serializable {
 
     /**
      * A Producer function that apply to nothing and return a product
+     *
      * @param <PRODUCT> the product type
      */
-    public static abstract class Producer<PRODUCT> extends Osgl.F0<PRODUCT> {
+    public static abstract class Producer<PRODUCT> extends Lang.F0<PRODUCT> {
         @Override
         public PRODUCT apply() throws NotAppliedException, Break {
             return produce();
@@ -2557,12 +2560,12 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * A Transformer is literally a kind of {@link F1} function
+     * A Transformer is a function that apply to `FROM` input and procude `TO` output
      *
      * @param <FROM> The type of the element the transformer function applied to
      * @param <TO>   The type of the result of transform of <code>&lt;FROM&gt;</code>
      */
-    public static abstract class Transformer<FROM, TO> extends Osgl.F1<FROM, TO> {
+    public static abstract class Transformer<FROM, TO> extends Lang.F1<FROM, TO> {
         @Override
         public final TO apply(FROM from) {
             return transform(from);
@@ -2577,8 +2580,117 @@ public class Osgl implements Serializable {
         public abstract TO transform(FROM from);
     }
 
+    /**
+     * A `TypeConverter` is a {@link Transformer} that convert a type to another
+     *
+     * @param <FROM> the generic type of input
+     * @param <TO>   the generic type of output
+     */
+    public static abstract class TypeConverter<FROM, TO> extends Transformer<FROM, TO> {
+
+        public final Class<FROM> fromType;
+        public final Class<TO> toType;
+
+        public TypeConverter(Class<FROM> fromType, Class<TO> toType) {
+            this.fromType = fromType;
+            this.toType = toType;
+        }
+
+        @Override
+        public final TO transform(FROM from) {
+            return null;
+        }
+
+        public abstract TO convert(FROM from);
+
+        public static TypeConverter<?, String> ANY_TO_STRING = new TypeConverter<Object, String>(Object.class, String.class) {
+            @Override
+            public String convert(Object o) {
+                return S.string(o);
+            }
+        };
+
+        public static TypeConverter<?, Boolean> ANY_TO_BOOLEAN = new TypeConverter<Object, Boolean>(Object.class, Boolean.class) {
+            @Override
+            public Boolean convert(Object o) {
+                return bool(o);
+            }
+        };
+
+        public static TypeConverter<String, Byte> STRING_TO_BYTE = new TypeConverter<String, Byte>(String.class, Byte.class) {
+            @Override
+            public Byte convert(String s) {
+                return Byte.valueOf(s);
+            }
+        };
+
+        public static TypeConverter<String, Character> STRING_TO_CHARACTER = new TypeConverter<String, Character>(String.class, Character.class) {
+            @Override
+            public Character convert(String s) {
+                return S.empty(s) ? null : s.charAt(0);
+            }
+        };
+
+        public static TypeConverter<String, Short> STRING_TO_SHORT = new TypeConverter<String, Short>(String.class, Short.class) {
+            @Override
+            public Short convert(String s) {
+                return Short.valueOf(s);
+            }
+        };
+
+        public static TypeConverter<String, Integer> STRING_TO_INTEGER = new TypeConverter<String, Integer>(String.class, Integer.class) {
+            @Override
+            public Integer convert(String s) {
+                return Integer.valueOf(s);
+            }
+        };
+
+        public static TypeConverter<String, Float> STRING_TO_FLOAT = new TypeConverter<String, Float>(String.class, Float.class) {
+            @Override
+            public Float convert(String s) {
+                return Float.valueOf(s);
+            }
+        };
+
+        public static TypeConverter<String, Long> STRING_TO_LONG = new TypeConverter<String, Long>(String.class, Long.class) {
+            @Override
+            public Long convert(String s) {
+                return Long.valueOf(s);
+            }
+        };
+
+        public static TypeConverter<String, Double> STRING_TO_DOUBLE = new TypeConverter<String, Double>(String.class, Double.class) {
+            @Override
+            public Double convert(String s) {
+                return Double.valueOf(s);
+            }
+        };
+
+        public static <ENUM extends Enum> TypeConverter<String, ENUM> stringToEnum(final Class<ENUM> enumClass) {
+            return new TypeConverter<String, ENUM>(String.class, enumClass) {
+                @Override
+                public ENUM convert(String s) {
+                    return Enum.valueOf(enumClass, s);
+                }
+            };
+        }
+    }
+
+    public static class _ConvertStage<FROM> {
+        private FROM from;
+        private _ConvertStage(FROM from) {
+            this.from = ensureNotNull(from);
+        }
+
+        public <TO> TO to(Class<TO> toType) {
+            TypeConverter<FROM, TO> converter = $.cast(TypeConverterRegistry.INSTANCE.get(from.getClass(), toType));
+            E.unexpectedIf(null == converter, "Unable to find converter from %s to %s", from.getClass(), toType);
+            return converter.convert(from);
+        }
+    }
+
     @SuppressWarnings("unused")
-    public static abstract class Operator<T> extends Osgl.F1<T, T> {
+    public static abstract class Operator<T> extends Lang.F1<T, T> {
         @Override
         public abstract Operator<T> invert();
 
@@ -2615,9 +2727,13 @@ public class Osgl implements Serializable {
             return _2;
         }
 
-        public A first() {return _1;}
+        public A first() {
+            return _1;
+        }
 
-        public B second() {return _2;}
+        public B second() {
+            return _2;
+        }
 
         public B last() {
             return _2;
@@ -2648,6 +2764,7 @@ public class Osgl implements Serializable {
         /**
          * Convert this {@code Tuple} instance into a Map with one key,value pair. Where
          * {@code key} is {@code _1} and {@code value} is {@code _2};
+         *
          * @return the Map as described
          */
         @SuppressWarnings("unused")
@@ -2661,20 +2778,21 @@ public class Osgl implements Serializable {
          * Convert a list of {@code Tuple} instances into a Map. Where
          * {@code key} is {@code _1} and {@code value} is {@code _2};
          * <p>
-         *     <b>Note</b> that the size of the returned Map might be lesser than
-         *     the size of the tuple list if there are multiple {@code _1} has
-         *     the same value, and the last one is the winner and it's {@code _2}
-         *     will be put into the Map
+         * <b>Note</b> that the size of the returned Map might be lesser than
+         * the size of the tuple list if there are multiple {@code _1} has
+         * the same value, and the last one is the winner and it's {@code _2}
+         * will be put into the Map
          * </p>
-         * @param <K> the key type
-         * @param <V> the value type
+         *
+         * @param <K>  the key type
+         * @param <V>  the value type
          * @param list the list of tuples to be transformed into Map
          * @return the Map as described
          */
         @SuppressWarnings("unused")
         public static <K, V> Map<K, V> toMap(Collection<Tuple<K, V>> list) {
             Map<K, V> m = C.Mutable.Map();
-            for (Tuple<K, V> t: list) {
+            for (Tuple<K, V> t : list) {
                 m.put(t._1, t._2);
             }
             return m;
@@ -2683,11 +2801,18 @@ public class Osgl implements Serializable {
 
     /**
      * Alias of {@link Tuple}
-     * @param <LEFT> the left side element type
+     *
+     * @param <LEFT>  the left side element type
      * @param <RIGHT> the right side element type
      */
     public static class Binary<LEFT, RIGHT> extends Tuple<LEFT, RIGHT> {
         public Binary(LEFT _1, RIGHT _2) {
+            super(_1, _2);
+        }
+    }
+
+    public static class Pair<LEFT, RIGHT> extends Binary<LEFT, RIGHT> {
+        public Pair(LEFT _1, RIGHT _2) {
             super(_1, _2);
         }
     }
@@ -2699,10 +2824,11 @@ public class Osgl implements Serializable {
 
     /**
      * Alias of {@link Binary}
+     *
      * @param <A> the left hand side element type
      * @param <B> the right hand side element type
      */
-    public static class T2<A, B> extends Binary<A, B> {
+    public static class T2<A, B> extends Pair<A, B> {
 
         public T2(A _1, B _2) {
             super(_1, _2);
@@ -2714,8 +2840,17 @@ public class Osgl implements Serializable {
         return new T2<>(a, b);
     }
 
+    public static <A, B> T2<A, B> Binary(A a, B b) {
+        return T2(a, b);
+    }
+
+    public static <A, B> T2<A, B> Pair(A a, B b) {
+        return T2(a, b);
+    }
+
     /**
      * A tuple with three elements
+     *
      * @param <A> the first element type
      * @param <B> the second element type
      * @param <C> the third element type
@@ -2731,11 +2866,17 @@ public class Osgl implements Serializable {
             this._3 = _3;
         }
 
-        public A first() {return _1;}
+        public A first() {
+            return _1;
+        }
 
-        public B second() {return _2;}
+        public B second() {
+            return _2;
+        }
 
-        public C third() {return _3;}
+        public C third() {
+            return _3;
+        }
 
         public C last() {
             return _3;
@@ -2758,14 +2899,14 @@ public class Osgl implements Serializable {
             if (this == o) return true;
             if (o instanceof Triple) {
                 Triple that = (Triple) o;
-                return Osgl.eq(that._1, _1) && Osgl.eq(that._2, _2) && Osgl.eq(that._3, _3);
+                return Lang.eq(that._1, _1) && Lang.eq(that._2, _2) && Lang.eq(that._3, _3);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Osgl.hc(_1, _2, _3);
+            return Lang.hc(_1, _2, _3);
         }
 
         @Override
@@ -2802,13 +2943,21 @@ public class Osgl implements Serializable {
             this._4 = _4;
         }
 
-        public A first() {return _1;}
+        public A first() {
+            return _1;
+        }
 
-        public B second() {return _2;}
+        public B second() {
+            return _2;
+        }
 
-        public C third() {return _3;}
+        public C third() {
+            return _3;
+        }
 
-        public D forth() {return _4;}
+        public D forth() {
+            return _4;
+        }
 
         public D last() {
             return _4;
@@ -2835,14 +2984,14 @@ public class Osgl implements Serializable {
             if (this == o) return true;
             if (o instanceof Quadruple) {
                 Quadruple that = (Quadruple) o;
-                return Osgl.eq(that._1, _1) && Osgl.eq(that._2, _2) && Osgl.eq(that._3, _3) && Osgl.eq(that._4, _4);
+                return Lang.eq(that._1, _1) && Lang.eq(that._2, _2) && Lang.eq(that._3, _3) && Lang.eq(that._4, _4);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Osgl.hc(_1, _2, _3, _4);
+            return Lang.hc(_1, _2, _3, _4);
         }
 
         @Override
@@ -2882,13 +3031,21 @@ public class Osgl implements Serializable {
             this._5 = _5;
         }
 
-        public A first() {return _1;}
+        public A first() {
+            return _1;
+        }
 
-        public B second() {return _2;}
+        public B second() {
+            return _2;
+        }
 
-        public C third() {return _3;}
+        public C third() {
+            return _3;
+        }
 
-        public D forth() {return _4;}
+        public D forth() {
+            return _4;
+        }
 
         public E fifth() {
             return _5;
@@ -2909,7 +3066,7 @@ public class Osgl implements Serializable {
         public T5<A, B, C, D, E> set3(C x) {
             return T5(_1, _2, x, _4, _5);
         }
-        
+
         public T5<A, B, C, D, E> set4(D x) {
             return T5(_1, _2, _3, x, _5);
         }
@@ -2923,14 +3080,14 @@ public class Osgl implements Serializable {
             if (this == o) return true;
             if (o instanceof Quintuple) {
                 Quintuple that = (Quintuple) o;
-                return Osgl.eq(that._1, _1) && Osgl.eq(that._2, _2) && Osgl.eq(that._3, _3) && Osgl.eq(that._4, _4) && Osgl.eq(that._5, _5);
+                return Lang.eq(that._1, _1) && Lang.eq(that._2, _2) && Lang.eq(that._3, _3) && Lang.eq(that._4, _4) && Lang.eq(that._5, _5);
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Osgl.hc(_1, _2, _3, _4, _5);
+            return Lang.hc(_1, _2, _3, _4, _5);
         }
 
         @Override
@@ -3040,7 +3197,7 @@ public class Osgl implements Serializable {
         /**
          * If a value is present, apply the provided {@code Option}-bearing
          * mapping function to it, return that result, otherwise return
-         * {@link #NONE}. This method is similar to {@link #map(Osgl.Function)},
+         * {@link #NONE}. This method is similar to {@link #map(Lang.Function)},
          * but the provided mapper is one whose result is already an
          * {@code Option}, and if invoked, {@code flatMap} does not wrap it
          * with an additional {@code Option}.
@@ -3086,7 +3243,7 @@ public class Osgl implements Serializable {
             return isDefined() ? get() : other.apply();
         }
 
-        public final void runWith($.Visitor<? super T> consumer) {
+        public final void runWith(Visitor<? super T> consumer) {
             if (isDefined()) {
                 consumer.apply(get());
             }
@@ -3167,7 +3324,7 @@ public class Osgl implements Serializable {
              * Negate of {@link #IS_DEFINED}
              */
             @SuppressWarnings("unused")
-            public final F0<Boolean> NOT_DEFINED = Osgl.F.negate(IS_DEFINED);
+            public final F0<Boolean> NOT_DEFINED = Lang.F.negate(IS_DEFINED);
 
             /**
              * A function that when applied, returns the value described by this {@code Option}
@@ -3180,7 +3337,7 @@ public class Osgl implements Serializable {
             };
 
             /**
-             * Returns a function that when applied, run {@link Osgl.Option#filter(Osgl.Function)} on this
+             * Returns a function that when applied, run {@link Lang.Option#filter(Lang.Function)} on this
              * {@code Option}
              *
              * @param predicate the predicate function
@@ -3197,7 +3354,7 @@ public class Osgl implements Serializable {
             }
 
             /**
-             * Returns a function that when applied, run {@link Osgl.Option#map(Osgl.Function)} on this
+             * Returns a function that when applied, run {@link Lang.Option#map(Lang.Function)} on this
              * {@code Option}
              *
              * @param mapper the function that Map {@code T} element to {@code B} object
@@ -3215,7 +3372,7 @@ public class Osgl implements Serializable {
             }
 
             /**
-             * Returns a function that when applied, run {@link Osgl.Option#flatMap(Osgl.Function)} on this
+             * Returns a function that when applied, run {@link Lang.Option#flatMap(Lang.Function)} on this
              * {@code Option}
              *
              * @param mapper the function that Map an elemnet of type T to a {@code Option} of type B
@@ -3232,7 +3389,7 @@ public class Osgl implements Serializable {
             }
 
             /**
-             * Returns a function that when applied, run {@link Osgl.Option#orElse(Object)} on this
+             * Returns a function that when applied, run {@link Lang.Option#orElse(Object)} on this
              * {@code Option}
              *
              * @param other the other value to be returned if this option is empty
@@ -3249,7 +3406,7 @@ public class Osgl implements Serializable {
             }
 
             /**
-             * Returns a function that when applied, run {@link Osgl.Option#orElse(Osgl.Func0)}
+             * Returns a function that when applied, run {@link Lang.Option#orElse(Lang.Func0)}
              * on this {@code Option}
              *
              * @param other the function that generates another {@code T} element when this
@@ -3267,14 +3424,14 @@ public class Osgl implements Serializable {
             }
 
             /**
-             * Returns a function that when applied, run {@link Osgl.Option#runWith(Osgl.Visitor)}
+             * Returns a function that when applied, run {@link Lang.Option#runWith(Lang.Visitor)}
              * on this {@code Option}
              *
              * @param consumer the function that consumes the element in this Option
              * @return a function that apply to {@code consumer} function if this Option is defined
              */
             @SuppressWarnings("unused")
-            public final F0<Void> runWith(final $.Visitor<? super T> consumer) {
+            public final F0<Void> runWith(final Visitor<? super T> consumer) {
                 return new F0<Void>() {
                     @Override
                     public Void apply() throws NotAppliedException, Break {
@@ -3458,18 +3615,18 @@ public class Osgl implements Serializable {
         }
 
         @Override
-        public Var<T> accept($.Visitor<? super T> visitor) {
+        public Var<T> accept(Visitor<? super T> visitor) {
             visitor.apply(v);
             return this;
         }
 
         @Override
-        public Var<T> each($.Visitor<? super T> visitor) {
+        public Var<T> each(Visitor<? super T> visitor) {
             return accept(visitor);
         }
 
         @Override
-        public Var<T> forEach($.Visitor<? super T> visitor) {
+        public Var<T> forEach(Visitor<? super T> visitor) {
             return accept(visitor);
         }
 
@@ -3479,7 +3636,7 @@ public class Osgl implements Serializable {
         }
 
         @Override
-        public Var<T> acceptLeft($.Visitor<? super T> visitor) {
+        public Var<T> acceptLeft(Visitor<? super T> visitor) {
             visitor.apply(v);
             return this;
         }
@@ -3491,15 +3648,15 @@ public class Osgl implements Serializable {
 
         @Override
         public Option<T> reduceLeft(Func2<T, T, T> accumulator) {
-            return Osgl.some(v);
+            return Lang.some(v);
         }
 
         @Override
         public Option<T> findFirst(Function<? super T, Boolean> predicate) {
             if (predicate.apply(v)) {
-                return Osgl.some(v);
+                return Lang.some(v);
             } else {
-                return Osgl.none();
+                return Lang.none();
             }
         }
 
@@ -3559,7 +3716,7 @@ public class Osgl implements Serializable {
         @Override
         public <R> C.List<R> flatMap(Function<? super T, ? extends Iterable<? extends R>> mapper) {
             ListBuilder<R> lb = new ListBuilder<R>(3);
-            forEach($.visitor(f1(mapper).andThen(C.F.addAllTo(lb))));
+            forEach(visitor(f1(mapper).andThen(C.F.addAllTo(lb))));
             return lb.toList();
         }
 
@@ -3567,14 +3724,14 @@ public class Osgl implements Serializable {
         public <E> C.List<? extends Binary<T, E>> zip(Iterable<E> iterable) {
             Iterator<E> itr = iterable.iterator();
             if (itr.hasNext()) {
-                return new Var<>(Osgl.T2(v, itr.next()));
+                return new Var<>(Lang.T2(v, itr.next()));
             }
             return C.List();
         }
 
         @Override
         public C.Sequence<Binary<T, Integer>> zipWithIndex() {
-            return new Var<>((Binary<T, Integer>)T2(v, 0));
+            return new Var<>((Binary<T, Integer>) T2(v, 0));
         }
 
         @Override
@@ -3608,8 +3765,8 @@ public class Osgl implements Serializable {
                 return true;
             }
             if (o instanceof Var) {
-                Var v = (Var)o;
-                return $.eq(v.get(), this.get());
+                Var v = (Var) o;
+                return eq(v.get(), this.get());
             }
             return false;
         }
@@ -3632,9 +3789,9 @@ public class Osgl implements Serializable {
         @Override
         public Option<T> findOne(Function<? super T, Boolean> predicate) {
             if (predicate.apply(v)) {
-                return Osgl.some(v);
+                return Lang.some(v);
             } else {
-                return Osgl.none();
+                return Lang.none();
             }
         }
 
@@ -3839,7 +3996,7 @@ public class Osgl implements Serializable {
 
         @Override
         public C.ListOrSet<T> without(T element) {
-            if (Osgl.eq(v, element)) return C.empty();
+            if (Lang.eq(v, element)) return C.empty();
             return this;
         }
 
@@ -3848,7 +4005,7 @@ public class Osgl implements Serializable {
             if (elements.length == 0) {
                 return this;
             }
-            int id = Osgl.locate(v, elements);
+            int id = Lang.locate(v, elements);
             if (-1 == id) return this;
             return C.empty();
         }
@@ -3878,32 +4035,32 @@ public class Osgl implements Serializable {
         }
 
         @Override
-        public C.List<T> acceptRight($.Visitor<? super T> visitor) {
+        public C.List<T> acceptRight(Visitor<? super T> visitor) {
             return accept(visitor);
         }
 
         @Override
-        public C.List<T> acceptRight($.IndexedVisitor<Integer, ? super T> indexedVisitor) {
+        public C.List<T> acceptRight(IndexedVisitor<Integer, ? super T> indexedVisitor) {
             return accept(indexedVisitor);
         }
 
         @Override
-        protected void forEachLeft($.Visitor<? super T> visitor) throws Break {
+        protected void forEachLeft(Visitor<? super T> visitor) throws Break {
             visitor.apply(v);
         }
 
         @Override
-        protected void forEachLeft($.IndexedVisitor<Integer, ? super T> indexedVisitor) throws Break {
+        protected void forEachLeft(IndexedVisitor<Integer, ? super T> indexedVisitor) throws Break {
             indexedVisitor.apply(0, v);
         }
 
         @Override
-        protected void forEachRight($.Visitor<? super T> visitor) throws Break {
+        protected void forEachRight(Visitor<? super T> visitor) throws Break {
             visitor.apply(v);
         }
 
         @Override
-        protected void forEachRight($.IndexedVisitor<Integer, ? super T> indexedVisitor) throws Break {
+        protected void forEachRight(IndexedVisitor<Integer, ? super T> indexedVisitor) throws Break {
             indexedVisitor.apply(0, v);
         }
 
@@ -3912,7 +4069,7 @@ public class Osgl implements Serializable {
             if (list.size() == 0) {
                 return C.List();
             }
-            return C.List((Binary<T, B>)T2(v, list.get(0)));
+            return C.List((Binary<T, B>) T2(v, list.get(0)));
         }
 
         @Override
@@ -3989,7 +4146,7 @@ public class Osgl implements Serializable {
 
         @Override
         public int indexOf(Object o) {
-            if (Osgl.eq(o, v)) {
+            if (Lang.eq(o, v)) {
                 return 0;
             }
             return -1;
@@ -4017,7 +4174,7 @@ public class Osgl implements Serializable {
 
         @Override
         public boolean contains(Object o) {
-            return Osgl.eq(v, o);
+            return Lang.eq(v, o);
         }
 
         @Override
@@ -4043,7 +4200,7 @@ public class Osgl implements Serializable {
         @Override
         public boolean containsAll(Collection<?> c) {
             for (Object o : c) {
-                if (Osgl.ne(o, v)) {
+                if (Lang.ne(o, v)) {
                     return false;
                 }
             }
@@ -4095,16 +4252,16 @@ public class Osgl implements Serializable {
             return this;
         }
 
-        public Var<T> update(Osgl.Func0<T> changer) {
+        public Var<T> update(Lang.Func0<T> changer) {
             v = changer.apply();
             return this;
         }
 
         public Option<T> toOption() {
             if (null == v) {
-                return Osgl.none();
+                return Lang.none();
             } else {
-                return Osgl.some(v);
+                return Lang.some(v);
             }
         }
 
@@ -4138,7 +4295,7 @@ public class Osgl implements Serializable {
             }
 
             public F1<T, Var<T>> updater(final Func2<T, T, T> changer) {
-                return new Osgl.F1<T, Var<T>>() {
+                return new Lang.F1<T, Var<T>>() {
                     @Override
                     public Var<T> apply(T t) throws NotAppliedException, Break {
                         F2<T, T, T> f2 = f2(changer);
@@ -4253,6 +4410,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code boolean} value equals to each other
+     *
      * @param a boolean a
      * @param b boolean b
      * @return {@code true} if {@code a == b}
@@ -4263,6 +4421,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code byte} value equals to each other
+     *
      * @param a byte a
      * @param b byte b
      * @return {@code true} if {@code a == b}
@@ -4273,6 +4432,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code char} value equals to each other
+     *
      * @param a char a
      * @param b char b
      * @return {@code true} if {@code a == b}
@@ -4283,6 +4443,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code short} value equals to each other
+     *
      * @param a short a
      * @param b short b
      * @return {@code true} if {@code a == b}
@@ -4293,6 +4454,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code int} value equals to each other
+     *
      * @param a int a
      * @param b int b
      * @return {@code true} if {@code a == b}
@@ -4303,6 +4465,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code float} value equals to each other
+     *
      * @param a float a
      * @param b float b
      * @return {@code true} if {@code a == b}
@@ -4313,6 +4476,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code long} value equals to each other
+     *
      * @param a long a
      * @param b long b
      * @return {@code true} if {@code a == b}
@@ -4323,6 +4487,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if two {@code double} value equals to each other
+     *
      * @param a double a
      * @param b double b
      * @return {@code true} if {@code a == b}
@@ -4366,7 +4531,7 @@ public class Osgl implements Serializable {
      * <tr><td>BigInteger</td><td>{@code !BigInteger.ZERO.equals(v)}</td></tr>
      * <tr><td>BigDecimal</td><td>{@code !BigDecimal.ZERO.equals(v)}</td></tr>
      * <tr><td>File</td><td>{@link java.io.File#exists() v.exists()}</td></tr>
-     * <tr><td>{@link Osgl.Func0}</td><td>{@code bool(v.apply())}</td></tr>
+     * <tr><td>{@link Lang.Func0}</td><td>{@code bool(v.apply())}</td></tr>
      * <tr><td>Other types</td><td>{@code true}</td></tr>
      * </tbody>
      * </table>
@@ -4538,8 +4703,8 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Do bool evaluation on an {@link Osgl.Func0} instance. This will call
-     * the {@link Osgl.Func0#apply()} method and continue to
+     * Do bool evaluation on an {@link Lang.Func0} instance. This will call
+     * the {@link Lang.Func0#apply()} method and continue to
      * do bool evaluation on the return value
      *
      * @param v the function to be evaluated
@@ -4682,7 +4847,7 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Returns negative of {@link #bool(Osgl.Func0)}
+     * Returns negative of {@link #bool(Lang.Func0)}
      *
      * @param f the function to be evaluated
      * @return {@code !(bool(f))}
@@ -4693,6 +4858,7 @@ public class Osgl implements Serializable {
 
     /**
      * Check if an object is `null` or {@link #NONE}
+     *
      * @param o the object to check
      * @return `true` if `o` is `null` or `NONE`
      */
@@ -4731,7 +4897,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns String representation of an object instance. Predicate the object specified
-     * is {@code null} or {@code Osgl.NONE}, then an empty string is returned
+     * is {@code null} or {@code Lang.NONE}, then an empty string is returned
      *
      * @param o the object which will be converted into a string
      * @return a String representation of object
@@ -4791,6 +4957,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of an iterable
+     *
      * @param it the iterable
      * @return the hash code of the iterable
      */
@@ -4804,6 +4971,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a boolean value
+     *
      * @param o the boolean value
      * @return the hash code of the boolean value
      */
@@ -4813,6 +4981,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a boolean array
+     *
      * @param oa the boolean array
      * @return the hash code of the boolean array
      */
@@ -4826,6 +4995,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a short value
+     *
      * @param o the short value
      * @return the hash code of the short value
      */
@@ -4835,6 +5005,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a short array
+     *
      * @param oa the short array
      * @return the hash code of the short array
      */
@@ -4848,6 +5019,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a byte value
+     *
      * @param o the byte value
      * @return the hash code of the byte value
      */
@@ -4857,6 +5029,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a byte array
+     *
      * @param oa the byte array
      * @return the hash code of the byte array
      */
@@ -4870,6 +5043,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a char value
+     *
      * @param o the char value
      * @return the hash code of the char value
      */
@@ -4879,6 +5053,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a char array
+     *
      * @param oa the char array
      * @return the hash code of the char array
      */
@@ -4892,6 +5067,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a int value
+     *
      * @param o the int value
      * @return the hash code of the int value
      */
@@ -4901,6 +5077,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a int array
+     *
      * @param oa the int array
      * @return the hash code of the int array
      */
@@ -4914,6 +5091,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a float value
+     *
      * @param o the float value
      * @return the hash code of the float value
      */
@@ -4923,6 +5101,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a float array
+     *
      * @param oa the float array
      * @return the hash code of the float array
      */
@@ -4936,6 +5115,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a long value
+     *
      * @param o the long value
      * @return the hash code of the long value
      */
@@ -4945,6 +5125,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a long array
+     *
      * @param oa the long array
      * @return the hash code of the long array
      */
@@ -4958,6 +5139,7 @@ public class Osgl implements Serializable {
 
     /**
      * Returns hash code of a double value
+     *
      * @param o the double value
      * @return the hash code of the double value
      */
@@ -5149,9 +5331,10 @@ public class Osgl implements Serializable {
 
     /**
      * Return an enum value from code
+     *
      * @param enumClass the enum class
-     * @param name the name of the enum value. `name` is case insensitive
-     * @param <T> the generic enum type
+     * @param name      the name of the enum value. `name` is case insensitive
+     * @param <T>       the generic enum type
      * @return the enum value or `null` if there is no value has the name specified
      */
     public static <T extends Enum<T>> T asEnum(Class<T> enumClass, String name) {
@@ -5160,10 +5343,11 @@ public class Osgl implements Serializable {
 
     /**
      * Return an enum value from code
-     * @param enumClass the enum class
-     * @param name the name of the enum value. `name` is case insensitive
+     *
+     * @param enumClass     the enum class
+     * @param name          the name of the enum value. `name` is case insensitive
      * @param caseSensitive specify whether it should do case sensitive lookup or case insensitive lookup
-     * @param <T> the generic enum type
+     * @param <T>           the generic enum type
      * @return the enum value or `null` if there is no value has the name specified
      */
     public static <T extends Enum<T>> T asEnum(final Class<T> enumClass, final String name, final boolean caseSensitive) {
@@ -5174,7 +5358,7 @@ public class Osgl implements Serializable {
         if (null == map) {
             T[] values = enumClass.getEnumConstants();
             map = new HashMap<>(values.length * 2);
-            for (T value: values) {
+            for (T value : values) {
                 map.put(value.name().toUpperCase(), value);
             }
             enumLookup.putIfAbsent(enumClass, map);
@@ -5186,7 +5370,8 @@ public class Osgl implements Serializable {
 
     /**
      * Print a line of message into standard out
-     * @param msg the message template
+     *
+     * @param msg  the message template
      * @param args the message arguments
      */
     public static void echo(String msg, Object... args) {
@@ -5195,7 +5380,8 @@ public class Osgl implements Serializable {
 
     /**
      * Print a line of message into standard err
-     * @param msg the message template
+     *
+     * @param msg  the message template
      * @param args the message arguments
      */
     public static void error(String msg, Object... args) {
@@ -5334,7 +5520,7 @@ public class Osgl implements Serializable {
      * If the object passed in is `null` then raise `NullPointerException`
      * otherwise return the object
      *
-     * @param o the object to be tested
+     * @param o   the object to be tested
      * @param <T> the generic type of the object
      * @return the object passed in if it is not null
      */
@@ -5461,6 +5647,7 @@ public class Osgl implements Serializable {
      * 3. String.class
      * 4. Any class extends `Enum.class`
      * 5. Locale.class
+     *
      * @param c the class to be checked
      * @return `true` if the give type `c` is simple type as described above
      */
@@ -5514,9 +5701,9 @@ public class Osgl implements Serializable {
         Class c = __primitiveTypes.get(className);
         if (null != c) return some((Class<T>) c);
         try {
-            return Osgl.some((Class<T>) Class.forName(className));
+            return Lang.some((Class<T>) Class.forName(className));
         } catch (Exception e) {
-            return Osgl.none();
+            return Lang.none();
         }
     }
 
@@ -5524,9 +5711,9 @@ public class Osgl implements Serializable {
         Class c = __primitiveTypes.get(className);
         if (null != c) return some((Class<T>) c);
         try {
-            return Osgl.some((Class<T>) Class.forName(className, true, classLoader));
+            return Lang.some((Class<T>) Class.forName(className, true, classLoader));
         } catch (Exception e) {
-            return Osgl.none();
+            return Lang.none();
         }
     }
 
@@ -5565,9 +5752,9 @@ public class Osgl implements Serializable {
         if (null != o) return some((T) o);
         try {
             Class<T> c = (Class<T>) Class.forName(className);
-            return Osgl.some(c.newInstance());
+            return Lang.some(c.newInstance());
         } catch (Exception e) {
-            return Osgl.none();
+            return Lang.none();
         }
     }
 
@@ -5575,7 +5762,7 @@ public class Osgl implements Serializable {
         E.invalidArgIf(pos < 0);
         if (pos < pts.length) {
             Class pt = pts[pos];
-            pt = $.wrapperClassOf(pt);
+            pt = wrapperClassOf(pt);
             return (pt.isAssignableFrom(p.getClass()));
         } else {
             return false;
@@ -5782,7 +5969,8 @@ public class Osgl implements Serializable {
     /**
      * Returns non-static field of a class by name. The field might be non-public declared in super classes
      * of the supplied class
-     * @param c the class
+     *
+     * @param c    the class
      * @param name the name of the field
      * @return the field instance or `null` if not found
      */
@@ -5793,8 +5981,9 @@ public class Osgl implements Serializable {
     /**
      * Returns field of a class by name. The field could be non-public field of super class of
      * the class specified
-     * @param c the class
-     * @param name the name of the field
+     *
+     * @param c        the class
+     * @param name     the name of the field
      * @param noStatic specify if static fields shall be included
      * @return the field instance or `null` if not found
      */
@@ -5805,10 +5994,11 @@ public class Osgl implements Serializable {
     /**
      * Returns field of a class by name. The field could be non-public field of super class of
      * the class specified
-     * @param c the class
-     * @param name the name of the field
+     *
+     * @param c         the class
+     * @param name      the name of the field
      * @param rootClass the class that stops of the recurive operation. Default is Object.class
-     * @param noStatic specify if static fields shall be included
+     * @param noStatic  specify if static fields shall be included
      * @return the field instance or `null` if not found
      */
     public static Field fieldOf(Class<?> c, String name, Class<?> rootClass, boolean noStatic) {
@@ -5836,18 +6026,19 @@ public class Osgl implements Serializable {
      * Returns all fields of a class and all super classes. Note all fields returned will
      * be called on {@link Field#setAccessible(boolean)} with value `true`
      *
-     * @param c the class
+     * @param c      the class
      * @param filter specify which field will be put into the list if not `null`
      * @return a list of fields
      */
-    public static List<Field> fieldsOf(Class<?> c, $.Function<Field, Boolean> filter) {
+    public static List<Field> fieldsOf(Class<?> c, Function<Field, Boolean> filter) {
         return fieldsOf(c, Object.class, filter);
     }
 
     /**
      * Returns all fields of a class and all super classes. Note all fields returned will
      * be called on {@link Field#setAccessible(boolean)} with value `true`
-     * @param c the class
+     *
+     * @param c        the class
      * @param noStatic specify if static fields shall be included. Default: `true`
      * @return a list of fields
      */
@@ -5858,14 +6049,15 @@ public class Osgl implements Serializable {
     /**
      * Returns all fields of a class and all super classes until root class. Note all fields returned will
      * be called on {@link Field#setAccessible(boolean)} with value `true`
-     * @param c the class
+     *
+     * @param c         the class
      * @param rootClass the class that stops the recursive operation
-     * @param noStatic specify if static fields should be included
+     * @param noStatic  specify if static fields should be included
      * @return a list of fields
      */
     public static List<Field> fieldsOf(Class<?> c, Class<?> rootClass, boolean noStatic) {
         List<Field> fields = new ArrayList<Field>();
-        $.Predicate<Field> filter = noStatic ? new $.Predicate<Field>() {
+        Predicate<Field> filter = noStatic ? new Predicate<Field>() {
             @Override
             public boolean test(Field field) {
                 return !Modifier.isStatic(field.getModifiers());
@@ -5878,24 +6070,25 @@ public class Osgl implements Serializable {
     /**
      * Returns all fields of a class and all super classes until root class. Note all fields returned will
      * be called on {@link Field#setAccessible(boolean)} with value `true`
-     * @param c the class
+     *
+     * @param c         the class
      * @param rootClass the class that stops the recursive lookup
-     * @param filter specify what field should be put into the list if not `null`
+     * @param filter    specify what field should be put into the list if not `null`
      * @return the list of fields
      */
-    public static List<Field> fieldsOf(Class<?> c, Class<?> rootClass, $.Function<Field, Boolean> filter) {
+    public static List<Field> fieldsOf(Class<?> c, Class<?> rootClass, Function<Field, Boolean> filter) {
         List<Field> fields = new ArrayList<Field>();
         addFieldsToList(fields, c, rootClass, filter);
         return fields;
     }
 
-    public static List<Field> fieldsOf(Class<?> c, $.Function<Class<?>, Boolean> classFilter, $.Function<Field, Boolean> fieldFilter) {
+    public static List<Field> fieldsOf(Class<?> c, Function<Class<?>, Boolean> classFilter, Function<Field, Boolean> fieldFilter) {
         List<Field> fields = new ArrayList<Field>();
         addFieldsToList(fields, c, classFilter, fieldFilter);
         return fields;
     }
 
-    private static void addFieldsToList(List<Field> list, Class<?> c, Class<?> rootClass, $.Function<Field, Boolean> filter) {
+    private static void addFieldsToList(List<Field> list, Class<?> c, Class<?> rootClass, Function<Field, Boolean> filter) {
         if (c.isInterface()) {
             return;
         }
@@ -5915,7 +6108,7 @@ public class Osgl implements Serializable {
         }
     }
 
-    private static void addFieldsToList(List<Field> list, Class<?> c, $.Function<Class<?>, Boolean> classFilter, $.Function<Field, Boolean> fieldFilter) {
+    private static void addFieldsToList(List<Field> list, Class<?> c, Function<Class<?>, Boolean> classFilter, Function<Field, Boolean> fieldFilter) {
         if (c.isInterface()) {
             return;
         }
@@ -5937,14 +6130,15 @@ public class Osgl implements Serializable {
 
     /**
      * Invoke a static method by name and parameters
-     * @param c the class
+     *
+     * @param c          the class
      * @param methodName the method name
-     * @param pa the parameters
-     * @param <T> the generic type of the class
-     * @param <R> the generic type of the return result
+     * @param pa         the parameters
+     * @param <T>        the generic type of the class
+     * @param <R>        the generic type of the return result
      * @return the result of method invocation
      */
-    public static <T, R> R invokeStatic(Class<T> c, String methodName, Object ... pa) {
+    public static <T, R> R invokeStatic(Class<T> c, String methodName, Object... pa) {
         return invokeMethod(null, c, null, methodName, pa);
     }
 
@@ -5952,27 +6146,29 @@ public class Osgl implements Serializable {
      * Invoke a static method by name and parameters. After invocation
      * it will cache the method into method bag supplied. This method
      * will convert all checked exception into corresponding runtime exception
-     * @param methodBag the method bag
-     * @param c the class
+     *
+     * @param methodBag  the method bag
+     * @param c          the class
      * @param methodName the method name
-     * @param pa the parameters
-     * @param <T> the generic type of class
-     * @param <R> the generic type of return instance
+     * @param pa         the parameters
+     * @param <T>        the generic type of class
+     * @param <R>        the generic type of return instance
      * @return the result of method invocation
      */
-    public static <T, R> R invokeStatic(Var<Method> methodBag, Class<T> c, String methodName, Object ... pa) {
+    public static <T, R> R invokeStatic(Var<Method> methodBag, Class<T> c, String methodName, Object... pa) {
         return invokeMethod(methodBag, c, null, methodName, pa);
     }
 
     /**
      * Invoke a static method. This method will convert all checked exception
      * into corresponding runtime exception
+     *
      * @param method the method
-     * @param pa the arguments to invoke the method
-     * @param <R> the generic type of the return result
+     * @param pa     the arguments to invoke the method
+     * @param <R>    the generic type of the return result
      * @return the result of the method invocation
      */
-    public static <R> R invokeStatic(Method method, Object ... pa) {
+    public static <R> R invokeStatic(Method method, Object... pa) {
         try {
             return (R) method.invoke(null, pa);
         } catch (Exception e) {
@@ -5986,15 +6182,15 @@ public class Osgl implements Serializable {
      *
      * After invocation, the method will be cached into the method bag supplied
      *
-     * @param methodBag A function to cache the method found by name and arguments
-     * @param o the instance on which the virtual method will be invoked
+     * @param methodBag  A function to cache the method found by name and arguments
+     * @param o          the instance on which the virtual method will be invoked
      * @param methodName the method name
-     * @param pa the arguments
-     * @param <T> generic type of the instance object
-     * @param <R> generic type of the return result
+     * @param pa         the arguments
+     * @param <T>        generic type of the instance object
+     * @param <R>        generic type of the return result
      * @return result of method invocation
      */
-    public static <T, R> R invokeVirtual(Var<Method> methodBag, T o, String methodName, Object ... pa) {
+    public static <T, R> R invokeVirtual(Var<Method> methodBag, T o, String methodName, Object... pa) {
         E.NPE(o);
         return invokeMethod(methodBag, null, o, methodName, pa);
     }
@@ -6002,14 +6198,15 @@ public class Osgl implements Serializable {
     /**
      * Invoke a virtual method by instance, method name and arguments. This method
      * will convert all checked exception into corresponding runtime exception
-     * @param o the instance on which the virtual method will be invoked
+     *
+     * @param o          the instance on which the virtual method will be invoked
      * @param methodName the method name
-     * @param pa the arguments
-     * @param <T> generic type of the instance object
-     * @param <R> generic type of the return result
+     * @param pa         the arguments
+     * @param <T>        generic type of the instance object
+     * @param <R>        generic type of the return result
      * @return result of method invocation
      */
-    public static <T, R> R invokeVirtual(T o, String methodName, Object ... pa) {
+    public static <T, R> R invokeVirtual(T o, String methodName, Object... pa) {
         E.NPE(o);
         return invokeMethod(null, null, o, methodName, pa);
     }
@@ -6017,14 +6214,15 @@ public class Osgl implements Serializable {
     /**
      * Invoke a virtual {@link Method method}. This method will convert all checked exception
      * to corresponding runtime exception
-     * @param o the instance on which the method will be invoked
+     *
+     * @param o      the instance on which the method will be invoked
      * @param method the method
-     * @param pa the arguments
-     * @param <T> generic type of the instance
-     * @param <R> generic type of the result
+     * @param pa     the arguments
+     * @param <T>    generic type of the instance
+     * @param <R>    generic type of the result
      * @return result of method invocation
      */
-    public static <T, R> R invokeVirtual(T o, Method method, Object ... pa) {
+    public static <T, R> R invokeVirtual(T o, Method method, Object... pa) {
         E.NPE(o);
         try {
             return (R) method.invoke(o, pa);
@@ -6035,21 +6233,22 @@ public class Osgl implements Serializable {
 
     /**
      * Returns {@link Method} by name and parameter value
-     * @param c the class
+     *
+     * @param c          the class
      * @param methodName the method name
-     * @param pa the parameter used to invoke the method
+     * @param pa         the parameter used to invoke the method
      * @return the method or `null` if not found
      */
-    public static Method getMethod(Class c, String methodName, Object ... pa) {
+    public static Method getMethod(Class c, String methodName, Object... pa) {
         Method[] ma = c.getMethods();
-        for (Method m: ma) {
+        for (Method m : ma) {
             if (!m.getName().equals(methodName)) {
                 continue;
             }
             Class[] pts = m.getParameterTypes();
             boolean shouldContinue = false;
             int len = pts.length;
-            for (int i = 0; i < len ; ++i) {
+            for (int i = 0; i < len; ++i) {
                 Object p = pa[i];
                 if (!testMethodParamType(pts, p, i)) {
                     shouldContinue = true;
@@ -6066,12 +6265,13 @@ public class Osgl implements Serializable {
 
     /**
      * Returns {@link Method} by name and argument type
-     * @param c the class
+     *
+     * @param c          the class
      * @param methodName the method name
-     * @param argTypes the argument types
+     * @param argTypes   the argument types
      * @return the method or `null` if not found
      */
-    public static Method getMethod(Class c, String methodName, Class ... argTypes) {
+    public static Method getMethod(Class c, String methodName, Class... argTypes) {
         try {
             return c.getMethod(methodName, argTypes);
         } catch (NoSuchMethodException e) {
@@ -6079,20 +6279,20 @@ public class Osgl implements Serializable {
         }
     }
 
-    private static <T, R> R invokeMethod(Var<Method> methodBag, Class c, T o, String methodName, Object ... pa) {
+    private static <T, R> R invokeMethod(Var<Method> methodBag, Class c, T o, String methodName, Object... pa) {
         try {
             if (null == c) {
                 c = o.getClass();
             }
             Method[] ma = c.getMethods();
-            for (Method m: ma) {
+            for (Method m : ma) {
                 if (!m.getName().equals(methodName)) {
                     continue;
                 }
                 Class[] pts = m.getParameterTypes();
                 boolean shouldContinue = false;
                 int len = pts.length;
-                for (int i = 0; i < len ; ++i) {
+                for (int i = 0; i < len; ++i) {
                     Object p = pa[i];
                     if (!testMethodParamType(pts, p, i)) {
                         shouldContinue = true;
@@ -6177,11 +6377,11 @@ public class Osgl implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T getProperty(Object entity, String ... propertyPath) {
+    private static <T> T getProperty(Object entity, String... propertyPath) {
         return getProperty(null, entity, propertyPath);
     }
 
-    private static <T> T getProperty(CacheService cache, Object entity, String ... propertyPath) {
+    private static <T> T getProperty(CacheService cache, Object entity, String... propertyPath) {
         if (null == entity) {
             return null;
         }
@@ -6241,7 +6441,7 @@ public class Osgl implements Serializable {
     }
 
     private static String propertyGetterKey(Class c, String p, boolean requireField) {
-        return S.builder("osgl:pg:").append(requireField ? "f:": "").append(c.getName()).append(":").append(p).toString();
+        return S.builder("osgl:pg:").append(requireField ? "f:" : "").append(c.getName()).append(":").append(p).toString();
     }
 
     @SuppressWarnings("unchecked")
@@ -6322,7 +6522,7 @@ public class Osgl implements Serializable {
         } else if (type instanceof Class) {
             Class classType = (Class) type;
             if (classType.isArray()) {
-                return (List)C.List(classType.getComponentType());
+                return (List) C.List(classType.getComponentType());
             }
         }
         return null;
@@ -6331,7 +6531,7 @@ public class Osgl implements Serializable {
     private static List<Class<?>> findArgumentTypes(ParameterizedType ptype) {
         List<Class<?>> retList = C.Mutable.List();
         Type[] ta = ptype.getActualTypeArguments();
-        for (Type t: ta) {
+        for (Type t : ta) {
             if (t instanceof Class) {
                 retList.add((Class) t);
             } else if (t instanceof ParameterizedType) {
@@ -6342,7 +6542,7 @@ public class Osgl implements Serializable {
     }
 
     @SuppressWarnings("unchecked")
-    private static void setProperty(final CacheService cache, Object entity, final Object val, String ... propertyPath) {
+    private static void setProperty(final CacheService cache, Object entity, final Object val, String... propertyPath) {
         E.NPE(entity);
         int len = propertyPath.length;
         E.illegalArgumentIf(len < 1);
@@ -6386,7 +6586,7 @@ public class Osgl implements Serializable {
         }
     }
 
-    private static void setProperty(Object entity, Object val, String ... propertyPath) {
+    private static void setProperty(Object entity, Object val, String... propertyPath) {
         setProperty(null, entity, val, propertyPath);
     }
 
@@ -6590,7 +6790,7 @@ public class Osgl implements Serializable {
         int len = elements.length;
         if (len == 0) return -1;
         for (int i = 0; i < len; ++i) {
-            if (Osgl.eq(element, elements[i])) return i;
+            if (Lang.eq(element, elements[i])) return i;
         }
         return -1;
     }
@@ -6820,11 +7020,13 @@ public class Osgl implements Serializable {
             array[i] = element;
         }
     }
+
     public static void fill(char element, char[] array) {
         for (int i = 0; i < array.length; ++i) {
             array[i] = element;
         }
     }
+
     public static void fill(short element, short[] array) {
         for (int i = 0; i < array.length; ++i) {
             array[i] = element;
@@ -7202,7 +7404,7 @@ public class Osgl implements Serializable {
      * @param <T>          return type
      * @return the result of the callback
      */
-    public static <T> Future<T> async(final Osgl.F0<T> callback, final int milliseconds) {
+    public static <T> Future<T> async(final Lang.F0<T> callback, final int milliseconds) {
         return _exec.submit(new Callable<T>() {
             @Override
             public T call() throws Exception {
@@ -7219,7 +7421,7 @@ public class Osgl implements Serializable {
         if (null == clfCls) {
             clf = ContextLocal.Factory.Predefined.defaultFactory();
         } else {
-            Osgl.Option<ContextLocal.Factory> fact = Osgl.safeNewInstance(clfCls);
+            Lang.Option<ContextLocal.Factory> fact = Lang.safeNewInstance(clfCls);
             if (fact.isDefined()) {
                 clf = fact.get();
             } else {
@@ -7245,6 +7447,7 @@ public class Osgl implements Serializable {
 
     /**
      * Evaluate Annotation properties
+     *
      * @param anno the annotation instance
      * @return a Map contains annotation instance properties
      */
@@ -7256,11 +7459,10 @@ public class Osgl implements Serializable {
             if (isStandardAnnotationMethod(m)) {
                 continue;
             }
-            properties.put(m.getName(), $.invokeVirtual(anno, m));
+            properties.put(m.getName(), invokeVirtual(anno, m));
         }
         return properties;
     }
-
 
 
     // --- eof common utilities
@@ -7278,7 +7480,7 @@ public class Osgl implements Serializable {
          * there is no need to test if the parameter is {@code null} in the tester as the utility will garantee the
          * object passed in is not null
          * <pre>
-         *  Osgl.Conf.registerBoolTester(new Osgl.F1&lt;Boolean, Object&gt;() {
+         *  Lang.Conf.registerBoolTester(new Lang.F1&lt;Boolean, Object&gt;() {
          *      {@literal @}Override
          *      public Boolean apply(Object o) {
          *          if (o instanceof Score) {
@@ -7587,7 +7789,7 @@ public class Osgl implements Serializable {
         }
 
         /**
-         * Returns a composed {@link Osgl.Predicate} function that for any given parameter, the test result is <code>true</code>
+         * Returns a composed {@link Lang.Predicate} function that for any given parameter, the test result is <code>true</code>
          * only when all of the specified predicates returns <code>true</code> when applied to the parameter
          *
          * @param predicates a collection of predicates that can be applied to a parameter and returns boolean value
@@ -7613,7 +7815,7 @@ public class Osgl implements Serializable {
         }
 
         /**
-         * Returns a composed {@link Osgl.Predicate} function that for any given parameter, the test result is <code>true</code>
+         * Returns a composed {@link Lang.Predicate} function that for any given parameter, the test result is <code>true</code>
          * only when all of the specified predicates returns <code>true</code> when applied to the parameter
          *
          * @param predicates an array of predicates that can be applied to a parameter and returns boolean value
@@ -7629,7 +7831,7 @@ public class Osgl implements Serializable {
         }
 
         /**
-         * Returns a composed {@link Osgl.Predicate} function that for any given parameter, the test result is <code>true</code>
+         * Returns a composed {@link Lang.Predicate} function that for any given parameter, the test result is <code>true</code>
          * only when any one of the specified predicates returns <code>true</code> when applied to the parameter
          *
          * @param predicates a collection of predicates that can be applied to a parameter and returns boolean value
@@ -7655,7 +7857,7 @@ public class Osgl implements Serializable {
         }
 
         /**
-         * Returns a composed {@link Osgl.Predicate} function that for any given parameter, the test result is <code>true</code>
+         * Returns a composed {@link Lang.Predicate} function that for any given parameter, the test result is <code>true</code>
          * when any one of the specified predicates returns <code>true</code> on the parameter
          *
          * @param predicates an array of predicates that can be applied to a parameter and returns boolean value
@@ -7684,7 +7886,7 @@ public class Osgl implements Serializable {
         }
 
         /**
-         * Alias of {@link #or(Osgl.Function[])}
+         * Alias of {@link #or(Lang.Function[])}
          *
          * @param predicates an array of predicate functions
          * @param <T>        the argument type
@@ -7711,7 +7913,7 @@ public class Osgl implements Serializable {
         }
 
         /**
-         * Negation of {@link #or(Osgl.Function[])}
+         * Negation of {@link #or(Lang.Function[])}
          *
          * @param predicates an array of predicate functions
          * @param <T>        the generic type of the argument the predicate functions take
@@ -7734,7 +7936,7 @@ public class Osgl implements Serializable {
             return new F1<T, Boolean>() {
                 @Override
                 public Boolean apply(T t) throws NotAppliedException, Break {
-                    return Osgl.not(t);
+                    return Lang.not(t);
                 }
             };
         }
@@ -7750,7 +7952,7 @@ public class Osgl implements Serializable {
          * @return the inverted function of input function {@code f}
          */
         public static <X, Y> Bijection<Y, X> invert(final Bijection<X, Y> f) {
-            return Osgl.f1(f.invert());
+            return Lang.f1(f.invert());
         }
 
         /**
@@ -8006,6 +8208,7 @@ public class Osgl implements Serializable {
 
         /**
          * The type-safe version of {@link #IDENTITY}
+         *
          * @param clz the class that restrict the type of &lt;T&gt;
          * @param <T> the generic type
          * @return the identity function that when get called, always return the parameter
@@ -8507,7 +8710,7 @@ public class Osgl implements Serializable {
         public static final F2 EQ = new F2() {
             @Override
             public Object apply(Object a, Object b) {
-                return Osgl.eq(a, b);
+                return Lang.eq(a, b);
             }
         };
 
@@ -8559,7 +8762,7 @@ public class Osgl implements Serializable {
             return new Predicate<P>() {
                 @Override
                 public boolean test(P p) {
-                    return Osgl.eq(p, element);
+                    return Lang.eq(p, element);
                 }
             };
         }
@@ -8673,7 +8876,7 @@ public class Osgl implements Serializable {
         public static final F1 HASH_CODE = new F1() {
             @Override
             public Integer apply(Object o) {
-                return Osgl.hc(o);
+                return Lang.hc(o);
             }
         };
 
@@ -8700,7 +8903,7 @@ public class Osgl implements Serializable {
         public static final F1 AS_STRING = new F1() {
             @Override
             public Object apply(Object o) {
-                return Osgl.asString2(o);
+                return Lang.asString2(o);
             }
         };
 
@@ -8746,7 +8949,7 @@ public class Osgl implements Serializable {
             return new Transformer<BEAN, Object>() {
                 @Override
                 public Object transform(BEAN bean) {
-                    return $.getProperty(bean, property);
+                    return getProperty(bean, property);
                 }
             };
         }
@@ -8754,6 +8957,7 @@ public class Osgl implements Serializable {
         /**
          * Returns a predicate function that when applied to a {@link Field} type
          * object, returns `true` if the field has specified annotation presented
+         *
          * @param annoClass the annotation
          * @return a predicate function as described above
          */

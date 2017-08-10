@@ -5,7 +5,7 @@ import org.osgl.exception.UnexpectedNewInstanceException;
 import org.osgl.util.E;
 
 /**
- * Test `newInstance(...)` method of {@link Osgl} class
+ * Test `newInstance(...)` method of {@link Lang} class
  */
 public class NewInstanceTest extends TestBase {
 

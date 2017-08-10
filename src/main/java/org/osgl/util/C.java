@@ -20,7 +20,7 @@
 package org.osgl.util;
 
 import org.osgl.$;
-import org.osgl.Osgl;
+import org.osgl.Lang;
 import org.osgl.exception.NotAppliedException;
 import org.osgl.util.algo.Algorithms;
 
@@ -350,7 +350,7 @@ public class C {
         Traversable<T> accept($.Visitor<? super T> visitor);
 
         /**
-         * Alias of {@link #accept(Osgl.Visitor)}
+         * Alias of {@link #accept(Lang.Visitor)}
          *
          * @param visitor the visitor to tranverse the elements
          * @return this {@code Traversable} instance
@@ -358,7 +358,7 @@ public class C {
         Traversable<T> each($.Visitor<? super T> visitor);
 
         /**
-         * Alias of {@link #accept(Osgl.Visitor)}
+         * Alias of {@link #accept(Lang.Visitor)}
          *
          * @param visitor the visitor function
          * @return this {@code Traversable} instance
@@ -700,11 +700,11 @@ public class C {
         /**
          * {@inheritDoc}
          * This method does not specify how to run the accumulator. It might be
-         * {@link C.Sequence#reduceLeft(Object, Osgl.Func2)} or
-         * {@link ReversibleSequence#reduceRight(Object, Osgl.Func2)}, or
+         * {@link C.Sequence#reduceLeft(Object, Lang.Func2)} or
+         * {@link ReversibleSequence#reduceRight(Object, Lang.Func2)}, or
          * even run reduction in parallel, it all depending on the implementation.
          * <p>For a guaranteed reduce from left to right, use
-         * {@link C.Sequence#reduceLeft(Object, Osgl.Func2)}  instead</p>
+         * {@link C.Sequence#reduceLeft(Object, Lang.Func2)}  instead</p>
          *
          * @param identity    {@inheritDoc}
          * @param accumulator {@inheritDoc}
@@ -737,7 +737,7 @@ public class C {
          * {@inheritDoc}
          * This method does not specify the approach to run reduction.
          * For a guaranteed reduction from head to tail, use
-         * {@link #reduceLeft(Osgl.Func2)} instead
+         * {@link #reduceLeft(Lang.Func2)} instead
          *
          * @param accumulator {@inheritDoc}
          * @return {@inheritDoc}
@@ -791,8 +791,8 @@ public class C {
          *
          * @param visitor the function to visit elements in this sequence
          * @return this sequence
-         * @see Traversable#accept(Osgl.Visitor)
-         * @see ReversibleSequence#acceptRight(Osgl.Visitor)
+         * @see Traversable#accept(Lang.Visitor)
+         * @see ReversibleSequence#acceptRight(Lang.Visitor)
          * @since 0.2
          */
         Sequence<T> acceptLeft($.Visitor<? super T> visitor);
@@ -1060,7 +1060,7 @@ public class C {
          * @param accumulator the function performs accumulation from {@code T} an {@code R} to anthoer {@code R}
          * @param <R>         the accumulation result
          * @return the aggregation result
-         * @see #reduce(Object, Osgl.Func2)
+         * @see #reduce(Object, Lang.Func2)
          * @since 0.2
          */
         <R> R reduceRight(R identity, $.Func2<R, T, R> accumulator);
@@ -1128,8 +1128,8 @@ public class C {
          *
          * @param visitor the function to visit elements in this sequence
          * @return this sequence
-         * @see Traversable#accept(Osgl.Visitor)
-         * @see Sequence#acceptLeft(Osgl.Visitor)
+         * @see Traversable#accept(Lang.Visitor)
+         * @see Sequence#acceptLeft(Lang.Visitor)
          * @since 0.2
          */
         ReversibleSequence<T> acceptRight($.Visitor<? super T> visitor);
@@ -1790,7 +1790,7 @@ public class C {
          * The function use the predicate to test all elements in this list. If test passed
          * then it add the element into {@link $.T2#_1 left side list}, otherwise the
          * element will be added into {@link $.T2#_2 right side list}. The result
-         * is returned as a {@link org.osgl.Osgl.Tuple tuple} contains the left and
+         * is returned as a {@link org.osgl.Lang.Tuple tuple} contains the left and
          * right side lift
          * </p>
          *
@@ -1986,7 +1986,7 @@ public class C {
         List<T> accept($.IndexedVisitor<Integer, ? super T> indexedVisitor);
 
         /**
-         * Alias of {@link #accept(Osgl.Visitor)}
+         * Alias of {@link #accept(Lang.Visitor)}
          *
          * @param indexedVisitor the function to be called on each element along with the index
          * @return this list
@@ -1994,7 +1994,7 @@ public class C {
         List<T> each($.IndexedVisitor<Integer, ? super T> indexedVisitor);
 
         /**
-         * Alias of {@link #accept(Osgl.Visitor)}
+         * Alias of {@link #accept(Lang.Visitor)}
          *
          * @param indexedVisitor the function to be called on each element along with the index
          * @return this list
@@ -2383,7 +2383,7 @@ public class C {
         }
 
         /**
-         * Alias of {@link #forEach(Osgl.IndexedVisitor)}
+         * Alias of {@link #forEach(Lang.IndexedVisitor)}
          *
          * @param indexedVisitor the visitor that can be applied on Key/Value pair stored in this Map
          * @return this Map
@@ -2393,7 +2393,7 @@ public class C {
         }
 
         /**
-         * Alias of {@link #forEach(Osgl.IndexedVisitor)}
+         * Alias of {@link #forEach(Lang.IndexedVisitor)}
          *
          * @param indexedVisitor the visitor that can be applied on Key/Value pair stored in this Map
          * @return this Map
@@ -3753,7 +3753,7 @@ public class C {
 
     /**
      * Run visitor function on each element supplied by the iterable. The visitor function can throw out
-     * {@link org.osgl.Osgl.Break} if it need to break the loop.
+     * {@link org.osgl.Lang.Break} if it need to break the loop.
      * <p>Note if {@link NotAppliedException} thrown out by visitor function, it will be ignored
      * and keep looping through the Map entry set. It is kind of {@code continue} mechanism in a funcitonal
      * way</p>
@@ -3776,7 +3776,7 @@ public class C {
 
     /**
      * Run visitor function on each element supplied by the iterator. The visitor function can throw out
-     * {@link org.osgl.Osgl.Break} if it need to break the loop.
+     * {@link org.osgl.Lang.Break} if it need to break the loop.
      * <p>Note if {@link NotAppliedException} thrown out by visitor function, it will be ignored
      * and keep looping through the Map entry set. It is kind of {@code continue} mechanism in a funcitonal
      * way</p>
@@ -3794,7 +3794,7 @@ public class C {
 
     /**
      * Run indexedVisitor function on all key/value pair in a given Map. The indexedVisitor function can
-     * throw out {@link org.osgl.Osgl.Break} if it need to break the loop.
+     * throw out {@link org.osgl.Lang.Break} if it need to break the loop.
      * <p>Note if {@link NotAppliedException} thrown out by indexedVisitor function, it will be ignored
      * and keep looping through the Map entry set. It is kind of {@code continue} mechanism in a funcitonal
      * way</p>
@@ -3803,7 +3803,7 @@ public class C {
      * @param indexedVisitor the function that takes (key,value) pair
      * @param <K>            the generic type of Key
      * @param <V>            the generic type of Value
-     * @throws $.Break the {@link org.osgl.Osgl.Break} with payload throwed out by indexedVisitor function to break to loop
+     * @throws $.Break the {@link org.osgl.Lang.Break} with payload throwed out by indexedVisitor function to break to loop
      */
     public static <K, V> void forEach(java.util.Map<K, V> map, $.IndexedVisitor<? super K, ? super V> indexedVisitor) throws $.Break {
         for (java.util.Map.Entry<K, V> entry : map.entrySet()) {
@@ -4148,7 +4148,7 @@ public class C {
         ;
 
         public static <T> $.Transformer<Iterable<T>, Collection<T>> asCollection() {
-            return new Osgl.Transformer<Iterable<T>, Collection<T>>() {
+            return new Lang.Transformer<Iterable<T>, Collection<T>>() {
                 @Override
                 public Collection<T> transform(Iterable<T> iterable) {
                     return C.asCollection(iterable);
@@ -4312,7 +4312,7 @@ public class C {
         public static <L extends List<? super T>, T> $.F1<L, L> add(final int index, final T element) {
             return new $.F1<L, L>() {
                 @Override
-                public L apply(L list) throws NotAppliedException, Osgl.Break {
+                public L apply(L list) throws NotAppliedException, Lang.Break {
                     list.add(index, element);
                     return list;
                 }
@@ -4466,7 +4466,7 @@ public class C {
          */
         @SuppressWarnings("unused")
         public static <T> $.Predicate<Collection<? extends T>> removeAllFrom(final Collection<? super T> fromCollection) {
-            return new Osgl.Predicate<Collection<? extends T>>() {
+            return new Lang.Predicate<Collection<? extends T>>() {
                 @Override
                 public boolean test(Collection<? extends T> theCollection) {
                     return fromCollection.removeAll(theCollection);
@@ -4486,7 +4486,7 @@ public class C {
          * @see #removeAllFrom(Collection)
          */
         public static <T> $.Predicate<Collection<? super T>> removeAll(final Collection<? extends T> source) {
-            return new Osgl.Predicate<Collection<? super T>>() {
+            return new Lang.Predicate<Collection<? super T>>() {
                 @Override
                 public boolean test(Collection<? super T> collection) {
                     return collection.removeAll(source);
@@ -4572,7 +4572,7 @@ public class C {
         public static <T> $.Processor<Deque<? super T>> dequePrepend(final T element) {
             return new $.Processor<Deque<? super T>>() {
                 @Override
-                public void process(Deque<? super T> deque) throws Osgl.Break, NotAppliedException {
+                public void process(Deque<? super T> deque) throws Lang.Break, NotAppliedException {
                     deque.addFirst(element);
                 }
             };
@@ -4611,7 +4611,7 @@ public class C {
         public static <T> $.Processor<Deque<? super T>> dequeAppend(final T element) {
             return new $.Processor<Deque<? super T>>() {
                 @Override
-                public void process(Deque<? super T> deque) throws Osgl.Break, NotAppliedException {
+                public void process(Deque<? super T> deque) throws Lang.Break, NotAppliedException {
                     deque.add(element);
                 }
             };
@@ -4648,9 +4648,9 @@ public class C {
          */
         @SuppressWarnings("unused")
         public static <T> $.Processor<Sequence<? super T>> sequencePrepend(final T element) {
-            return new Osgl.Processor<Sequence<? super T>>() {
+            return new Lang.Processor<Sequence<? super T>>() {
                 @Override
-                public void process(Sequence<? super T> sequence) throws Osgl.Break, NotAppliedException {
+                public void process(Sequence<? super T> sequence) throws Lang.Break, NotAppliedException {
                     sequence.prepend(element);
                 }
             };
@@ -4689,9 +4689,9 @@ public class C {
          */
         @SuppressWarnings("unused")
         public static <T> $.Processor<Sequence<? super T>> sequenceAppend(final T element) {
-            return new Osgl.Processor<Sequence<? super T>>() {
+            return new Lang.Processor<Sequence<? super T>>() {
                 @Override
-                public void process(Sequence<? super T> sequence) throws Osgl.Break, NotAppliedException {
+                public void process(Sequence<? super T> sequence) throws Lang.Break, NotAppliedException {
                     sequence.append(element);
                 }
             };
@@ -4703,7 +4703,7 @@ public class C {
          * @param visitor the function to be used to loop through the argument
          * @param <T>     the element type
          * @return the function as described
-         * @see C#forEach(Iterable, Osgl.Visitor)
+         * @see C#forEach(Iterable, Lang.Visitor)
          */
         @SuppressWarnings("unused")
         public static <T> $.F1<Iterable<? extends T>, Void> forEachIterable(final $.Visitor<? super T> visitor) {
@@ -4757,7 +4757,7 @@ public class C {
         }
 
         /**
-         * A function that apply to {@link java.util.Map.Entry} and returns a {@link Osgl.Binary}
+         * A function that apply to {@link java.util.Map.Entry} and returns a {@link Lang.Binary}
          */
         public static final $.Function<java.util.Map.Entry, $.Binary> MAP_ENTRY_TO_BINARY = new $.Transformer<java.util.Map.Entry, $.Binary>() {
             @Override
@@ -4770,7 +4770,7 @@ public class C {
          * A type cast version of {@link #MAP_ENTRY_TO_BINARY}
          * @param <K> the map entry key type
          * @param <V> the map entry value type
-         * @return a function apply to {@link java.util.Map.Entry} and returns a {@link Osgl.Binary}
+         * @return a function apply to {@link java.util.Map.Entry} and returns a {@link Lang.Binary}
          */
         public static <K, V> $.Function<java.util.Map.Entry<K, V>, $.Binary<K, V>> mapEntryToBinary() {
             return $.cast(MAP_ENTRY_TO_BINARY);

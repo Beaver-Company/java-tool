@@ -3,7 +3,7 @@ package org.osgl.util;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
-class RefectionArrayIterator<T> extends OsglIteratorBase<T> implements Iterator<T> {
+class RefectionArrayIterator<T> extends IteratorBase<T> implements Iterator<T> {
     private final Object array;
     private int currentIndex = 0;
 

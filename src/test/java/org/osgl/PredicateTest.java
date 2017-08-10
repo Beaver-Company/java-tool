@@ -53,7 +53,7 @@ public class PredicateTest extends TestBase {
     }
 
     @Test
-    public void testOsglPredicate() {
+    public void testLangPredicate() {
         $.Predicate p = N.F.greaterThan(4);
         assertSame(p, $.predicate(p));
     }

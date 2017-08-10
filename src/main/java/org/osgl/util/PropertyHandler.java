@@ -1,8 +1,8 @@
 package org.osgl.util;
 
-import org.osgl.Osgl;
+import org.osgl.Lang;
 
 public interface PropertyHandler {
-    void setObjectFactory(Osgl.Function<Class<?>, Object> factory);
-    void setStringValueResolver(Osgl.Func2<String, Class<?>, ?> stringValueResolver);
+    void setObjectFactory(Lang.Function<Class<?>, Object> factory);
+    void setStringValueResolver(Lang.Func2<String, Class<?>, ?> stringValueResolver);
 }

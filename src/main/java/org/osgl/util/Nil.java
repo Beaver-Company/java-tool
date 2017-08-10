@@ -20,7 +20,7 @@
 package org.osgl.util;
 
 import org.osgl.$;
-import org.osgl.Osgl;
+import org.osgl.Lang;
 import org.osgl.exception.NotAppliedException;
 
 import java.io.Serializable;
@@ -356,12 +356,12 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
 
         @Override
         public C.Sequence<T> append(C.Sequence<? extends T> seq) {
-            return Osgl.cast(seq);
+            return Lang.cast(seq);
         }
 
         @Override
         public C.Sequence<T> prepend(C.Sequence<? extends T> seq) {
-            return Osgl.cast(seq);
+            return Lang.cast(seq);
         }
 
         @Override
@@ -691,7 +691,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
 
         @Override
-        public Osgl.T2<C.List<T>, C.List<T>> split(Osgl.Function<? super T, Boolean> predicate) {
+        public Lang.T2<C.List<T>, C.List<T>> split(Lang.Function<? super T, Boolean> predicate) {
             C.List<T> empty = this;
             return $.T2(empty, empty);
         }

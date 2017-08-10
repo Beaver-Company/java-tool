@@ -1,7 +1,7 @@
 package org.osgl.util;
 
 import org.osgl.$;
-import org.osgl.Osgl;
+import org.osgl.Lang;
 import org.osgl.exception.NotAppliedException;
 
 import java.util.*;
@@ -567,12 +567,12 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     }
 
     @Override
-    public Osgl.T2<C.List<T>, C.List<T>> split(final Osgl.Function<? super T, Boolean> predicate) {
+    public Lang.T2<C.List<T>, C.List<T>> split(final Lang.Function<? super T, Boolean> predicate) {
         final C.List<T> left = C.Mutable.List();
         final C.List<T> right = C.Mutable.List();
         accept(new $.Visitor<T>() {
             @Override
-            public void visit(T t) throws Osgl.Break {
+            public void visit(T t) throws Lang.Break {
                 if (predicate.apply(t)) {
                     left.add(t);
                 } else {
@@ -1321,7 +1321,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     }
 
     @Override
-    public <K, V> C.Map<K, V> toMap(Osgl.Function<? super T, ? extends K> keyExtractor, Osgl.Function<? super T, ? extends V> valExtractor) {
+    public <K, V> C.Map<K, V> toMap(Lang.Function<? super T, ? extends K> keyExtractor, Lang.Function<? super T, ? extends V> valExtractor) {
         C.Map<K, V> map = C.Mutable.Map();
         for (T v : this) {
             map.put(keyExtractor.apply(v), valExtractor.apply(v));
@@ -1330,7 +1330,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     }
 
     @Override
-    public <K> C.Map<K, T> toMapByVal(Osgl.Function<? super T, ? extends K> keyExtractor) {
+    public <K> C.Map<K, T> toMapByVal(Lang.Function<? super T, ? extends K> keyExtractor) {
         C.Map<K, T> map = C.Mutable.Map();
         for (T v : this) {
             map.put(keyExtractor.apply(v), v);
@@ -1339,7 +1339,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     }
 
     @Override
-    public <V> C.Map<T, V> toMapByKey(Osgl.Function<? super T, ? extends V> valExtractor) {
+    public <V> C.Map<T, V> toMapByKey(Lang.Function<? super T, ? extends V> valExtractor) {
         C.Map<T, V> map = C.Mutable.Map();
         for (T v : this) {
             map.put(v, valExtractor.apply(v));

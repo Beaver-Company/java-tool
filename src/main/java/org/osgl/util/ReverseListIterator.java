@@ -2,7 +2,7 @@ package org.osgl.util;
 
 import java.util.ListIterator;
 
-class ReverseListIterator<T> extends OsglIteratorBase<T> implements ListIterator<T> {
+class ReverseListIterator<T> extends IteratorBase<T> implements ListIterator<T> {
     private ListIterator<T> itr;
     ReverseListIterator(ListIterator<T> itr) {
         this.itr = itr;

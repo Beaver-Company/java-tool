@@ -22,9 +22,9 @@ package org.osgl;
 import java.io.ObjectStreamException;
 
 /**
- * Alias of {@link Osgl}
+ * Alias of {@link Lang}
  */
-public final class $ extends Osgl {
+public final class $ extends Lang {
 
     public static final $ INSTANCE = new $();
 

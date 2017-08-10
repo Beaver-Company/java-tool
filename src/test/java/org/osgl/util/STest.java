@@ -202,4 +202,26 @@ public class STest extends UtilTestBase {
         eq(C.List("abc"), S.split("abc", '.'));
     }
 
+    @Test
+    public void testWrap() {
+        String content = S.random();
+        String expected = "[" + content + "]";
+        eq(expected, S.wrap(content).with(S.SQUARE_BRACKETS));
+        eq(expected, S.wrap(content).with("[", "]"));
+
+        expected = "'" + content + "'";
+        eq(expected, S.wrap(content).with("'"));
+    }
+
+    @Test
+    public void testStrip() {
+        String content = S.random();
+        String s = "[" + content + "]";
+        eq(content, S.strip(s).of(S.SQUARE_BRACKETS));
+        eq(content, S.strip(s).of(S.pair("[", "]")));
+        eq(content, S.strip(s).of("[", "]"));
+
+        s = "/" + content + "/";
+        eq(content, S.strip(s).of("/"));
+    }
 }

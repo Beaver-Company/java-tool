@@ -1,11 +1,12 @@
 package org.osgl.util;
 
 import org.osgl.$;
-import org.osgl.Osgl;
+import org.osgl.Lang;
 import org.osgl.exception.NotAppliedException;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -32,30 +33,30 @@ public class S {
      */
     public static final String[] EMPTY_ARRAY = new String[0];
 
-    public static final Binary PARENTHESES = binary("(", ")");
+    public static final Pair PARENTHESES = pair("(", ")");
 
-    public static final Binary BRACKETS = binary("[", "]");
+    public static final Pair BRACKETS = pair("[", "]");
 
-    public static final Binary BRACES = binary("{", "}");
+    public static final Pair SQUARE_BRACKETS = BRACKETS;
 
-    public static final Binary DIAMOND = binary("<", ">");
+    public static final Pair BRACES = pair("{", "}");
 
-    public static final Binary ANGLE_BRACKETS = DIAMOND;
+    public static final Pair CURLY_BRACES = BRACES;
 
-    public static final Binary SINGLE_ANGLE_QUOTATION_MARK = binary("‹", "›");
+    public static final Pair DIAMOND = pair("<", ">");
 
-    public static final Binary DOUBLE_ANGLE_QUOTATION_MARK = binary("«", "»");
+    public static final Pair ANGLE_BRACKETS = DIAMOND;
 
-    public static final Binary 书名号 = binary("《", "》");
+    public static final Pair SINGLE_ANGLE_QUOTATION_MARK = pair("‹", "›");
 
-    public static final Binary SHU_MING_HAO = 书名号;
+    public static final Pair DOUBLE_ANGLE_QUOTATION_MARK = pair("«", "»");
 
-    public static String getCommonSep() {
-        return COMMON_SEP;
-    }
+    public static final Pair 书名号 = pair("《", "》");
 
-    public final static String fmt(String tmpl) {
-        return tmpl;
+    public static final Pair SHU_MING_HAO = 书名号;
+
+    public static String fmt(String tmpl) {
+        return string(tmpl);
     }
 
     /**
@@ -65,9 +66,24 @@ public class S {
      * @param args the message arguments
      * @return the formatted string
      */
-    public final static String fmt(String tmpl, Object... args) {
+    public static String fmt(String tmpl, Object... args) {
         if (0 == args.length) return tmpl;
         return String.format(tmpl, args);
+    }
+
+    public static String msgFmt(String tmpl) {
+        return S.string(tmpl);
+    }
+
+    /**
+     * A handy alias for {@link MessageFormat#format(String, Object...)}
+     * @param tmpl the message template
+     * @param args the message arguments
+     * @return the formatted string
+     */
+    public static String msgFmt(String tmpl, Object... args) {
+        if (0 == args.length) return tmpl;
+        return MessageFormat.format(tmpl, args);
     }
 
     /**
@@ -87,7 +103,7 @@ public class S {
      * @return true if the string is null or empty (no spaces)
      */
     public static boolean empty(String s) {
-        return (null == s || "".equals(s));
+        return (null == s || 0 == s.length());
     }
 
     /**
@@ -101,7 +117,7 @@ public class S {
      * @return true if the string is null or empty or all blanks
      */
     public static boolean blank(String s) {
-        return (null == s || "".equals(s.trim()));
+        return (null == s || 0 == s.trim().length());
     }
 
     /**
@@ -298,6 +314,33 @@ public class S {
     public static boolean isNumeric(String s) {
         return N.isNumeric(s);
     }
+
+    /**
+     * Throw IllegalArgumentException if the string specified
+     * {@link #isBlank(String) is blank}, otherwise return
+     * the string specified
+     * @param s the string to be tested
+     * @return the string if it is not blank
+     * @throws IllegalArgumentException if the string `s` is blank
+     */
+    public static String ensureNotBlank(String s) {
+        E.illegalArgumentIf(isBlank(s));
+        return s;
+    }
+
+    /**
+     * Throw IllegalArgumentException if the string specified
+     * {@link #isEmpty(String)}  is empty}, otherwise return
+     * the string specified
+     * @param s the string to be tested
+     * @return the string if it is not empty
+     * @throws IllegalArgumentException if the string `s` is empty
+     */
+    public static String ensureNotEmpty(String s) {
+        E.illegalArgumentIf(isEmpty(s));
+        return s;
+    }
+
 
     /**
      * Return the string of first N chars.
@@ -963,6 +1006,56 @@ public class S {
         return new String(ca);
     }
 
+    /**
+     * The way to use `_StripStringState`:
+     *
+     * ```
+     * String s1 = "[any content]";
+     * String stripped = S.strip(S.BRACKETS).from(s1);
+     * // stripped will be "any content"
+     *
+     * String s2 = "'any content'";
+     * stripped = S.strip("'").from(s2);
+     * // stripped will be "any content"
+     * ```
+     */
+    public static class _StripStringState {
+        private String toBeStripped;
+        private _StripStringState(String s) {
+            toBeStripped = S.ensureNotEmpty(s);
+        }
+        public String of(String wrapper) {
+            return stripOf(toBeStripped, wrapper, wrapper);
+        }
+        public String of($.Tuple<String, String> wrapper) {
+            return stripOf(toBeStripped, wrapper.left(), wrapper.right());
+        }
+        public String of(String left, String right) {
+            return stripOf(toBeStripped, left, right);
+        }
+        private static String stripOf(String s, String left, String right) {
+            if (s.startsWith(left)) {
+                s = s.substring(left.length());
+            }
+            if (s.endsWith(right)) {
+                s = s.substring(0, s.length() - right.length());
+            }
+            return s;
+        }
+    }
+
+    public static _StripStringState strip(String toBeStripped) {
+        return new _StripStringState(toBeStripped);
+    }
+
+    public static String stripOf(String toBeStripped, String wrapper) {
+        return _StripStringState.stripOf(toBeStripped, wrapper, wrapper);
+    }
+
+    public static String stripOf(String toBeStripped, $.Tuple<String, String> wrapper) {
+        return _StripStringState.stripOf(toBeStripped, wrapper.left(), wrapper.right());
+    }
+
     public static class _WrapStringBuilder {
         private String content;
         private _WrapStringBuilder(String content) {
@@ -978,6 +1071,10 @@ public class S {
 
         public String with($.Tuple<String, String> wrapper) {
             return wrap(content, wrapper);
+        }
+
+        public String with(String left, String right) {
+            return wrap(content, left, right);
         }
 
         @Override
@@ -2049,12 +2146,20 @@ public class S {
         return new StringBuilder(capacity);
     }
 
-    public static Binary binary($.T2<String, String> t2) {
-        return new Binary(t2);
+    public static Pair binary($.Tuple<String, String> tuple) {
+        return new T2(tuple);
     }
 
-    public static Binary binary(String left, String right) {
-        return new Binary(left, right);
+    public static Pair binary(String left, String right) {
+        return new T2(left, right);
+    }
+
+    public static Pair pair($.Tuple<String, String> tuple) {
+        return new T2(tuple);
+    }
+
+    public static Pair pair(String left, String right) {
+        return new T2(left, right);
     }
 
     /**
@@ -4367,17 +4472,27 @@ public class S {
             super(_1, _2);
         }
 
-        public Binary($.T2<String, String> t2) {
-            super(t2._1, t2._2);
+        public Binary($.Tuple<String, String> tuple) {
+            super(tuple._1, tuple._2);
         }
     }
 
-    public static class T2 extends Binary {
+    public static class Pair extends Binary {
+        public Pair(String _1, String _2) {
+            super(_1, _2);
+        }
+
+        public Pair($.Tuple<String, String> tuple) {
+            super(tuple);
+        }
+    }
+
+    public static class T2 extends Pair {
         public T2(String _1, String _2) {
             super(_1, _2);
         }
 
-        public T2(Osgl.T2<String, String> t2) {
+        public T2(Lang.Tuple<String, String> t2) {
             super(t2);
         }
     }
@@ -4396,7 +4511,7 @@ public class S {
             super(_1, _2, _3);
         }
 
-        public T3(Osgl.Triple<String, String, String> t3) {
+        public T3(Lang.Triple<String, String, String> t3) {
             super(t3);
         }
     }
@@ -4416,7 +4531,7 @@ public class S {
             super(_1, _2, _3, _4);
         }
 
-        public T4(Osgl.Quadruple<String, String, String, String> t4) {
+        public T4(Lang.Quadruple<String, String, String, String> t4) {
             super(t4);
         }
     }
@@ -4435,7 +4550,7 @@ public class S {
             super(_1, _2, _3, _4, _5);
         }
 
-        public T5(Osgl.Quintuple<String, String, String, String, String> t5) {
+        public T5(Lang.Quintuple<String, String, String, String, String> t5) {
             super(t5);
         }
     }

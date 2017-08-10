@@ -1,7 +1,7 @@
 package org.osgl.util;
 
 import org.osgl.$;
-import org.osgl.Osgl;
+import org.osgl.Lang;
 
 class ListPropertyHandler extends PropertyHandlerBase {
 
@@ -16,15 +16,15 @@ class ListPropertyHandler extends PropertyHandlerBase {
         this.itemType = $.ensureNotNull(itemType);
     }
 
-    ListPropertyHandler(Osgl.Function<Class<?>, Object> objectFactory,
-                        Osgl.Func2<String, Class<?>, ?> stringValueResolver,
+    ListPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
+                        Lang.Func2<String, Class<?>, ?> stringValueResolver,
                         Class<?> itemType) {
         super(objectFactory, stringValueResolver);
         this.itemType = $.ensureNotNull(itemType);
     }
 
-    ListPropertyHandler(Osgl.Function<Class<?>, Object> objectFactory,
-                        Osgl.Func2<String, Class<?>, ?> stringValueResolver,
+    ListPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
+                        Lang.Func2<String, Class<?>, ?> stringValueResolver,
                         PropertyGetter.NullValuePolicy nullValuePolicy,
                         Class<?> itemType) {
         super(objectFactory, stringValueResolver, nullValuePolicy);
