@@ -13,7 +13,7 @@ public class OsglTest extends TestBase {
     @Test
     public void testToString2() {
         String[][] sa = {{"foo", "bar"}, {"1", "2"}};
-        eq("[[foo, bar], [1, 2]]", $.toString2(sa));
+        eq("[[foo, bar], [1, 2]]", $.asString2(sa));
     }
 
     @Test
@@ -28,7 +28,7 @@ public class OsglTest extends TestBase {
 
     @Test
     public void testPredicateOr() {
-        C.List<String> l = C.list("a.xml", "b.html", "c.txt", "d.txt");
+        C.List<String> l = C.List("a.xml", "b.html", "c.txt", "d.txt");
         l = l.filter(S.F.endsWith(".xml").or(S.F.endsWith(".html")));
         yes(l.contains("a.xml"));
         yes(l.contains("b.html"));

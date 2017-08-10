@@ -25,7 +25,7 @@ public class Gh19_n_20 extends TestBase {
         List<Bar> barList;
         Foo(Bar ... bars) {
             this.bars = bars;
-            this.barList = C.listOf(bars);
+            this.barList = C.List(bars);
         }
     }
 

@@ -26,7 +26,7 @@ public abstract class StringValueResolver<T> extends $.F1<String, T> {
     }
 
     protected StringValueResolver(Class<T> targetType) {
-        this.targetType = $.notNull(targetType);
+        this.targetType = $.ensureNotNull(targetType);
     }
 
     public abstract T resolve(String value);
@@ -79,7 +79,7 @@ public abstract class StringValueResolver<T> extends $.F1<String, T> {
      *
      * Note use this method only on new resolver instance instead of shared instance
      *
-     * @param attributes the attributes map
+     * @param attributes the attributes Map
      * @return this resolver instance
      */
     public StringValueResolver<T> attributes(Map<String, Object> attributes) {
@@ -412,7 +412,7 @@ public abstract class StringValueResolver<T> extends $.F1<String, T> {
         }
     };
 
-    private static Map<Class, StringValueResolver> predefined = C.newMap(
+    private static Map<Class, StringValueResolver> predefined = C.Mutable.Map(
             boolean.class, _boolean,
             Boolean.class, _Boolean,
             char.class, _char,
@@ -443,7 +443,7 @@ public abstract class StringValueResolver<T> extends $.F1<String, T> {
     }
 
     public static Map<Class, StringValueResolver> predefined() {
-        return C.map(predefined);
+        return C.Map(predefined);
     }
 
     @SuppressWarnings("unchecked")

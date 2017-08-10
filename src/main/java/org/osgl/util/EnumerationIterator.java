@@ -5,14 +5,11 @@ import org.osgl.$;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-/**
- * Bridge from {@link java.util.Enumeration} to {@link java.util.Iterator}
- */
-class EnumerationIterator<T> implements Iterator<T> {
+class EnumerationIterator<T> extends OsglIteratorBase<T> implements Iterator<T> {
     private Enumeration<? extends T> e;
 
     EnumerationIterator(Enumeration<? extends T> enumeration) {
-        e = $.notNull(enumeration);
+        e = $.ensureNotNull(enumeration);
     }
 
     @Override

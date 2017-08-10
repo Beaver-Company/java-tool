@@ -9,7 +9,7 @@ public class SimpleStringValueResolver extends Osgl.F2<String, Class<?>, Object>
 
     public static final SimpleStringValueResolver INSTANCE = new SimpleStringValueResolver();
 
-    protected Map<Class, StringValueResolver> resolvers = C.newMap();
+    protected Map<Class, StringValueResolver> resolvers = C.Mutable.Map();
 
     public SimpleStringValueResolver() {
         registerPredefinedResolvers();

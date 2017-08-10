@@ -164,42 +164,42 @@ public class STest extends UtilTestBase {
     @Test
     public void testFastSplitNormalCase() {
         S.List result = S.fastSplit("abc.123.xyz", ".");
-        eq(result, C.list("abc", "123", "xyz"));
+        eq(result, C.List("abc", "123", "xyz"));
 
         result = S.fastSplit("abc..123..xyz", "..");
-        eq(result, C.list("abc", "123", "xyz"));
+        eq(result, C.List("abc", "123", "xyz"));
     }
 
     @Test
     public void testFastSplitTrimSeparator() {
         S.List result = S.fastSplit(".abc..123...xyz.", ".");
-        eq(result, C.list("abc", "123", "xyz"));
+        eq(result, C.List("abc", "123", "xyz"));
     }
 
     @Test
     public void testFastSplitNoSeparator() {
-        eq(C.list("abc"), S.fastSplit("abc", "."));
+        eq(C.List("abc"), S.fastSplit("abc", "."));
     }
 
 
     @Test
     public void testCharSplitNormalCase() {
         S.List result = S.split("abc.123.xyz", '.');
-        eq(result, C.list("abc", "123", "xyz"));
+        eq(result, C.List("abc", "123", "xyz"));
 
         result = S.split("abc..123..xyz", '.');
-        eq(result, C.list("abc", "123", "xyz"));
+        eq(result, C.List("abc", "123", "xyz"));
     }
 
     @Test
     public void testCharSplitTrimSeparator() {
         S.List result = S.split(".abc..123...xyz.", '.');
-        eq(result, C.list("abc", "123", "xyz"));
+        eq(result, C.List("abc", "123", "xyz"));
     }
 
     @Test
     public void testCharSplitNoSeparator() {
-        eq(C.list("abc"), S.split("abc", '.'));
+        eq(C.List("abc"), S.split("abc", '.'));
     }
 
 }

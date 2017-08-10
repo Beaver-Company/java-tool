@@ -4,13 +4,6 @@ import org.osgl.$;
 
 import java.util.NoSuchElementException;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 8/10/13
- * Time: 8:58 PM
- * To change this template use File | Settings | File Templates.
- */
 abstract class StatefulIterator<T> extends ReadOnlyIterator<T> {
 
     private $.Option<T> current = $.none();

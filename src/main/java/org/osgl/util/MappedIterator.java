@@ -4,14 +4,7 @@ import org.osgl.$;
 
 import java.util.Iterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 4/10/13
- * Time: 10:38 AM
- * To change this template use File | Settings | File Templates.
- */
-class MappedIterator<T, R> implements Iterator<R> {
+class MappedIterator<T, R> extends OsglIteratorBase<R> {
 
     private Iterator<? extends T> data;
     private $.F1<? super T, ? extends R> mapper;

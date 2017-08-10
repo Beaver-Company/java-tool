@@ -20,7 +20,7 @@ public class PropertyTest extends TestBase {
     public static class Bar {
         String s;
         private boolean b;
-        private Map<Color, String> colors = C.newMap(Color.R, "red", Color.G, "green");
+        private Map<Color, String> colors = C.Mutable.Map(Color.R, "red", Color.G, "green");
         Bar() {}
         Bar(String s, boolean b) {
             this.s = s;
@@ -64,7 +64,7 @@ public class PropertyTest extends TestBase {
         }
         public void addBar(Bar bar) {
             if (barList == null) {
-                barList = C.newList();
+                barList = C.Mutable.List();
             }
             barList.add(bar);
         }
@@ -110,7 +110,7 @@ public class PropertyTest extends TestBase {
 
     @Test
     public void testGetPropertyWithCache() {
-        final C.Map<String, Serializable> map = C.newMap();
+        final C.Map<String, Serializable> map = C.Mutable.Map();
         Osgl.F1<String, Serializable> getter = new Osgl.F1<String, Serializable>() {
             @Override
             public Serializable apply(String s) throws NotAppliedException, Osgl.Break {
@@ -125,7 +125,7 @@ public class PropertyTest extends TestBase {
             }
         };
         CacheService cache = new CacheService() {
-            private Map<String, Object> map = C.newMap();
+            private Map<String, Object> map = C.Mutable.Map();
             @Override
             public void put(String key, Object value, int ttl) {
                 map.put(key, value);

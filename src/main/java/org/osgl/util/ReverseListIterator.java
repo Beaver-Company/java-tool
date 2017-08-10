@@ -2,14 +2,7 @@ package org.osgl.util;
 
 import java.util.ListIterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 6/11/13
- * Time: 10:14 AM
- * To change this template use File | Settings | File Templates.
- */
-class ReverseListIterator<T> implements ListIterator<T> {
+class ReverseListIterator<T> extends OsglIteratorBase<T> implements ListIterator<T> {
     private ListIterator<T> itr;
     ReverseListIterator(ListIterator<T> itr) {
         this.itr = itr;

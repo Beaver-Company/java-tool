@@ -4,13 +4,6 @@ import org.osgl.$;
 
 import java.util.Iterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 22/10/13
- * Time: 10:32 PM
- * To change this template use File | Settings | File Templates.
- */
 class FilteredIterator<T> extends StatefulIterator<T> {
 
     static enum Type {

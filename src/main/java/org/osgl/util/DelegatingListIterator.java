@@ -2,15 +2,7 @@ package org.osgl.util;
 
 import java.util.ListIterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 6/10/13
- * Time: 10:37 AM
- * To change this template use File | Settings | File Templates.
- */
-class DelegatingListIterator<T>
-extends DelegatingIterator<T> implements ListIterator<T> {
+class DelegatingListIterator<T> extends DelegatingIterator<T> implements ListIterator<T> {
 
     DelegatingListIterator(ListIterator<T> itr, boolean readOnly) {
         super(itr, readOnly);

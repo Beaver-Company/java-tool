@@ -31,9 +31,10 @@ import java.util.*;
 /**
  * The namespace for OSGL collection utilities
  */
-public enum C {
+public class C {
 
-    INSTANCE;
+    C() {
+    }
 
     /**
      * The character enum for a data structure
@@ -127,7 +128,7 @@ public enum C {
 
     /**
      * Define a traversable structure with functional programming support,
-     * including map, reduce etc.
+     * including Map, reduce etc.
      *
      * @param <T> The element type
      */
@@ -191,8 +192,8 @@ public enum C {
          * mapper function applied to this traversal element.
          * <pre>
          *     Traversable traversable = C.list(23, _.NONE, null);
-         *     assertEquals(C.list(true, false, false), traversal.map(_.F.NOT_NULL));
-         *     assertEquals(C.list("23", "", ""), traversal.map(_.F.AS_STRING));
+         *     assertEquals(C.list(true, false, false), traversal.Map(_.F.NOT_NULL));
+         *     assertEquals(C.list("23", "", ""), traversal.Map(_.F.AS_STRING));
          * </pre>
          * <p>For Lazy Traversable, it must use lazy evaluation for this method.
          * Otherwise it is up to implementation to decide whether use lazy
@@ -326,7 +327,7 @@ public enum C {
          * found first is returned. It's all up to the implementation to refine the
          * semantic of this method
          *
-         * @param predicate the function map element to Boolean
+         * @param predicate the function Map element to Boolean
          * @return an element in this traversal that matches the predicate or
          * {@link $#NONE} if no element matches
          * @since 0.2
@@ -350,6 +351,7 @@ public enum C {
 
         /**
          * Alias of {@link #accept(Osgl.Visitor)}
+         *
          * @param visitor the visitor to tranverse the elements
          * @return this {@code Traversable} instance
          */
@@ -357,6 +359,7 @@ public enum C {
 
         /**
          * Alias of {@link #accept(Osgl.Visitor)}
+         *
          * @param visitor the visitor function
          * @return this {@code Traversable} instance
          */
@@ -724,7 +727,7 @@ public enum C {
          *
          * @param identity    the identity value for the accumulating function
          * @param accumulator the function to accumulate two values
-         * @param <R> the aggregation result type
+         * @param <R>         the aggregation result type
          * @return the reduced result
          * @since 0.2
          */
@@ -769,7 +772,7 @@ public enum C {
          * of the element applications in the sequence returns {@code true}
          * then {@link $#none()} is returned
          *
-         * @param predicate the function map the element to Boolean
+         * @param predicate the function Map the element to Boolean
          * @return an option describe the first element matches the
          * predicate or {@link $#none()}
          * @since 0.2
@@ -841,6 +844,7 @@ public enum C {
 
         /**
          * Count the element occurence in this sequence
+         *
          * @param t the element
          * @return the number of times the element be presented in this sequence
          */
@@ -1052,9 +1056,9 @@ public enum C {
          *      return result;
          * </pre>
          *
-         * @param identity the initial value
+         * @param identity    the initial value
          * @param accumulator the function performs accumulation from {@code T} an {@code R} to anthoer {@code R}
-         * @param <R> the accumulation result
+         * @param <R>         the accumulation result
          * @return the aggregation result
          * @see #reduce(Object, Osgl.Func2)
          * @since 0.2
@@ -1088,7 +1092,7 @@ public enum C {
          * of the element applications in the sequence returns {@code true}
          * then {@link $#none()} is returned
          *
-         * @param predicate the function map the element to Boolean
+         * @param predicate the function Map the element to Boolean
          * @return an option describe the first element matches the
          * predicate or {@link $#none()}
          * @since 0.2
@@ -1248,11 +1252,11 @@ public enum C {
         }
 
         public C.List<T> asList() {
-            return C.listOf(data);
+            return List(data);
         }
 
-        public C.List<T> asNewList() {
-            return C.newListOf(data);
+        public C.List<T> asMutableList() {
+            return Mutable.List(data);
         }
 
         public static <T> Array<T> of(T[] data) {
@@ -1264,6 +1268,10 @@ public enum C {
             T[] newData = $.newArray(data, len);
             System.arraycopy(data, 0, newData, 0, len);
             return new Array<>(newData);
+        }
+
+        public static <T> RefectionArrayIterator<T> toIterator(Object array) {
+            return new RefectionArrayIterator(array);
         }
 
     }
@@ -1637,6 +1645,7 @@ public enum C {
          * this list doesn't have duplicated items, it could return this list directly
          * or choose to return an new copy of this list depends on the sub class
          * implementation
+         *
          * @return a list contains only unique elements in this list
          */
         List<T> unique();
@@ -1646,6 +1655,7 @@ public enum C {
          * this list and keep the orders. If this list doesn't have duplicated items,
          * it could return this list directly or choose to return an new copy of this list
          * depends on the sub class implementation
+         *
          * @param comp the comparator check the duplicate elements
          * @return a list contains unique element as per the comparator
          */
@@ -1669,6 +1679,7 @@ public enum C {
          * call.
          * <p><b>Note</b> if this list is immutable or readonly, {@code UnsupportedOperationException}
          * will be thrown out with this call</p>
+         *
          * @param iterable the iterable provides the elements to be
          *                 added into the list
          * @return {@code true} if this list changed as result of addd
@@ -1775,13 +1786,14 @@ public enum C {
 
         /**
          * Split this list into two list based on the predicate specified.
-         * <p>
-         *     The function use the predicate to test all elements in this list. If test passed
-         *     then it add the element into {@link $.T2#_1 left side list}, otherwise the
-         *     element will be added into {@link $.T2#_2 right side list}. The result
-         *     is returned as a {@link org.osgl.Osgl.Tuple tuple} contains the left and
-         *     right side lift
+         * 
+         * The function use the predicate to test all elements in this list. If test passed
+         * then it add the element into {@link $.T2#_1 left side list}, otherwise the
+         * element will be added into {@link $.T2#_2 right side list}. The result
+         * is returned as a {@link org.osgl.Osgl.Tuple tuple} contains the left and
+         * right side lift
          * </p>
+         *
          * @param predicate the function to test the elements in this list
          * @return a tuple of two lists
          */
@@ -1869,7 +1881,7 @@ public enum C {
          * <p>If index is less than zero then it will insert at
          * {@code (size() + index)}</p>
          *
-         * @param index specify the position where the element should be inserted
+         * @param index   specify the position where the element should be inserted
          * @param subList the sub list contains elements to be inserted
          * @return a list as specified above
          * @throws IndexOutOfBoundsException Math.abs(index) &gt; size()
@@ -1967,6 +1979,7 @@ public enum C {
         /**
          * Loop through the list and for each element, call on the
          * indexedVisitor function specified
+         *
          * @param indexedVisitor the function to be called on each element along with the index
          * @return this list
          */
@@ -1974,6 +1987,7 @@ public enum C {
 
         /**
          * Alias of {@link #accept(Osgl.Visitor)}
+         *
          * @param indexedVisitor the function to be called on each element along with the index
          * @return this list
          */
@@ -1981,6 +1995,7 @@ public enum C {
 
         /**
          * Alias of {@link #accept(Osgl.Visitor)}
+         *
          * @param indexedVisitor the function to be called on each element along with the index
          * @return this list
          */
@@ -1989,6 +2004,7 @@ public enum C {
         /**
          * Loop through the list from {@code 0} to {@code size - 1}. Call the indexedVisitor function
          * on each element along with the index
+         *
          * @param indexedVisitor the function to be called on each element along with the index
          * @return this list
          */
@@ -1998,6 +2014,7 @@ public enum C {
         /**
          * Loop through the list from {@code size() - 1} to {@code 0}. Call the indexedVisitor function
          * on each element along with the index
+         *
          * @param indexedVisitor the function to be called on each element along with the index
          * @return this list
          */
@@ -2050,67 +2067,49 @@ public enum C {
 
         /**
          * Create a {@link Map} from this list using a key extract function and a value extract function
-         *
+         * 
          * The key extractor will take the element stored in this list and calculate a key,
-         * and then store the element being used along with the key calculated into the map
+         * and then store the element being used along with the key calculated into the Map
          * to be returned.
-         *
+         * 
          * The value extractor will take the element stored in this list and calculate a value,
          * and then store the element as the key along with the outcome as the value
          *
-         * @param keyExtractor the function that generate map key from the element in this list
-         * @param valExtractor the function that generate map value from the element in this list
-         * @param <K> the generic type of key in the map
-         * @param <V> the generic type of value in the map
-         * @return a map as described above
+         * @param keyExtractor the function that generate Map key from the element in this list
+         * @param valExtractor the function that generate Map value from the element in this list
+         * @param <K>          the generic type of key in the Map
+         * @param <V>          the generic type of value in the Map
+         * @return a Map as described above
          */
         <K, V> Map<K, V> toMap($.Function<? super T, ? extends K> keyExtractor, $.Function<? super T, ? extends V> valExtractor);
 
 
         /**
          * Create a {@link Map} from this list using a key extract function.
-         *
+         * 
          * The key extractor will take the element stored in this list and calculate a key,
-         * and then store the element being used along with the key calculated into the map
+         * and then store the element being used along with the key calculated into the Map
          * to be returned.
          *
-         * @param keyExtractor the function that generate map key from the element in this list
-         * @param <K> the generic type of key in the map
-         * @return a map that indexed by key generated by the function from the element in this list
+         * @param keyExtractor the function that generate Map key from the element in this list
+         * @param <K>          the generic type of key in the Map
+         * @return a Map that indexed by key generated by the function from the element in this list
          */
         <K> Map<K, T> toMapByVal($.Function<? super T, ? extends K> keyExtractor);
 
         /**
          * Create a {@link Map} from this list using a value extract function.
-         *
+         * 
          * The value extractor will take the element stored in this list and calculate a value,
          * and then store the element as the key along with the outcome as the value
          *
-         * @param valExtractor the function that generate map value from the element in this list
-         * @param <V> the generic type of value in the map
-         * @return a map that stores the value calculated along with the corresponding element as the key
+         * @param valExtractor the function that generate Map value from the element in this list
+         * @param <V>          the generic type of value in the Map
+         * @return a Map that stores the value calculated along with the corresponding element as the key
          */
         <V> Map<T, V> toMapByKey($.Function<? super T, ? extends V> valExtractor);
     }
 
-//    /**
-//     * The osgl Set interface is a mixture of {@link java.util.Set} and osgl {@link Traversable}
-//     *
-//     * @param <T> the element type of the {@code Set}
-//     * @since 0.2
-//     */
-//    public static interface Set<T> extends java.util.Set<T>, Traversable<T> {
-//    }
-//
-//    /**
-//     * The osgl sorted Set interface is a mixture of {@link java.util.Set} and osgl {@link Sequence}
-//     *
-//     * @param <T> the element type of the {@code SortedSet}
-//     * @since 0.2
-//     */
-//    public static interface SortedSet<T> extends java.util.SortedSet<T>, ReversibleSequence<T> {
-//    }
-//
 
     public static class Map<K, V> implements java.util.Map<K, V>, Serializable {
         public static class Entry<K, V> extends $.T2<K, V> implements java.util.Map.Entry<K, V> {
@@ -2134,24 +2133,26 @@ public enum C {
             }
 
             public static <K, V> Entry<K, V> valueOf(K k, V v) {
-                return new Entry<K, V>(k, v);
+                return new Entry<>(k, v);
             }
         }
 
         public class _Builder {
             private K key;
+
             private _Builder(K key) {
-                this.key = $.notNull(key);
+                this.key = $.ensureNotNull(key);
             }
-            public Map<K, V> to(V val) {
+
+            public <BV> Map<K, BV> to(V val) {
                 Map<K, V> me = Map.this;
                 if (me.ro) {
-                    Map<K, V> mapBuffer = C.newMap(me);
-                    mapBuffer.put(key, val);
-                    return C.map(mapBuffer);
+                    Map<K, V> newMap = Mutable.Map(me);
+                    newMap.put(key, val);
+                    return $.cast(newMap);
                 }
                 Map.this.put(key, val);
-                return Map.this;
+                return $.cast(Map.this);
             }
         }
 
@@ -2161,7 +2162,7 @@ public enum C {
 
         @SuppressWarnings("unchecked")
         protected Map(boolean readOnly, Object... args) {
-            HashMap<K, V> map = new HashMap<K, V>();
+            HashMap<K, V> map = new HashMap<>();
             int len = args.length;
             for (int i = 0; i < len; i += 2) {
                 K k = (K) args[i];
@@ -2222,25 +2223,25 @@ public enum C {
 
         @Override
         public V put(K key, V value) {
-            E.unsupportedIf(ro, "The map is read only");
+            E.unsupportedIf(ro, "The Map is read only");
             return _m.put(key, value);
         }
 
         @Override
         public V remove(Object key) {
-            E.unsupportedIf(ro, "The map is read only");
+            E.unsupportedIf(ro, "The Map is read only");
             return _m.remove(key);
         }
 
         @Override
         public void putAll(java.util.Map<? extends K, ? extends V> m) {
-            E.unsupportedIf(ro, "The map is read only");
+            E.unsupportedIf(ro, "The Map is read only");
             _m.putAll(m);
         }
 
         @Override
         public void clear() {
-            E.unsupportedIf(ro, "The map is read only");
+            E.unsupportedIf(ro, "The Map is read only");
             _m.clear();
         }
 
@@ -2256,7 +2257,7 @@ public enum C {
 
         @Override
         public Set<java.util.Map.Entry<K, V>> entrySet() {
-            Set<java.util.Map.Entry<K, V>> set = C.newSet();
+            Set<java.util.Map.Entry<K, V>> set = C.Mutable.Set();
             for (K k : _m.keySet()) {
                 V v = _m.get(k);
                 set.add(Entry.valueOf(k, v));
@@ -2284,12 +2285,12 @@ public enum C {
                 return true;
             }
 
-           	if (!(o instanceof java.util.Map)) {
+            if (!(o instanceof java.util.Map)) {
                 return false;
             }
 
             if (o instanceof Map) {
-                return o.equals(_m) && ((Map)o).ro == ro;
+                return o.equals(_m) && ((Map) o).ro == ro;
             }
 
             return o.equals(_m);
@@ -2300,11 +2301,27 @@ public enum C {
             return new _Builder(key);
         }
 
+        /**
+         * Check if this Map is read only
+         * @return `true` if the Map is read only or `false` otherwise
+         */
         @SuppressWarnings("unused")
         public boolean readOnly() {
             return ro;
         }
 
+        /**
+         * Return a Map with specified read only flag.
+         *
+         * If the current Map has different read only flag with the
+         * specified read only flag, then it will return an new Map
+         * contains all entries in this Map instance.
+         *
+         * Otherwise it returns this Map instance directly
+         *
+         * @param readOnly the read only flag
+         * @return A map as described above
+         */
         @SuppressWarnings("unused")
         public Map<K, V> readOnly(boolean readOnly) {
             if (ro ^ readOnly) {
@@ -2315,12 +2332,47 @@ public enum C {
         }
 
         /**
-         * Loop through this map on each key/value pair, apply them to the function specified
+         * Return a Map contains all entries in this Map with entry
+         * key applied to the predicate function specified
+         *
+         * @param predicate the key predicate function
+         * @return A map as described above
+         */
+        public Map<K, V> filter($.Function<K, Boolean> predicate) {
+            Map<K, V> filtered = new Map<>(false);
+            for (java.util.Map.Entry<K, V> entry : entrySet()) {
+                if (predicate.apply(entry.getKey())) {
+                    filtered.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return filtered;
+        }
+
+        /**
+         * Return a Map contains all entries in this Map with entry
+         * value applied to the predicate function specified
+         *
+         * @param predicate the value predicate function
+         * @return A map as described above
+         */
+        public Map<K, V> filterByValue($.Function<V, Boolean> predicate) {
+            Map<K, V> filtered = new Map<>(false);
+            for (java.util.Map.Entry<K, V> entry : entrySet()) {
+                if (predicate.apply(entry.getValue())) {
+                    filtered.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return filtered;
+        }
+
+        /**
+         * Loop through this Map on each key/value pair, apply them to the function specified
+         *
          * @param indexedVisitor the function that takes argument of (key, value) pair
-         * @return this map
+         * @return this Map
          */
         public Map<K, V> forEach($.IndexedVisitor<? super K, ? super V> indexedVisitor) {
-            for (java.util.Map.Entry<K, V> entry: entrySet()) {
+            for (java.util.Map.Entry<K, V> entry : entrySet()) {
                 try {
                     indexedVisitor.apply(entry.getKey(), entry.getValue());
                 } catch (NotAppliedException e) {
@@ -2332,49 +2384,50 @@ public enum C {
 
         /**
          * Alias of {@link #forEach(Osgl.IndexedVisitor)}
+         *
          * @param indexedVisitor the visitor that can be applied on Key/Value pair stored in this Map
-         * @return this map
+         * @return this Map
          */
         public Map<K, V> each($.IndexedVisitor<? super K, ? super V> indexedVisitor) {
             return forEach(indexedVisitor);
         }
 
-
         /**
          * Alias of {@link #forEach(Osgl.IndexedVisitor)}
+         *
          * @param indexedVisitor the visitor that can be applied on Key/Value pair stored in this Map
-         * @return this map
+         * @return this Map
          */
         public Map<K, V> accept($.IndexedVisitor<? super K, ? super V> indexedVisitor) {
             return forEach(indexedVisitor);
         }
 
         public <NV> Map<K, NV> transformValues($.Function<V, NV> valueTransformer) {
-            Map<K, NV> newMap = C.newMap();
+            Map<K, NV> newMap = Mutable.Map();
             for (java.util.Map.Entry<K, V> entry : entrySet()) {
                 newMap.put(entry.getKey(), valueTransformer.apply(entry.getValue()));
             }
-            return newMap;
+            return newMap.readOnly(readOnly());
         }
 
         public <NK> Map<NK, V> transformKeys($.Function<K, NK> keyTransformer) {
-            Map<NK, V> newMap = C.newMap();
+            Map<NK, V> newMap = Mutable.Map();
             for (java.util.Map.Entry<K, V> entry : entrySet()) {
                 newMap.put(keyTransformer.apply(entry.getKey()), entry.getValue());
             }
-            return newMap;
+            return newMap.readOnly(readOnly());
         }
 
         public <NK, NV> Map<NK, NV> transform($.Function<K, NK> keyTransformer, $.Function<V, NV> valueTransformer) {
-            Map<NK, NV> newMap = C.newMap();
+            Map<NK, NV> newMap = C.Mutable.Map();
             for (java.util.Map.Entry<K, V> entry : entrySet()) {
                 newMap.put(keyTransformer.apply(entry.getKey()), valueTransformer.apply(entry.getValue()));
             }
-            return newMap;
+            return newMap.readOnly(readOnly());
         }
 
         public Set<$.Binary<K, V>> zip() {
-            C.Set<$.Binary<K, V>> zipped = C.newSet();
+            C.Set<$.Binary<K, V>> zipped = C.Mutable.Set();
             for (java.util.Map.Entry<K, V> entry : entrySet()) {
                 zipped.add($.T2(entry.getKey(), entry.getValue()));
             }
@@ -2392,9 +2445,9 @@ public enum C {
 
         @SuppressWarnings("unchecked")
         private void readObject(java.io.ObjectInputStream s)
-        throws IOException, ClassNotFoundException {
+                throws IOException, ClassNotFoundException {
             s.defaultReadObject();
-            _m = (java.util.Map)s.readObject();
+            _m = (java.util.Map) s.readObject();
             int i = s.readInt();
             ro = i != 0;
         }
@@ -2480,11 +2533,10 @@ public enum C {
          * Returns a set contains all elements in this set plus all the elements
          * specified in the parameter list
          *
-         * @param element the first element to be added into the returning set
-         * @param elements rest elements to be added into the returning set
+         * @param elements elements to be added into the returning set
          * @return a set as described above
          */
-        Set<T> with(T element, T... elements);
+        Set<T> with(T... elements);
 
         /**
          * Returns a set contains all elements in the set except the
@@ -2499,11 +2551,10 @@ public enum C {
          * Returns a set contains all elements in the set except the
          * ones specified
          *
-         * @param element  the element that should not be in the resulting set
          * @param elements the array contains elements that should not be in the resulting set
          * @return a set without the element specified
          */
-        Set<T> without(T element, T... elements);
+        Set<T> without(T... elements);
 
     }
 
@@ -2539,7 +2590,7 @@ public enum C {
         ListOrSet<T> without(T element);
 
         @Override
-        ListOrSet<T> without(T element, T... elements);
+        ListOrSet<T> without(T... elements);
 
         @Override
         <R> ListOrSet<R> map($.Function<? super T, ? extends R> mapper);
@@ -2568,7 +2619,7 @@ public enum C {
          * @param collection the collection whose elements are to be placed into this list
          * @param <ET>       the generic type of the list element
          * @return The List been created
-         * @exception  NullPointerException if the specified collection is null
+         * @throws NullPointerException if the specified collection is null
          */
         <ET> java.util.List<ET> create(Collection<? extends ET> collection) throws NullPointerException;
 
@@ -2586,33 +2637,33 @@ public enum C {
             static final ListFactory JDK_ARRAYLIST_FACT = new ListFactory() {
                 @Override
                 public <ET> java.util.List<ET> create() {
-                    return new ArrayList<ET>();
+                    return new ArrayList<>();
                 }
 
                 @Override
                 public <ET> java.util.List<ET> create(Collection<? extends ET> collection) {
-                    return new ArrayList<ET>(collection);
+                    return new ArrayList<>(collection);
                 }
 
                 @Override
                 public <ET> java.util.List<ET> create(int initialCapacity) {
-                    return new ArrayList<ET>(initialCapacity);
+                    return new ArrayList<>(initialCapacity);
                 }
             };
             static final ListFactory JDK_LINKEDLIST_FACT = new ListFactory() {
                 @Override
                 public <ET> java.util.List<ET> create() {
-                    return new LinkedList<ET>();
+                    return new LinkedList<>();
                 }
 
                 @Override
                 public <ET> java.util.List<ET> create(Collection<? extends ET> collection) {
-                    return new LinkedList<ET>(collection);
+                    return new LinkedList<>(collection);
                 }
 
                 @Override
                 public <ET> java.util.List<ET> create(int initialCapacity) {
-                    return new LinkedList<ET>();
+                    return new LinkedList<>();
                 }
             };
 
@@ -2627,11 +2678,11 @@ public enum C {
     }
 
     /**
-     * "osgl.list.factory", the property key to configure user defined
-     * {@link ListFactory list factory}.
+     * "osgl.List.factory", the property key to configure user defined
+     * {@link ListFactory List factory}.
      * Upon loaded, osgl tried to get a class name string from system
      * properties use this configuration key. If osgl find the String
-     * returned is not empty then it will initialize the list factory
+     * returned is not empty then it will initialize the List factory
      * use the class name configured. If any exception raised during the
      * initialization, then it might cause the JVM failed to boot up
      *
@@ -2641,7 +2692,7 @@ public enum C {
 
     /**
      * "osgl.random_access_list.factory", the property key to configure user defined {@link ListFactory
-     * random access list factory}. See {@link #CONF_LINKED_LIST_FACTORY} for how osgl use this configuration
+     * random access List factory}. See {@link #CONF_LINKED_LIST_FACTORY} for how osgl use this configuration
      *
      * @since 0.2
      */
@@ -2709,7 +2760,7 @@ public enum C {
         if (iterable instanceof Collection) {
             return $.cast(iterable);
         }
-        return C.list(iterable);
+        return C.List(iterable);
     }
     // --- eof conversion methods ---
 
@@ -2796,16 +2847,45 @@ public enum C {
         return new LazyRange<Integer>(1, Integer.MAX_VALUE, N.F.intRangeStep(2));
     }
 
-    @SuppressWarnings("unused")
+    /**
+     * An immutable empty List
+     */
     public static final List EMPTY_LIST = Nil.list();
-    @SuppressWarnings("unused")
+
+    /**
+     * An immutable empty Set
+     */
     public static final Set EMPTY_SET = Nil.set();
-    @SuppressWarnings("unused")
+
+    /**
+     * An immutable empty map
+     */
     public static final Map EMPTY_MAP = Nil.EMPTY_MAP;
+
+    /**
+     * An immutable empty collection that is both List and Set
+     */
     public static final ListOrSet EMPTY = Nil.EMPTY;
 
-    @SuppressWarnings("unchecked")
+    /**
+     * Returns an empty collection that is both a List and a Set
+     *
+     * @param <T> the generic type of the collection element
+     * @return the collection as described above
+     */
     public static <T> ListOrSet<T> empty() {
+        return EMPTY;
+    }
+
+    /**
+     * Returns an empty collection that is both a List and a Set with
+     * element type specified by the class `c`
+     *
+     * @param c   the class sepcify the collection element type
+     * @param <T> the generic type of the collection element
+     * @return the collection as described above
+     */
+    public static <T> ListOrSet<T> empty(Class<T> c) {
         return EMPTY;
     }
 
@@ -2813,366 +2893,511 @@ public enum C {
      * Returns an empty immutable list
      *
      * @param <T> the type of the list element
-     * @return the empty list
+     * @return the list as described above
      */
-    public static <T> List<T> list() {
+    public static <T> List<T> List() {
         return Nil.list();
-    }
-
-    @SuppressWarnings("unused")
-    public static <T> List<T> emptyListOf(Class<T> c) {
-        return Nil.list();
-    }
-
-    public static <T> List<T> list(T t) {
-        return $.val(t);
     }
 
     /**
-     * Creates an immutable list of an array of elements.
-     * <p>Note the array will not be copied, instead it will
+     * Returns an empty immutable list of type specified by class `c`
+     *
+     * @param c   the class specify the list element type
+     * @param <T> the generic type of the list element
+     * @return the list as described above
+     */
+    public static <T> List<T> emptyList(Class<T> c) {
+        return Nil.list();
+    }
+
+    /**
+     * Creates an immutable list from an array of elements.
+     *
+     * Note the array will not be copied, instead it will
      * be used directly as the backing data for the list.
      * To create an list with a copy of the array specified.
-     * Use the {@link #newListOf(Object[])} method</p>
+     * Use the {@link #toList(Object[])} method
      *
-     * @param ta  an array of elements
-     * @param <T> the element type
-     * @return an immutable list backed by the specified array
+     * @param elements an array of elements
+     * @param <T>      the element type
+     * @return the list as described above
      */
-    public static <T> List<T> listOf(T... ta) {
-        return ImmutableList.of(ta);
+    public static <T> List<T> List(T... elements) {
+        return ImmutableList.of(elements);
     }
 
     /**
-     * Creates an immutable list from an element plus an array of elements
+     * Creates an immutable list from an array of elements.
      *
-     * @param t   the first element
-     * @param ta  the array
-     * @param <T> the element type
-     * @return an immutable list contains the first element and followed by all element in the array
+     * Note elements in the array will be copied into the
+     * return list
+     *
+     * @param elements an array of elements
+     * @param <T>      the element type
+     * @return the list as described above
      */
-    public static <T> List<T> list(T t, T... ta) {
-        int len = ta.length;
-        T[] a = $.newArray(ta, len + 1);
-        a[0] = t;
-        System.arraycopy(ta, 0, a, 1, len);
-        return ImmutableList.of(a);
+    public static <T> List<T> toList(T... elements) {
+        return ImmutableList.copyOf(elements);
     }
 
     /**
-     * Create an immutable Boolean list from a boolean (primitive type) array.
-     * <p>At the moment the implementation will convert the boolean (primary)
-     * array to Boolean (wraper) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Create an immutable Boolean list from a boolean array.
+     * 
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(boolean[])} method
      *
-     * @param elements an array of primary boolean
-     * @return a Boolean typed list
+     * @param elements a boolean array
+     * @return the list as described above
      */
-    public static List<Boolean> listOf(boolean[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable Boolean list of a byte (primitive type) array.
-     * The elements of the array is copied into the returned list
-     *
-     * @param elements an array of bytes
-     * @return an immutable list contains specified elements
-     */
-    public static List<Boolean> list(boolean[] elements) {
-        if (elements.length == 0) {
-            return Nil.list();
+    public static List<Boolean> List(boolean[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Boolean[] ba = $.asWrapped(elements);
+                return ImmutableList.of(ba);
         }
-        Boolean[] ba = $.asObject(elements);
-        return ImmutableList.of(ba);
     }
 
     /**
-     * Create an immutable Byte list from a byte (primitive type) array.
-     * <p>At the moment the implementation will convert the byte (primary)
-     * array to Byte (reference) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Creates an immutable list from a boolean array
+     * 
+     * Note elements in the array will be copied into the
+     * return list
      *
-     * @param elements an array of primary byte
-     * @return a Byte typed list
+     * @param elements a boolean array
+     * @return the list as described above
      */
-    public static List<Byte> listOf(byte[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable Byte list of a byte (primitive type) array.
-     * The elements of the array is copied into the returned list
-     *
-     * @param elements an array of bytes
-     * @return an immutable list contains specified elements
-     */
-    public static List<Byte> list(byte[] elements) {
-        if (elements.length == 0) {
-            return Nil.list();
+    public static List<Boolean> toList(boolean[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Boolean[] ba = $.asWrapped(elements);
+                return ImmutableList.copyOf(ba);
         }
-        Byte[] ba = $.asObject(elements);
-        return ImmutableList.of(ba);
     }
 
     /**
-     * Create an immutable Short list from a char (primitive type) array.
-     * <p>At the moment the implementation will convert the char (primary)
-     * array to Character (reference) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Create an immutable Byte list from a byte array.
+     * 
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(byte[])} method
      *
-     * @param elements an array of primary short
-     * @return a Short typed list
+     * @param elements a byte array
+     * @return the list as described above
      */
-    public static List<Character> listOf(char[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable Character list of a char array.
-     * The elements of the array is copied into the returned list
-     *
-     * @param elements an array of shorts
-     * @return an immutable list contains specified elements
-     */
-    public static List<Character> list(char[] elements) {
-        if (0 == elements.length) {
-            return Nil.list();
+    public static List<Byte> List(byte[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Byte[] ba = $.asWrapped(elements);
+                return ImmutableList.of(ba);
         }
-        Character[] a = $.asObject(elements);
-        return ImmutableList.of(a);
     }
 
     /**
-     * Create an immutable Short list from a short (primitive type) array.
-     * <p>At the moment the implementation will convert the short (primary)
-     * array to Short (reference) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Creates an immutable list from a byte array
+     * 
+     * Note elements in the array will be copied into the
+     * return list
      *
-     * @param elements an array of primary short
-     * @return a Short typed list
+     * @param elements a byte array
+     * @return the List as described above
      */
-    public static List<Short> listOf(short[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable Short list of a short array.
-     * The elements of the array is copied into the returned list
-     *
-     * @param elements an array of shorts
-     * @return an immutable list contains specified elements
-     */
-    public static List<Short> list(short[] elements) {
-        if (0 == elements.length) {
-            return Nil.list();
+    public static List<Byte> toList(byte[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Byte[] ba = $.asWrapped(elements);
+                return ImmutableList.copyOf(ba);
         }
-        Short[] a = $.asObject(elements);
-        return ImmutableList.of(a);
     }
 
     /**
-     * Create an immutable Integer list from an int (primitive type) array.
-     * <p>At the moment the implementation will convert the int (primary)
-     * array to Integer (reference) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Create a {@link FastStr} from a char array.
      *
-     * @param elements an array of primary int
-     * @return an Integer list
-     */
-    public static List<Integer> listOf(int[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable integer list of a int array. If an empty array specified,
-     * the nan empty immutable list is returned
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(char[])} method
      *
-     * @param elements an array of int
-     * @return an immutable list contains specified elements
+     * @param elements a char array
+     * @return a {@link FastStr} instance
      */
-    public static List<Integer> list(int[] elements) {
-        if (elements.length == 0) {
-            return Nil.list();
+    public static FastStr List(char[] elements) {
+        switch (elements.length) {
+            case 0:
+                return FastStr.EMPTY_STR;
+            default:
+                return FastStr.unsafeOf(elements);
         }
-        Integer[] a = $.asObject(elements);
-        return ImmutableList.of(a);
     }
 
     /**
-     * Create an immutable Long list from a long (primitive type) array.
-     * <p>At the moment the implementation will convert the long (primary)
-     * array to Long (reference) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Create a {@link FastStr} from a char array.
      *
-     * @param elements an array of primary long
-     * @return an Long list
-     */
-    public static List<Long> listOf(long[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable Long list of a long array. If an empty array specified,
-     * the nan empty immutable list is returned
+     * Note the elements in array is copied into the return
+     * list
      *
-     * @param elements an array of long
-     * @return an immutable list contains specified elements
+     * @param elements a char array
+     * @return a {@link FastStr} instance
      */
-    public static List<Long> list(long[] elements) {
-        if (0 == elements.length) {
-            return list();
+    public static FastStr toList(char[] elements) {
+        switch (elements.length) {
+            case 0:
+                return FastStr.EMPTY_STR;
+            default:
+                return FastStr.of(elements);
         }
-        return ImmutableList.of($.asObject(elements));
     }
 
     /**
-     * Create an immutable Float list from a float (primitive type) array.
-     * <p>At the moment the implementation will convert the float (primary)
-     * array to Float (reference) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Create a {@link FastStr} from a Character array.
+     * 
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(Character[])} method
      *
-     * @param elements an array of primary float
-     * @return an Float list
+     * @param elements a Character array
+     * @return a {@link FastStr} instance
      */
-    public static List<Float> listOf(float[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable byte list of a float array. If an empty array specified,
-     * the nan empty immutable list is returned
-     *
-     * @param elements an array of floats
-     * @return an immutable list contains specified elements
-     */
-    public static List<Float> list(float[] elements) {
-        if (0 == elements.length) {
-            return list();
+    public static FastStr List(Character... elements) {
+        switch (elements.length) {
+            case 0:
+                return FastStr.EMPTY_STR;
+            default:
+                return FastStr.unsafeOf($.asPrimitive(elements));
         }
-        return ImmutableList.of($.asObject(elements));
     }
 
     /**
-     * Create an immutable Double list from an double (primitive type) array.
-     * <p>At the moment the implementation will convert the double (primary)
-     * array to Double (reference) array, thus a copy of the array
-     * will actually take place. However it should assume the
-     * array will directly be used as backing data in user application
-     * to cater to the future optimized implementation</p>
+     * Create a {@link FastStr} from a Character array.
+     * 
+     * Note the elements in array is copied into the return
+     * list
      *
-     * @param elements an array of primary double
-     * @return an Double list
+     * @param elements a Character array
+     * @return a {@link FastStr} instance
      */
-    public static List<Double> listOf(double[] elements) {
-        return list(elements);
-    }
-
-    /**
-     * Create an immutable Byte list of a double array. If an empty array specified,
-     * the nan empty immutable list is returned
-     *
-     * @param elements an array of double
-     * @return an immutable list contains specified elements
-     */
-    public static List<Double> list(double[] elements) {
-        if (0 == elements.length) {
-            return list();
+    public static FastStr toList(Character... elements) {
+        switch (elements.length) {
+            case 0:
+                return FastStr.EMPTY_STR;
+            default:
+                return FastStr.of(elements);
         }
-        return ImmutableList.of($.asObject(elements));
     }
 
-    public static <T> List<T> list(Iterable<? extends T> iterable) {
+    /**
+     * Create an immutable Short list from a short array.
+     *
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(short[])} method
+     *
+     * @param elements a short array
+     * @return a List as described above
+     */
+    public static List<Short> List(short[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                return ImmutableList.of($.asWrapped(elements));
+        }
+    }
+
+    /**
+     * Create an immutable List from a short array.
+     *
+     * Note the elements in array is copied into the return
+     * list
+     *
+     * @param elements a short array
+     * @return a List as described above
+     */
+    public static List<Short> toList(short[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                return ImmutableList.copyOf($.asWrapped(elements));
+        }
+    }
+
+    /**
+     * Create an immutable Integer list from a int array.
+     *
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(int[])} method
+     *
+     * @param elements a int array
+     * @return a List as described above
+     */
+    public static List<Integer> List(int[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Integer[] wrapped = $.asWrapped(elements);
+                return ImmutableList.of(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable Integer List from a int array.
+     *
+     * Note the elements in array is copied into the return
+     * list
+     *
+     * @param elements a int array
+     * @return a List as described above
+     */
+    public static List<Integer> toList(int[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Integer[] wrapped = $.asWrapped(elements);
+                return ImmutableList.copyOf(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable Long list from a long array.
+     *
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(long[])} method
+     *
+     * @param elements a long array
+     * @return a List as described above
+     */
+    public static List<Long> List(long[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Long[] wrapped = $.asWrapped(elements);
+                return ImmutableList.of(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable Long List from a long array.
+     *
+     * Note the elements in array is copied into the return
+     * list
+     *
+     * @param elements a long array
+     * @return a List as described above
+     */
+    public static List<Long> toList(long[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Long[] wrapped = $.asWrapped(elements);
+                return ImmutableList.copyOf(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable Float list from a float array.
+     *
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(float[])} method
+     *
+     * @param elements a float array
+     * @return a List as described above
+     */
+    public static List<Float> List(float[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Float[] wrapped = $.asWrapped(elements);
+                return ImmutableList.of(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable Float List from a float array.
+     *
+     * Note the elements in array is copied into the return
+     * list
+     *
+     * @param elements a float array
+     * @return a List as described above
+     */
+    public static List<Float> toList(float[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Float[] wrapped = $.asWrapped(elements);
+                return ImmutableList.copyOf(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable Double list from a double array.
+     *
+     * Note the array will not be copied, instead it will
+     * be used directly as the backing data for the list.
+     * To create an list with a copy of the array specified.
+     * Use the {@link #toList(double[])} method
+     *
+     * @param elements a long array
+     * @return a List as described above
+     */
+    public static List<Double> List(double[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Double[] wrapped = $.asWrapped(elements);
+                return ImmutableList.of(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable Double List from a double array.
+     *
+     * Note the elements in array is copied into the return
+     * list
+     *
+     * @param elements a double array
+     * @return a List as described above
+     */
+    public static List<Double> toList(double[] elements) {
+        switch (elements.length) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(elements[0]);
+            default:
+                Double[] wrapped = $.asWrapped(elements);
+                return ImmutableList.copyOf(wrapped);
+        }
+    }
+
+    /**
+     * Create an immutable List from an iterable
+     * @param iterable the iterable
+     * @param <T> the generic type of the iterable
+     * @return an List that contains all elements in the iterable
+     */
+    public static <T> List<T> List(Iterable<? extends T> iterable) {
         return ListBuilder.toList(iterable);
     }
 
-    public static <T> List<T> list(Iterator<? extends T> iterator) {
+    /**
+     * Create an immutable List from an iterator
+     * @param iterator the iterator
+     * @param <T> the generic type of the iterator
+     * @return an List that contains all elements the iterator iterated
+     */
+    public static <T> List<T> List(Iterator<? extends T> iterator) {
         return ListBuilder.toList(iterator);
     }
 
-    public static <T> List<T> list(Enumeration<? extends T> enumeration) {
+    /**
+     * Create an immutable List from an enumeration
+     * @param enumeration the enumeration
+     * @param <T> the generic type of the enumeration
+     * @return an List that contains all elements in the enumeration
+     */
+    public static <T> List<T> List(Enumeration<? extends T> enumeration) {
         return ListBuilder.toList(enumeration);
     }
 
-    public static <T> List<T> list(Collection<? extends T> col) {
+    /**
+     * Create an immutable List from an collection
+     * @param col the collection
+     * @param <T> the generic type of the collection
+     * @return an List that contains all elements in the collection
+     */
+    public static <T> List<T> List(Collection<? extends T> col) {
         return ListBuilder.toList(col);
     }
 
-    public static <T> List<T> list(java.util.List<? extends T> javaList) {
+    /**
+     * Create an immutable List from a JDK List
+     * @param javaList the JDK list
+     * @param <T> the generic type of the JDK list
+     * @return an List that contains all elements in the JDK list
+     */
+    public static <T> List<T> List(java.util.List<? extends T> javaList) {
         if (javaList instanceof List) {
             List<T> list = $.cast(javaList);
 
             if (list.is(Feature.IMMUTABLE)) {
                 return list;
             } else {
-                return new ReadOnlyDelegatingList<T>(list);
+                return new ReadOnlyDelegatingList<>(list);
             }
         }
-        return new ReadOnlyDelegatingList<T>(javaList);
+        return new ReadOnlyDelegatingList<>(javaList);
     }
 
+    /**
+     * Returns a single element immutable List
+     * @param t the element
+     * @param <T> the generic type of the element
+     * @return the List as described above
+     */
     public static <T> List<T> singletonList(T t) {
-        return list(t);
+        return $.val(t);
     }
 
-    public static <T> List<T> wrap(java.util.List<T> list) {
-        return DelegatingList.wrap(list);
-    }
-
-    public static <T> List<T> newSizedList(int size) {
-        return new DelegatingList<T>(size);
-    }
-
-    public static <T> List<T> newList() {
-        return newSizedList(10);
-    }
-
-    public static <T> List<T> newList(Iterable<? extends T> iterable) {
-        return new DelegatingList<T>(iterable);
-    }
-
-    public static <T> List<T> newList(T t) {
-        return new DelegatingList<T>(10).append(t);
-    }
-
-    public static <T> List<T> newList(T t1, T t2) {
-        return new DelegatingList<T>(10).append(t1).append(t2);
-    }
-
-    public static <T> List<T> newList(T t1, T t2, T t3) {
-        return new DelegatingList<T>(10).append(t1).append(t2).append(t3);
-    }
-
-    public static <T> List<T> newList(T t1, T t2, T t3, T... ta) {
-        int len = ta.length;
-        List<T> l = new DelegatingList<T>(len + 3).append(t1).append(t2).append(t3);
-        l.addAll(listOf(ta));
-        return l;
-    }
-
-    public static <T> List<T> newListOf(T[] ts) {
-        return new DelegatingList<>(C.listOf(ts));
-    }
 
     /**
      * Return a {@link Sequence} consists of all elements in the
      * iterable specified
+     *
      * @param iterable the iterable in which elements will be used to fill into the sequence
-     * @param <T> the element type
+     * @param <T>      the element type
      * @return the sequence
      */
     @SuppressWarnings("unchecked")
@@ -3194,41 +3419,41 @@ public enum C {
 
     public static <PROPERTY> C.List<PROPERTY> extract(java.util.Collection<?> collection, final String propertyPath) {
         if (collection.isEmpty()) {
-            return C.list();
+            return C.List();
         }
         $.Transformer<Object, PROPERTY> extractor = new $.Transformer<Object, PROPERTY>() {
             @Override
             public PROPERTY transform(Object element) {
-                return (PROPERTY)$.getProperty(element, propertyPath);
+                return (PROPERTY) $.getProperty(element, propertyPath);
             }
         };
-        return C.list(collection).map(extractor);
+        return C.List(collection).map(extractor);
     }
 
     public static <PROPERTY> Sequence<PROPERTY> lazyExtract(Iterable<?> iterable, final String propertyPath) {
         $.Transformer<Object, PROPERTY> extractor = new $.Transformer<Object, PROPERTY>() {
             @Override
             public PROPERTY transform(Object element) {
-                return (PROPERTY)$.getProperty(element, propertyPath);
+                return (PROPERTY) $.getProperty(element, propertyPath);
             }
         };
-        return map(iterable, extractor);
+        return transform(iterable, extractor);
     }
 
-    public static <T, R> Sequence<R> map(Iterable<T> seq, $.Function<? super T, ? extends R> mapper) {
+    public static <T, R> Sequence<R> transform(Iterable<T> seq, $.Function<? super T, ? extends R> mapper) {
         if (seq instanceof ReversibleSequence) {
-            return map((ReversibleSequence<T>) seq, mapper);
+            return transform((ReversibleSequence<T>) seq, mapper);
         }
         return new MappedSeq<>(seq, mapper);
     }
 
-    public static <T, R> ReversibleSequence<R> map(ReversibleSequence<T> seq, $.Function<? super T, ? extends R> mapper
+    public static <T, R> ReversibleSequence<R> transform(ReversibleSequence<T> seq, $.Function<? super T, ? extends R> mapper
     ) {
-        return new ReversibleMappedSeq<T, R>(seq, mapper);
+        return new ReversibleMappedSeq<>(seq, mapper);
     }
 
     public static <T> Sequence<T> filter(Sequence<T> seq, $.Function<? super T, Boolean> predicate) {
-        return new FilteredSeq<T>(seq, predicate);
+        return new FilteredSeq<>(seq, predicate);
     }
 
     @SuppressWarnings("unchecked")
@@ -3236,14 +3461,15 @@ public enum C {
         if (sequence instanceof ReversibleSequence) {
             return prepend(t, (ReversibleSequence) sequence);
         } else {
-            return concat(C.list(t), sequence);
+            return concat(C.List(t), sequence);
         }
     }
 
     /**
      * Concatenate two {@link Sequence} into one
-     * @param s1 the first sequence
-     * @param s2 the second sequence
+     *
+     * @param s1  the first sequence
+     * @param s2  the second sequence
      * @param <T> the element type
      * @return the concatenated sequence
      */
@@ -3253,8 +3479,9 @@ public enum C {
 
     /**
      * Concatenate two {@link ReversibleSequence} into one
-     * @param s1 the first reversible sequence
-     * @param s2 the second reversible sequence
+     *
+     * @param s1  the first reversible sequence
+     * @param s2  the second reversible sequence
      * @param <T> the element type
      * @return the concatenated reversible sequence
      */
@@ -3265,89 +3492,99 @@ public enum C {
 
     /**
      * Concatenate two {@link List} into one.
-     * <p><b>Note</b> if the first list is readonly or immutable an new list instance
+     *
+     * <b>Note</b> if the first list is readonly or immutable an new list instance
      * will be created with elements in both list 1 and list 2 filled in. Otherwise
-     * all elemnets from list 2 will be appended to list 1 and return list 1 instance</p>
-     * @param l1 list 1
-     * @param l2 list 2
+     * all elemnets from list 2 will be appended to list 1 and return list 1 instance
+     *
+     * @param l1  list 1
+     * @param l2  list 2
      * @param <T> the element type
      * @return a list with elements of both list 1 and list 2
      */
-    @SuppressWarnings("unused")
     public static <T> List<T> concat(List<T> l1, List<T> l2) {
         return l1.append(l2);
     }
 
     /**
+     * Concatenate two JDK list into one list
+     *
+     * <b>Note</b> if the first list is readonly or immutable an new list instance
+     * will be created with elements in both list 1 and list 2 filled in. Otherwise
+     * all elemnets from list 2 will be appended to list 1 and return list 1 instance
+     *
+     * @param l1  list 1
+     * @param l2  list 2
+     * @param <T> the element type
+     * @return a list with elements of both list 1 and list 2
+     */
+    public static <T> List<T> concat(java.util.List<T> l1, java.util.List<T> l2) {
+        return C.List(l1).append(l2);
+    }
+
+    /**
      * Create an empty immutable set
+     *
      * @param <T> the generic type
      * @return the empty set
      */
-    public static <T> Set<T> set() {
+    public static <T> Set<T> Set() {
         return Nil.set();
     }
 
     /**
-     * Create an immutable set of a single element
-     * @param element the single element
-     * @param <T> the element type
-     * @return the set that contains only specified element
-     */
-    public static <T> Set<T> set(T element) {
-        java.util.Set<T> set = new HashSet<T>();
-        set.add(element);
-        return ImmutableSet.of(set);
-    }
-
-    /**
-     * Create an immutable set contains specified elements
-     * @param t1 one element to be added into the result set
-     * @param ta an array from which all elements will be added into the result set
-     * @param <T> the element type
-     * @return a set that contains all elements specified
-     */
-    public static <T> Set<T> set(T t1, T... ta) {
-        java.util.Set<T> set = new HashSet<T>();
-        set.add(t1);
-        Collections.addAll(set, ta);
-        return ImmutableSet.of(set);
-    }
-
-    /**
      * Create an immutable set of an array of elements
-     * @param ta the array from which all elements will be added into
-     *           the result set
+     *
+     * @param ta  the array from which all elements will be added into
+     *            the result set
      * @param <T> the element type
      * @return the set contains all elements in the array
      */
-    public static <T> Set<T> setOf(T... ta) {
-        java.util.Set<T> set = new HashSet<T>();
+    public static <T> Set<T> Set(T... ta) {
+        java.util.Set<T> set = new HashSet<>();
         Collections.addAll(set, ta);
         return ImmutableSet.of(set);
     }
 
     /**
      * Create an immutable set of all elements contained in the collection specified
+     *
      * @param col the collection from which elements will be added into the
      *            result set
      * @param <T> the element type
      * @return the set contains all elements in the collection
-     * @see #newSet(Collection)
      */
-    public static <T> Set<T> set(Collection<? extends T> col) {
+    public static <T> Set<T> Set(Collection<? extends T> col) {
         return ImmutableSet.of(col);
     }
 
     /**
+     * Create an immutable set from existing set.
+     *
+     * If the set specified is immutable or readonly then return the set directly
+     *
+     * @param set the set
+     * @param <T> the generic type of set element
+     * @return a set as described above
+     */
+    public static <T> Set<T> Set(Set<? extends T> set) {
+        if (set.is(Feature.IMMUTABLE) || set.is(Feature.READONLY)) {
+            return $.cast(set);
+        }
+        return ImmutableSet.of(set);
+    }
+
+    /**
      * Create an immutable set of all elements supplied by the iterable specified
+     *
      * @param itr the iterable from where elements will be added into the result set
      * @param <T> the element type
      * @return the set contains all elements supplied by the iterable
      */
     @SuppressWarnings("unchecked")
-    public static <T> Set<T> set(Iterable<? extends T> itr) {
+    public static <T> Set<T> Set(Iterable<? extends T> itr) {
         if (itr instanceof Collection) {
-            return set((Collection<T>) itr);
+            return Set((Collection<T>) itr);
         }
         java.util.Set<T> set = new HashSet<T>();
         for (T t : itr) set.add(t);
@@ -3355,85 +3592,105 @@ public enum C {
     }
 
     /**
-     * Create an new empty set
-     * @param <T> the element type
-     * @return an empty set
+     * Returns a set that contains all elements in `col1` and all elements in `col2`
+     * @param col1 the first collection
+     * @param col2 the second collection
+     * @param <T> the collection element type
+     * @return a set as described above
      */
-    public static <T> Set<T> newSet() {
-        return new DelegatingSet<T>();
+    public static <T> Set<T> unionOf(Collection<? extends T> col1, Collection<? extends T> col2) {
+        return C.Set(col1).with(col2);
     }
 
     /**
-     * Create an new set with all elements contained in the collection
-     * specified
-     * @param col the collection from which all elements will be added into
-     *            the result set
-     * @param <T> the element type
-     * @return the set contains all elements in the collection
-     * @see #set(Collection)
+     * Returns a set that contains all elements in `col1`, all elements in `col2`, all elements in `col3` and
+     * all elements in rest collections
+     * @param col1 the first collection
+     * @param col2 the second collection
+     * @param col3 the third collection
+     * @param otherCols the rest collections
+     * @param <T> the collection element type
+     * @return a set as described above
      */
-    public static <T> Set<T> newSet(Collection<? extends T> col) {
-        return new DelegatingSet<>(col);
-    }
-
-    public static <T> Set<T> unionOf(Collection<? extends T> col1, Collection<? extends T> col2) {
-        return C.set(col1).with(col2);
-    }
-
-    public static <T> Set<T> unionOf(Collection<? extends T> col1, Collection<? extends T> col2, Collection<? extends T> col3, Collection<? extends T> ... otherCols) {
-        Set<T> union = C.newSet(col1);
+    public static <T> Set<T> unionOf(Collection<? extends T> col1, Collection<? extends T> col2, Collection<? extends T> col3, Collection<? extends T>... otherCols) {
+        Set<T> union = C.Mutable.Set(col1);
         union.addAll(col2);
         union.addAll(col3);
         for (Collection<? extends T> col : otherCols) {
             union.addAll(col);
         }
-        return C.set(union);
+        return C.Set(union);
     }
 
+    /**
+     * Returns a set that contains elements exists in both `col1` and `col2`
+     * @param col1 the first collection
+     * @param col2 the second collection
+     * @param <T> the collection element type
+     * @return a set as described above
+     */
     public static <T> Set<T> intercectionOf(Collection<? extends T> col1, Collection<? extends T> col2) {
-        return C.set(col1).withIn(col2);
+        return C.Set(col1).withIn(col2);
     }
 
+    /**
+     * Returns a set that contains elements in both `col1`, `col2`, `col3` and　rest collections
+     * @param col1 the first collection
+     * @param col2 the second collection
+     * @param col3 the third collection
+     * @param otherCols the rest collections
+     * @param <T> the collection element type
+     * @return a set as described above
+     */
     public static <T> Set<T> interceptionOf(Collection<? extends T> col1, Collection<? extends T> col2, Collection<? extends T> col3, Collection<? extends T>... otherCols) {
-        Set<T> interception = C.newSet(col1);
+        Set<T> interception = C.Mutable.Set(col1);
         interception.retainAll(col2);
         interception.retainAll(col3);
         for (Collection<? extends T> col : otherCols) {
             interception.retainAll(col);
         }
-        return C.set(interception);
+        return C.Set(interception);
     }
 
     /**
-     * This method is deprecated. please use {@link #Map(Object...)} instead
+     * Returns a {@link Map._Builder} with the first key specified
+     *
+     * A general usage of this method
+     *
+     * ```
+     * C.Map<String, Integer> map = C.map("one").to(1)
+     *      .map("two").to(2)
+     *      .map("three").to(3);
+     * ```
+     *
+     * @param key the key
+     * @param <K> the generic type of key
+     * @return the map builder
      */
-    @Deprecated
-    public static <K, V> Map<K, V> map(Object... args) {
-        if (null == args || args.length == 0) {
-            return Nil.EMPTY_MAP;
-        }
-        return new Map(true, args);
+    public static <K, V> Map<K, V>._Builder map(K key) {
+        Map<K, V> map = Map();
+        return map.map(key);
     }
 
     /**
      * Create a immutable {@link Map} from elements specified in an array.
      * <p>Example</p>
      * <pre>
-     *     Map&lt;String, Integer&gt; scores = C.map("Tom", 80, "Peter", 93, ...);
+     *     Map&lt;String, Integer&gt; scores = C.Map("Tom", 80, "Peter", 93, ...);
      * </pre>
      * <p>The above code will create an immutable Map with the following entries</p>
      * <ul>
-     *     <li>(Tom, 80)</li>
-     *     <li>(Peter, 93)</li>
-     *     <li>...</li>
+     * <li>(Tom, 80)</li>
+     * <li>(Peter, 93)</li>
+     * <li>...</li>
      * </ul>
      * <p><b>Note</b> the array size must be an even number, otherwise {@link IndexOutOfBoundsException}
      * will be thrown out</p>
+     *
      * @param args the argument array specifies the entries
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return an immutable map contains of specified entries
-     * @see #newMap(Object...)
+     * @param <K>  the key type
+     * @param <V>  the value type
+     * @return an immutable Map contains of specified entries
      */
     public static <K, V> Map<K, V> Map(Object... args) {
         if (null == args || args.length == 0) {
@@ -3442,20 +3699,8 @@ public enum C {
         return new Map<>(true, args);
     }
 
-    /**
-     * This method is deprecated, please use {@link #Map(Collection)} instead
-     */
-    @Deprecated
-    public static <K, V> Map<K, V> map(Collection<$.Tuple<K, V>> kvCol) {
-        Map<K, V> map = C.newMap();
-        for ($.Tuple<K, V> entry : kvCol) {
-            map.put(entry._1, entry._2);
-        }
-        return map;
-    }
-
     public static <K, V> Map<K, V> Map(Collection<$.Tuple<K, V>> kvCol) {
-        Map<K, V> map = C.newMap();
+        Map<K, V> map = Mutable.Map();
         for ($.Tuple<K, V> entry : kvCol) {
             map.put(entry._1, entry._2);
         }
@@ -3464,83 +3709,17 @@ public enum C {
 
     /**
      * Create an immutable {@link java.util.Map} from existing {@link java.util.Map}
-     * @param map the map from which entries will be put into the new immutable map
+     *
+     * @param map the Map from which entries will be put into the new immutable Map
      * @param <K> the key type
      * @param <V> the value type
-     * @return an immutable map of the existing map
+     * @return an immutable Map of the existing Map
      */
-    public static <K, V> Map<K, V> map(java.util.Map<? extends K, ? extends V> map) {
+    public static <K, V> Map<K, V> Map(java.util.Map<? extends K, ? extends V> map) {
         if (null == map) {
             return Nil.EMPTY_MAP;
         }
         return new Map(true, map);
-    }
-
-    /**
-     * Create an new {@link Map} from an array of elements.
-     * <p>Example</p>
-     * <pre>
-     *     Map&lt;String, Integer&gt; scores = C.newMap("Tom", 80, "Peter", 93, ...);
-     * </pre>
-     * <p>The above code will create a Map with the following entries</p>
-     * <ul>
-     *     <li>(Tom, 80)</li>
-     *     <li>(Peter, 93)</li>
-     *     <li>...</li>
-     * </ul>
-     * <p><b>Note</b> the array size must be an even number, otherwise {@link IndexOutOfBoundsException}
-     * will be thrown out</p>
-     * @param args the argument array specifies the entries
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return a map contains of specified entries
-     * @see #map(Object...)
-     */
-    @SuppressWarnings("unchecked")
-    public static <K, V> Map<K, V> newMap(Object... args) {
-        return new Map(false, args);
-    }
-
-    /**
-     * Create an new {@link Map} from existing {@link java.util.Map}
-     * @param map the map that contains elements to be put into the new map
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return a map that contains all entries in the existing map
-     */
-    @SuppressWarnings("unchecked")
-    public static <K, V> Map<K, V> newMap(java.util.Map<? extends K, ? extends V> map) {
-        return new Map(false, map);
-    }
-
-    /**
-     * Convert a {@link Enumeration} to an {@link Iterable}
-     * @param e the enumeration
-     * @param <T> the element type
-     * @return an iterable corresponding to the enumeration
-     */
-    public static <T> Iterable<T> enumerable(final Enumeration<T> e) {
-        return new Iterable<T>() {
-            @Override
-            public Iterator<T> iterator() {
-                return new Iterator<T>() {
-                    @Override
-                    public boolean hasNext() {
-                        return e.hasMoreElements();
-                    }
-
-                    @Override
-                    public T next() {
-                        return e.nextElement();
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw E.unsupport();
-                    }
-                };
-            }
-        };
     }
     // --- eof factory methods ---
 
@@ -3578,9 +3757,10 @@ public enum C {
      * <p>Note if {@link NotAppliedException} thrown out by visitor function, it will be ignored
      * and keep looping through the Map entry set. It is kind of {@code continue} mechanism in a funcitonal
      * way</p>
+     *
      * @param iterable supply the element to be applied to the visitor function
-     * @param visitor the function called on element provided by the iterable
-     * @param <T> the generic type of the iterable elements
+     * @param visitor  the function called on element provided by the iterable
+     * @param <T>      the generic type of the iterable elements
      * @throws $.Break break the loop
      */
     //TODO: implement forEach iteration in parallel
@@ -3600,9 +3780,10 @@ public enum C {
      * <p>Note if {@link NotAppliedException} thrown out by visitor function, it will be ignored
      * and keep looping through the Map entry set. It is kind of {@code continue} mechanism in a funcitonal
      * way</p>
+     *
      * @param iterator iterator provides elements to be applied to the visitor function
-     * @param visitor the function applied on the element
-     * @param <T> the generic type of the element
+     * @param visitor  the function applied on the element
+     * @param <T>      the generic type of the element
      */
     public static <T> void forEach(Iterator<? extends T> iterator, $.Visitor<? super T> visitor) {
         while (iterator.hasNext()) {
@@ -3612,15 +3793,16 @@ public enum C {
     }
 
     /**
-     * Run indexedVisitor function on all key/value pair in a given map. The indexedVisitor function can
+     * Run indexedVisitor function on all key/value pair in a given Map. The indexedVisitor function can
      * throw out {@link org.osgl.Osgl.Break} if it need to break the loop.
      * <p>Note if {@link NotAppliedException} thrown out by indexedVisitor function, it will be ignored
      * and keep looping through the Map entry set. It is kind of {@code continue} mechanism in a funcitonal
      * way</p>
-     * @param map the map in which enties will be applied to the indexedVisitor function
+     *
+     * @param map            the Map in which enties will be applied to the indexedVisitor function
      * @param indexedVisitor the function that takes (key,value) pair
-     * @param <K> the generic type of Key
-     * @param <V> the generic type of Value
+     * @param <K>            the generic type of Key
+     * @param <V>            the generic type of Value
      * @throws $.Break the {@link org.osgl.Osgl.Break} with payload throwed out by indexedVisitor function to break to loop
      */
     public static <K, V> void forEach(java.util.Map<K, V> map, $.IndexedVisitor<? super K, ? super V> indexedVisitor) throws $.Break {
@@ -3633,11 +3815,330 @@ public enum C {
         }
     }
 
+    /**
+     * Convert an {@link Enumeration} to {@link Iterable}
+     * @param enumeration the enumeration
+     * @param <T> the generic type of the element
+     * @return an Iterable that backed by the enumeration
+     */
+    public static <T> Iterable<T> toIterable(final Enumeration<T> enumeration) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return new EnumerationIterator<>(enumeration);
+            }
+        };
+    }
+
+    /**
+     * Convert an {@link Iterator} to {@link Iterable}
+     * @param iterator the iterator
+     * @param <T> the element generic type
+     * @return the iterable backed by the iterator
+     */
+    public static <T> Iterable<T> toIterable(final Iterator<T> iterator) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return iterator;
+            }
+        };
+    }
+
+    /**
+     * Convert an {@link Enumeration} to {@link Iterator}
+     * @param enumeration the enumeration
+     * @param <T> the element generic type
+     * @return the Iterator backed by the enumeration
+     */
+    public static <T> Iterator<T> toIterator(Enumeration<T> enumeration) {
+        return new EnumerationIterator<>(enumeration);
+    }
+
+    /**
+     * Convert a Map entry into a {@link $.Binary}
+     * @param mapEntry the map entry
+     * @param <K> the generic type of entry key
+     * @param <V> the generic type of entry value
+     * @return a binary pair of key and value
+     */
+    public static <K, V> $.Binary<K, V> toBinary(java.util.Map.Entry<K, V> mapEntry) {
+        return $.T2(mapEntry.getKey(), mapEntry.getValue());
+    }
+
     // --- eof utility methods ---
 
-    // --- Mutable collection/map constructors
+    // --- Mutable collection/Map constructors
     public enum Mutable {
+        ;
 
+        /**
+         * Create a mutable list
+         *
+         * @param <T> the generic type of the list element
+         * @return the List as described above
+         */
+        public static <T> List<T> List() {
+            return new DelegatingList<>(10);
+        }
+
+        /**
+         * Create a mutable list with initial capacity specified
+         * @param initialCapacity the initial capacity hint
+         * @param <T>
+         * @return the list as described
+         */
+        public static <T> List<T> sizedList(int initialCapacity) {
+            return new DelegatingList<>(initialCapacity);
+        }
+
+        /**
+         * Returns an empty mutable list of type specified by class `c`
+         *
+         * @param c   the class specify the list element type
+         * @param <T> the generic type of the list element
+         * @return the list as described above
+         */
+        public static <T> List<T> emptyList(Class<T> c) {
+            return new DelegatingList<>(10);
+        }
+
+
+        /**
+         * Creates an mutable list from an array of elements.
+         *
+         * @param elements an array of elements
+         * @param <T>      the element type
+         * @return the list as described above
+         */
+        public static <T> List<T> List(T... elements) {
+            List<T> list = new DelegatingList<>(elements.length);
+            for (T element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Boolean list from a boolean array.
+         *
+         * @param elements a boolean array
+         * @return the list as described above
+         */
+        public static List<Boolean> List(boolean... elements) {
+            List<Boolean> list = new DelegatingList<>(elements.length);
+            for (Boolean element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Byte list from a byte array.
+         *
+         * @param elements a byte array
+         * @return the list as described above
+         */
+        public static List<Byte> List(byte... elements) {
+            List<Byte> list = new DelegatingList<>(elements.length);
+            for (Byte element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Character list from a char array.
+         *
+         * @param elements a char array
+         * @return the list as described above
+         */
+        public static List<Character> List(char... elements) {
+            List<Character> list = new DelegatingList<>(elements.length);
+            for (Character element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Short list from a short array.
+         *
+         * @param elements a short array
+         * @return a List as described above
+         */
+        public static List<Short> List(short... elements) {
+            List<Short> list = new DelegatingList<>(elements.length);
+            for (Short element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Integer list from a int array.
+         *
+         * @param elements a int array
+         * @return a List as described above
+         */
+        public static List<Integer> List(int... elements) {
+            List<Integer> list = new DelegatingList<>(elements.length);
+            for (Integer element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Long list from a long array.
+         *
+         *
+         * @param elements a long array
+         * @return a List as described above
+         */
+        public static List<Long> List(long... elements) {
+            List<Long> list = new DelegatingList<>(elements.length);
+            for (Long element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Float list from a float array.
+         *
+         * Note the array will not be copied, instead it will
+         * be used directly as the backing data for the list.
+         * To create an list with a copy of the array specified.
+         * Use the {@link #toList(float[])} method
+         *
+         * @param elements a float array
+         * @return a List as described above
+         */
+        public static List<Float> List(float... elements) {
+            List<Float> list = new DelegatingList<>(elements.length);
+            for (Float element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable Double list from a double array.
+         *
+         * @param elements a long array
+         * @return a List as described above
+         */
+        public static List<Double> List(double... elements) {
+            List<Double> list = new DelegatingList<>(elements.length);
+            for (Double element : elements) {
+                list.add(element);
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable List from an iterable
+         * @param iterable the iterable
+         * @param <T> the generic type of the iterable
+         * @return an List that contains all elements in the iterable
+         */
+        public static <T> List<T> List(Iterable<? extends T> iterable) {
+            return List(iterable.iterator());
+        }
+
+        /**
+         * Create an mutable List from an iterator
+         * @param iterator the iterator
+         * @param <T> the generic type of the iterator
+         * @return an List that contains all elements the iterator iterated
+         */
+        public static <T> List<T> List(Iterator<? extends T> iterator) {
+            List<T> list = List();
+            while (iterator.hasNext()) {
+                list.add(iterator.next());
+            }
+            return list;
+        }
+
+        /**
+         * Create an mutable List from an enumeration
+         * @param enumeration the enumeration
+         * @param <T> the generic type of the enumeration
+         * @return an List that contains all elements in the enumeration
+         */
+        public static <T> List<T> List(Enumeration<? extends T> enumeration) {
+            return List(toIterator(enumeration));
+        }
+
+        /**
+         * Create an mutable List from an collection
+         * @param col the collection
+         * @param <T> the generic type of the collection
+         * @return an List that contains all elements in the collection
+         */
+        public static <T> List<T> List(Collection<? extends T> col) {
+            return new DelegatingList<>(col);
+        }
+
+        /**
+         * Create a mutable empty set
+         *
+         * @param <T> the element type
+         * @return a set as described above
+         */
+        public static <T> Set<T> Set(T ... elements) {
+            return new DelegatingSet<T>().with(elements);
+        }
+
+        /**
+         * Create a mutable set with all elements contained in the collection
+         * specified
+         *
+         * @param col the collection from which all elements will be added into
+         *            the result set
+         * @param <T> the element type
+         * @return a set as described above
+         */
+        public static <T> Set<T> Set(Collection<? extends T> col) {
+            return new DelegatingSet<>(col);
+        }
+
+        /**
+         * Create an mutable Map from JDK map
+         * @param map the JDK map
+         * @param <K> generic type of key
+         * @param <V> generic type of value
+         * @return the map as described above
+         */
+        public static <K, V> Map<K, V> Map(java.util.Map<? extends K, ? extends V> map) {
+            return new Map(false, map);
+        }
+
+
+        /**
+         * Create a mutable {@link Map} from elements specified in an array.
+         * <p>Example</p>
+         * <pre>
+         *     Map&lt;String, Integer&gt; scores = C.Map("Tom", 80, "Peter", 93, ...);
+         * </pre>
+         * <p>The above code will create an immutable Map with the following entries</p>
+         * <ul>
+         * <li>(Tom, 80)</li>
+         * <li>(Peter, 93)</li>
+         * <li>...</li>
+         * </ul>
+         * <p><b>Note</b> the array size must be an even number, otherwise {@link IndexOutOfBoundsException}
+         * will be thrown out</p>
+         *
+         * @param args the argument array specifies the entries
+         * @param <K>  the key type
+         * @param <V>  the value type
+         * @return an mutable Map contains of specified entries
+         */
+        public static <K, V> Map<K, V> Map(Object... args) {
+            return new Map<>(false, args);
+        }
     }
 
     /**
@@ -3660,7 +4161,7 @@ public enum C {
          * the collection specified
          *
          * @param collection the collection to be checked on against the argument when applying the prediate
-         * @param <T> the generic type of the element of the collection
+         * @param <T>        the generic type of the element of the collection
          * @return a predicate function
          * @see Collection#contains(Object)
          * @see #contains(Object)
@@ -3679,7 +4180,7 @@ public enum C {
          * element specified
          *
          * @param element the element to be checked
-         * @param <T> the type of the element
+         * @param <T>     the type of the element
          * @return the function that do the check
          * @see Collection#contains(Object)
          * @see #containsIn(Collection)
@@ -3696,9 +4197,10 @@ public enum C {
         /**
          * Returns a predicate function that check if all element in the argument (a collection) contained
          * in the collection specified
+         *
          * @param collection the collection to be checked on against all elements in the argument when
          *                   applying the function
-         * @param <T> the generic type of the element of the collection or argument
+         * @param <T>        the generic type of the element of the collection or argument
          * @return the function that do the check
          * @see Collection#containsAll(Collection)
          * @see #containsAll(Collection)
@@ -3716,9 +4218,10 @@ public enum C {
         /**
          * Returns a predicate function that check if all element in the collection specified are contained in
          * the argument collection
+         *
          * @param collection the collection in which all elements will be checked if contained in the argument
          *                   collection when applying the function
-         * @param <T> the element type
+         * @param <T>        the element type
          * @return the function that do the check
          * @see Collection#containsAll(Collection)
          * @see #allContainsIn(Collection)
@@ -3736,8 +4239,9 @@ public enum C {
         /**
          * Returns a function that add the argument to a collection specified and returns
          * {@code true} if added successfully or {@code false} otherwise
+         *
          * @param destination the collection into which the argument to be added
-         * @param <T> the generic type of the collection elements
+         * @param <T>         the generic type of the collection elements
          * @return a function that do the add operation
          * @see Collection#add(Object)
          * @see #add(Object)
@@ -3754,8 +4258,9 @@ public enum C {
         /**
          * Returns a function that add the specified element into the argument collection and
          * return {@code true} if add successfully or {@code false} otherwise
+         *
          * @param element the element to be added when applying the function
-         * @param <T> the element type
+         * @param <T>     the element type
          * @return the function
          * @see Collection#add(Object)
          * @see #addTo(Collection)
@@ -3772,10 +4277,11 @@ public enum C {
         /**
          * Returns a function that add the argument into the specified list at specified position.
          * the function returns {@code true} if added successfully or {@code false} otherwise
+         *
          * @param destination a list into which the argument to be added
-         * @param index specify the position where the argument can be added
-         * @param <L> the generic type of the list
-         * @param <T> the generic type of the list element
+         * @param index       specify the position where the argument can be added
+         * @param <L>         the generic type of the list
+         * @param <T>         the generic type of the list element
          * @return the function that do the add operation
          * @see java.util.List#add(int, Object)
          * @see #add(int, Object)
@@ -3794,10 +4300,11 @@ public enum C {
         /**
          * Returns a function that add specified element into the argument list at specified position. The
          * function returns the argument list after element added
-         * @param index the location at where the element should be added to
+         *
+         * @param index   the location at where the element should be added to
          * @param element the element the be added to the argument list
-         * @param <L> the list type
-         * @param <T> the element type
+         * @param <L>     the list type
+         * @param <T>     the element type
          * @return the function
          * @see java.util.List#add(int, Object)
          * @see #addTo(int, List)
@@ -3816,9 +4323,10 @@ public enum C {
          * Returns a function that takes argument of type {@link Collection} and add all elements inside
          * into the specified collection. The function returns {@code true} if the collection specified
          * has been changed as a result of adding elements
+         *
          * @param destination the collection into which all elements in the argument collection will be added
          *                    when applying the function
-         * @param <T> the generic type of the collection element and the argument collection element
+         * @param <T>         the generic type of the collection element and the argument collection element
          * @return the function that add all elements from iterable argument into the collection specified
          * @see Collection#addAll(Collection)
          * @see #addAll(Collection)
@@ -3829,9 +4337,9 @@ public enum C {
                 @Override
                 public boolean test(Iterable<? extends T> source) throws NotAppliedException, $.Break {
                     if (source instanceof Collection) {
-                        return destination.addAll((Collection)(source));
+                        return destination.addAll((Collection) (source));
                     }
-                    return destination.addAll(C.list(source));
+                    return destination.addAll(C.List(source));
                 }
             };
         }
@@ -3840,9 +4348,10 @@ public enum C {
          * Returns a function that add all elements in the source collection specified into the destination
          * collection as argument. The function returns {@code true} if the argument collection has been
          * changes as a result of call.
+         *
          * @param source the collection from which the elements will be added into the argument collection
          *               when applying the function
-         * @param <T> the element type
+         * @param <T>    the element type
          * @return the function the perform the add operation
          * @see Collection#addAll(Collection)
          * @see #addAllTo(Collection)
@@ -3860,9 +4369,10 @@ public enum C {
         /**
          * Returns a function that add all elements from the argument collection into the destination list specified
          * at the position specified
-         * @param index the position at where the element shall be inserted into the destination list
+         *
+         * @param index       the position at where the element shall be inserted into the destination list
          * @param destination the list into which the elements will be added
-         * @param <T> the element type
+         * @param <T>         the element type
          * @return the function that do the add operation
          * @see java.util.List#addAll(int, Collection)
          * @see #addAll(int, Collection)
@@ -3883,9 +4393,10 @@ public enum C {
         /**
          * Returns a function that add all elements from the source collection specified into the argument list at
          * the position specified
-         * @param index the position where the element should be insert in the argument list
+         *
+         * @param index  the position where the element should be insert in the argument list
          * @param source the collection from which the elements to be get to added into the argument list
-         * @param <T> the element type
+         * @param <T>    the element type
          * @return the function that do the add operation
          * @see java.util.List#addAll(int, Collection)
          * @see #addAllTo(int, List)
@@ -3905,6 +4416,7 @@ public enum C {
          * Returns a function that remove the argument from a collection specified.
          * <p>The function returns {@code true} if argument removed successfully or
          * {@code false} otherwise</p>
+         *
          * @param collection the collection from which the argument to be removed
          *                   when applying the function returned
          * @return the function that remove element from the collection
@@ -3924,8 +4436,9 @@ public enum C {
         /**
          * Returns a function that remove the element specified from the argument collection. The
          * function returns {@code true} if the argument collection changed as a result of the call.
+         *
          * @param toBeRemoved the element to be removed from the argument when applying the function
-         * @param <T> the element type
+         * @param <T>         the element type
          * @return the function that do removing
          * @see Collection#remove(Object)
          * @see #removeFrom(Collection)
@@ -3944,8 +4457,9 @@ public enum C {
          * Returns a function that remove all elements in the argument collection from
          * the {@code fromCollection} specified. The function returns {@code true} if
          * the fromCollection changed as a result of call
+         *
          * @param fromCollection the collection from which elements will be removed
-         * @param <T> the element type
+         * @param <T>            the element type
          * @return the function
          * @see Collection#removeAll(Collection)
          * @see #removeAll(Collection)
@@ -3964,8 +4478,9 @@ public enum C {
          * Returns a function that remove all elements in the {@code source} collection from the
          * argument collection. The function returns {@code true} if the argument collection changed
          * as a result of call
+         *
          * @param source the collection in which elements will be used to remove from argument collection
-         * @param <T> the element type
+         * @param <T>    the element type
          * @return the function
          * @see Collection#removeAll(Collection)
          * @see #removeAllFrom(Collection)
@@ -3984,8 +4499,9 @@ public enum C {
          * Returns a function that retains only elements contained in the argument collection in the
          * collection specified. The function returns {@code true} if the collection specified
          * changed as a result of call
+         *
          * @param collection the collection in which elements will be retained/removed
-         * @param <T> the element type
+         * @param <T>        the element type
          * @return the function as described
          * @see Collection#retainAll(Collection)
          * @see #retainAll(Collection)
@@ -4004,9 +4520,10 @@ public enum C {
          * Returns a function that retains only elements contained in the specified collection in
          * the argument collection. The function returns {@code true} if argument collection changes
          * as a result of the call
+         *
          * @param collection the collection in which elements will be used to check if argument collection
          *                   element shall be retained or not
-         * @param <T> the element type
+         * @param <T>        the element type
          * @return the function as described above
          * @see Collection#retainAll(Collection)
          * @see #retainAllIn(Collection)
@@ -4024,8 +4541,9 @@ public enum C {
         /**
          * Returns a function that prepend an element to a deque specified and return the
          * deque instance
+         *
          * @param deque the deque to which the element argument will be prepend to
-         * @param <T> the element type
+         * @param <T>   the element type
          * @return the function as described
          * @see Deque#addFirst(Object)
          * @see #dequePrepend(Object)
@@ -4043,8 +4561,9 @@ public enum C {
 
         /**
          * Returns a function that prepend specified element to argument deque
+         *
          * @param element the element to be added to the head of the argument (deque type)
-         * @param <T> the element type
+         * @param <T>     the element type
          * @return the function as described
          * @see Deque#addFirst(Object)
          * @see #prependTo(Deque)
@@ -4061,8 +4580,9 @@ public enum C {
 
         /**
          * Returns a function that append the argument to a {@link Deque} specified
+         *
          * @param deque the deque to which the argument shall be append when applying the function returned
-         * @param <T> the generic type of the argument/deque element
+         * @param <T>   the generic type of the argument/deque element
          * @return the function that do the append operation
          * @see Deque#add(Object)
          * @see #dequeAppend(Object)
@@ -4080,8 +4600,9 @@ public enum C {
 
         /**
          * Returns a function that append specified element to argument deque
+         *
          * @param element the element to be added to the tail of the argument (deque type)
-         * @param <T> the element type
+         * @param <T>     the element type
          * @return the function as described
          * @see Deque#add(Object)
          * @see #appendTo(Deque)
@@ -4098,8 +4619,9 @@ public enum C {
 
         /**
          * Returns a function that prepend the argument to a {@link Sequence} specified
+         *
          * @param sequence the sequence to which the argument shall be prepend whene applying the function
-         * @param <T> the generic type of the argument/sequence element
+         * @param <T>      the generic type of the argument/sequence element
          * @return the function that do the prepend operation
          * @see Sequence#prepend(Object)
          * @see #sequencePrepend(Object)
@@ -4117,8 +4639,9 @@ public enum C {
 
         /**
          * Returns a function that preppend specified element to argument sequence
+         *
          * @param element the element to be added to the head of the argument (sequence type)
-         * @param <T> the element type
+         * @param <T>     the element type
          * @return the function as described
          * @see Sequence#prepend(Object)
          * @see #prependTo(Sequence)
@@ -4136,8 +4659,9 @@ public enum C {
         /**
          * Returns a function that append the argument to a {@link Sequence} specified
          * <p><b>Note</b> the function returns the sequence with the argument been removed</p>
+         *
          * @param sequence the sequence to which the argument shall be append when applying the function
-         * @param <T> the generic type of the argument/sequence element
+         * @param <T>      the generic type of the argument/sequence element
          * @return the function that do the append operation
          * @see Sequence#append(Iterable)
          * @see #sequenceAppend(Object)
@@ -4156,8 +4680,9 @@ public enum C {
 
         /**
          * Returns a function that append specified element to argument sequence
+         *
          * @param element the element to be added to the tail of the argument (sequence type)
-         * @param <T> the element type
+         * @param <T>     the element type
          * @return the function as described
          * @see Sequence#append(Iterable)
          * @see #appendTo(Sequence)
@@ -4174,8 +4699,9 @@ public enum C {
 
         /**
          * Returns a function that apply the visitor function specified on the argument (iterable)
+         *
          * @param visitor the function to be used to loop through the argument
-         * @param <T> the element type
+         * @param <T>     the element type
          * @return the function as described
          * @see C#forEach(Iterable, Osgl.Visitor)
          */
@@ -4189,6 +4715,67 @@ public enum C {
                 }
             };
         }
+
+        /**
+         * Defines the function that apply to a Map and return the values collection of the map
+         */
+        public static final $.Function<java.util.Map, Collection> MAP_VALUES = new $.Transformer<java.util.Map, Collection>() {
+            @Override
+            public Collection transform(java.util.Map map) {
+                return map.values();
+            }
+        };
+
+        /**
+         * A type cast version of {@link #MAP_VALUES}
+         * @param <K> the generic type of map key
+         * @param <V> the generic type of map value
+         * @return the function that apply to a Map and return the values collection of the map
+         */
+        public static <K, V> $.Function<java.util.Map<K, V>, Collection<V>> mapValues() {
+            return $.cast(MAP_VALUES);
+        }
+
+        /**
+         * Defines the function that apply to a Map and return the key set of the map
+         */
+        public static final $.Function<java.util.Map, Set> MAP_KEYS = new $.Transformer<java.util.Map, Set>() {
+            @Override
+            public Set transform(java.util.Map map) {
+                return C.Set(map.keySet());
+            }
+        };
+
+        /**
+         * A type cast version of {@link #MAP_KEYS}
+         * @param <K> the generic type of map key
+         * @param <V> the generic type of map value
+         * @return the function that apply to a Map and return the key set of the map
+         */
+        public static <K, V> $.Function<java.util.Map<K, V>, Set<V>> mapKeys() {
+            return $.cast(MAP_KEYS);
+        }
+
+        /**
+         * A function that apply to {@link java.util.Map.Entry} and returns a {@link Osgl.Binary}
+         */
+        public static final $.Function<java.util.Map.Entry, $.Binary> MAP_ENTRY_TO_BINARY = new $.Transformer<java.util.Map.Entry, $.Binary>() {
+            @Override
+            public $.Binary transform(java.util.Map.Entry entry) {
+                return C.toBinary(entry);
+            }
+        };
+
+        /**
+         * A type cast version of {@link #MAP_ENTRY_TO_BINARY}
+         * @param <K> the map entry key type
+         * @param <V> the map entry value type
+         * @return a function apply to {@link java.util.Map.Entry} and returns a {@link Osgl.Binary}
+         */
+        public static <K, V> $.Function<java.util.Map.Entry<K, V>, $.Binary<K, V>> mapEntryToBinary() {
+            return $.cast(MAP_ENTRY_TO_BINARY);
+        }
+
     }
 
 }

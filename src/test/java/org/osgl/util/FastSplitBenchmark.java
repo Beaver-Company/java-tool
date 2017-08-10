@@ -20,7 +20,7 @@ public class FastSplitBenchmark extends BenchmarkBase {
     @BenchmarkOptions(warmupRounds = 1, benchmarkRounds = 1)
     public void testFastSplit() {
         S.List sl = S.fastSplit(toBeSplited, "**");
-        UtilTestBase.eq(sl, C.listOf(toBeSplited.split("\\*\\*")));
+        UtilTestBase.eq(sl, C.List(toBeSplited.split("\\*\\*")));
     }
 
     @Test

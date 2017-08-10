@@ -14,17 +14,17 @@ import java.util.Map;
 public class ImmutableListTest extends ListTestBase {
     @Override
     protected C.List<Integer> prepareData(int... ia) {
-        return C.list(ia);
+        return C.List(ia);
     }
 
     @Override
     protected C.List<Integer> prepareEmptyData() {
-        return C.list();
+        return C.List();
     }
 
     @Override
     protected <T> C.List<T> prepareTypedData(T... ta) {
-        return C.listOf(ta);
+        return C.List(ta);
     }
 
     @Test

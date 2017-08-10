@@ -15,7 +15,8 @@
   ~ under the License.  
   -->
 <!-- history
-1.5.0
+2.0.0
+* #32 Create readable alias for `C` namespace
 * #26 Add method to generate Map from List
 * #11 Make API accept Visitor be real Visitor
 
@@ -134,7 +135,7 @@
 * Add new reader() and is() method to IO class dealing with URL and InputStreamReader
 * Add eq2(Object, Object) to _, to allow do equal matching against two arrays
 * Add asPrimitive() method set to _, to allow convert Object array to primitive array
-* Add toString2() to _ to output array type object in a good format
+* Add asString2() to _ to output array type object in a good format
 * Add COMMON_SEP to S; add SPLIT and split(String) to S.F
 * Better handling of primitive types in S.newInstance and S.classForName
 * S.builder now accept primitive types and object types as constructor; original S.builder(int) semantic is now expressed in S.sizedBuilder(int)
@@ -168,7 +169,7 @@
 * ListBase.unique not working as expected
 
 0.4.4-SNAPSHOT
-* C.list(List) shouldn't sort the list
+* C.List(List) shouldn't sort the List
 * Add S.F.IS_BLANK function
 * Add S.F.NULL_SAFE function
 
@@ -210,7 +211,7 @@
   <groupId>org.osgl</groupId>
   <artifactId>osgl-tool</artifactId>
   <packaging>jar</packaging>
-  <version>1.5.0-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
 
   <name>Java Tool</name>
   <description>A simple Java toolkit</description>

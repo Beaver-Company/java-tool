@@ -1204,7 +1204,7 @@ public class FastStr extends StrBase<FastStr>
             int off = 0;
             int next = 0;
             boolean limited = limit > 0;
-            C.List<FastStr> list = C.newList();
+            C.List<FastStr> list = C.Mutable.List();
             while ((next = indexOf(ch, off)) != -1) {
                 if (!limited || list.size() < limit - 1) {
                     list.add(substr(off, next));
@@ -1218,7 +1218,7 @@ public class FastStr extends StrBase<FastStr>
             }
             // If no match was found, return this
             if (off == 0) {
-                return C.listOf(this);
+                return C.<FastStr>List(this);
             }
 
             // Add remaining segment
@@ -1241,7 +1241,7 @@ public class FastStr extends StrBase<FastStr>
         for (int i = 0; i < len; ++i) {
             ssa[i] = unsafeOf(sa[i]);
         }
-        return C.listOf(ssa);
+        return C.List(ssa);
     }
 
 
@@ -1524,6 +1524,11 @@ public class FastStr extends StrBase<FastStr>
         char[] newArray = new char[ca.length];
         System.arraycopy(ca, 0, newArray, 0, ca.length);
         return new FastStr(ca);
+    }
+
+    public static FastStr of(Character[] ca) {
+        if (ca.length == 0) return EMPTY_STR;
+        return new FastStr($.asPrimitive(ca));
     }
 
     /**

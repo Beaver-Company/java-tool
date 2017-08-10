@@ -9,7 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 @BenchmarkOptions(benchmarkRounds = 15000, warmupRounds = 1000, clock = Clock.NANO_TIME)
-@BenchmarkMethodChart(filePrefix = "map-types-benchmark-barchart")
+@BenchmarkMethodChart(filePrefix = "Map-types-benchmark-barchart")
 public class StringConcatBenchmark extends AbstractBenchmark {
 
     private static String s1;

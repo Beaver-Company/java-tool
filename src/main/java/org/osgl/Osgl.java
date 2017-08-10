@@ -414,7 +414,7 @@ public class Osgl implements Serializable {
         /**
          * Returns the inverse function mapping from {@code Y} back to {@code X}
          *
-         * @return a function that map {@code Y} type element to {@code X} type element
+         * @return a function that Map {@code Y} type element to {@code X} type element
          */
         Bijection<Y, X> invert();
     }
@@ -2171,7 +2171,10 @@ public class Osgl implements Serializable {
      * @since 0.2
      */
     @SuppressWarnings({"unused", "unchecked"})
-    public static <T> Predicate<T> generalPredicate(final $.Visitor<? super T> f) {
+    public static <T> Predicate<T> generalPredicate(final Function<? super T, ?> f) {
+        if (f instanceof Predicate) {
+            return (Predicate<T>) f;
+        }
         return new Predicate<T>() {
             @Override
             public boolean test(T t) {
@@ -2231,6 +2234,20 @@ public class Osgl implements Serializable {
          * @throws Break if the logic decide to break visit progress (usually when visiting a sequence of elements)
          */
         public abstract void visit(T t) throws Break;
+    }
+
+    /**
+     * Consumer is special kind of {@link Visitor} that expose `consume(T)` method
+     * to replace {@link Visitor#visit(Object)} method
+     * @param <T> the generic type of object to be consumed
+     */
+    public abstract static class Consumer<T> extends Visitor<T> {
+        @Override
+        public void visit(T t) throws Break {
+            consume(t);
+        }
+
+        public abstract void consume(T t);
     }
 
     public abstract static class V1<P1> extends Visitor<P1> {
@@ -2527,6 +2544,19 @@ public class Osgl implements Serializable {
     }
 
     /**
+     * A Producer function that apply to nothing and return a product
+     * @param <PRODUCT> the product type
+     */
+    public static abstract class Producer<PRODUCT> extends Osgl.F0<PRODUCT> {
+        @Override
+        public PRODUCT apply() throws NotAppliedException, Break {
+            return produce();
+        }
+
+        public abstract PRODUCT produce();
+    }
+
+    /**
      * A Transformer is literally a kind of {@link F1} function
      *
      * @param <FROM> The type of the element the transformer function applied to
@@ -2611,13 +2641,17 @@ public class Osgl implements Serializable {
             return "T2(_1: " + _1 + ", _2: " + _2 + ")";
         }
 
+        public org.osgl.util.C.List toList() {
+            return org.osgl.util.C.List(_1, _2);
+        }
+
         /**
          * Convert this {@code Tuple} instance into a Map with one key,value pair. Where
          * {@code key} is {@code _1} and {@code value} is {@code _2};
-         * @return the map as described
+         * @return the Map as described
          */
         @SuppressWarnings("unused")
-        public Map<A, B> asMap() {
+        public Map<A, B> toMap() {
             Map<A, B> m = new HashMap<A, B>();
             m.put(_1, _2);
             return m;
@@ -2627,19 +2661,19 @@ public class Osgl implements Serializable {
          * Convert a list of {@code Tuple} instances into a Map. Where
          * {@code key} is {@code _1} and {@code value} is {@code _2};
          * <p>
-         *     <b>Note</b> that the size of the returned map might be lesser than
+         *     <b>Note</b> that the size of the returned Map might be lesser than
          *     the size of the tuple list if there are multiple {@code _1} has
          *     the same value, and the last one is the winner and it's {@code _2}
-         *     will be put into the map
+         *     will be put into the Map
          * </p>
          * @param <K> the key type
          * @param <V> the value type
-         * @param list the list of tuples to be transformed into map
-         * @return the map as described
+         * @param list the list of tuples to be transformed into Map
+         * @return the Map as described
          */
         @SuppressWarnings("unused")
-        public static <K, V> Map<K, V> asMap(Collection<Tuple<K, V>> list) {
-            Map<K, V> m = C.newMap();
+        public static <K, V> Map<K, V> toMap(Collection<Tuple<K, V>> list) {
+            Map<K, V> m = C.Mutable.Map();
             for (Tuple<K, V> t: list) {
                 m.put(t._1, t._2);
             }
@@ -2738,6 +2772,10 @@ public class Osgl implements Serializable {
         public String toString() {
             return "T3(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ")";
         }
+
+        public org.osgl.util.C.List toList() {
+            return org.osgl.util.C.List(_1, _2, _3);
+        }
     }
 
     public static class T3<A, B, C> extends Triple<A, B, C> {
@@ -2810,6 +2848,10 @@ public class Osgl implements Serializable {
         @Override
         public String toString() {
             return "T4(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ", _4:" + _4 + ")";
+        }
+
+        public org.osgl.util.C.List toList() {
+            return org.osgl.util.C.List(_1, _2, _3, _4);
         }
     }
 
@@ -2894,6 +2936,11 @@ public class Osgl implements Serializable {
         @Override
         public String toString() {
             return "T5(_1: " + _1 + ", _2: " + _2 + ", _3:" + _3 + ", _4:" + _4 + ", _5:" + _5 + ")";
+        }
+
+
+        public org.osgl.util.C.List toList() {
+            return org.osgl.util.C.List(_1, _2, _3, _4, _5);
         }
     }
 
@@ -3153,7 +3200,7 @@ public class Osgl implements Serializable {
              * Returns a function that when applied, run {@link Osgl.Option#map(Osgl.Function)} on this
              * {@code Option}
              *
-             * @param mapper the function that map {@code T} element to {@code B} object
+             * @param mapper the function that Map {@code T} element to {@code B} object
              * @param <B>    the type of returning option element type
              * @return the function returns either a {@code B} type option if this option
              * is defined or {@link #NONE} if this option is not defined
@@ -3171,9 +3218,9 @@ public class Osgl implements Serializable {
              * Returns a function that when applied, run {@link Osgl.Option#flatMap(Osgl.Function)} on this
              * {@code Option}
              *
-             * @param mapper the function that map an elemnet of type T to a {@code Option} of type B
+             * @param mapper the function that Map an elemnet of type T to a {@code Option} of type B
              * @param <B>    the element type of the {@code Option}
-             * @return the function that flat map all {@code T} element to {@code B} Options
+             * @return the function that flat Map all {@code T} element to {@code B} Options
              */
             public final <B> F0<Option<B>> flatMap(final Function<? super T, Option<B>> mapper) {
                 return new F0<Option<B>>() {
@@ -3459,7 +3506,7 @@ public class Osgl implements Serializable {
         @Override
         public C.List<T> take(int n) {
             if (n == 0) {
-                return C.list();
+                return C.List();
             } else if (n < 0) {
                 return drop(size() + n);
             } else {
@@ -3469,7 +3516,7 @@ public class Osgl implements Serializable {
 
         @Override
         public C.List<T> tail() throws UnsupportedOperationException {
-            return C.list();
+            return C.List();
         }
 
         @Override
@@ -3477,7 +3524,7 @@ public class Osgl implements Serializable {
             if (predicate.apply(v)) {
                 return this;
             }
-            return C.list();
+            return C.List();
         }
 
         @Override
@@ -3485,13 +3532,13 @@ public class Osgl implements Serializable {
             if (n == 0) {
                 return this;
             }
-            return C.list();
+            return C.List();
         }
 
         @Override
         public C.List<T> dropWhile(Function<? super T, Boolean> predicate) {
             if (predicate.apply(v)) {
-                return C.list();
+                return C.List();
             }
             return this;
         }
@@ -3522,7 +3569,7 @@ public class Osgl implements Serializable {
             if (itr.hasNext()) {
                 return new Var<>(Osgl.T2(v, itr.next()));
             }
-            return C.list();
+            return C.List();
         }
 
         @Override
@@ -3617,7 +3664,7 @@ public class Osgl implements Serializable {
                 throw new IndexOutOfBoundsException();
             }
             if (fromIndex == toIndex) {
-                return C.list();
+                return C.List();
             }
             return this;
         }
@@ -3630,7 +3677,7 @@ public class Osgl implements Serializable {
         @Override
         public C.List<T> tail(int n) {
             if (n == 0) {
-                return C.list();
+                return C.List();
             }
             return this;
         }
@@ -3749,9 +3796,9 @@ public class Osgl implements Serializable {
         @Override
         public C.List<T> insert(int index, T t) throws IndexOutOfBoundsException {
             if (index == 0) {
-                return C.list(t, v);
+                return C.List(t, v);
             } else if (index == 1) {
-                return C.list(v, t);
+                return C.List(v, t);
             } else {
                 throw new IndexOutOfBoundsException();
             }
@@ -3760,9 +3807,9 @@ public class Osgl implements Serializable {
         @Override
         public C.List<T> insert(int index, T... ta) throws IndexOutOfBoundsException {
             if (index == 0) {
-                return C.listOf(ta).prepend(v);
+                return C.List(ta).prepend(v);
             } else if (index == 1) {
-                return C.listOf(ta).append(v);
+                return C.List(ta).append(v);
             }
             throw new IndexOutOfBoundsException();
         }
@@ -3770,9 +3817,9 @@ public class Osgl implements Serializable {
         @Override
         public C.List<T> insert(int index, List<T> subList) throws IndexOutOfBoundsException {
             if (index == 0) {
-                return C.list(subList).prepend(v);
+                return C.List(subList).prepend(v);
             } else if (index == 1) {
-                return C.list(subList).append(v);
+                return C.List(subList).append(v);
             }
             throw new IndexOutOfBoundsException();
         }
@@ -3797,16 +3844,18 @@ public class Osgl implements Serializable {
         }
 
         @Override
-        public C.ListOrSet<T> without(T element, T... elements) {
-            if (Osgl.eq(v, element)) return C.empty();
-            int id = search(v, elements);
+        public C.ListOrSet<T> without(T... elements) {
+            if (elements.length == 0) {
+                return this;
+            }
+            int id = Osgl.locate(v, elements);
             if (-1 == id) return this;
             return C.empty();
         }
 
         @Override
         public C.Set<T> onlyIn(Collection<? extends T> col) {
-            C.Set<T> set = C.newSet(col);
+            C.Set<T> set = C.Mutable.Set(col);
             if (col.contains(v)) {
                 set.remove(v);
             }
@@ -3815,17 +3864,17 @@ public class Osgl implements Serializable {
 
         @Override
         public C.Set<T> with(Collection<? extends T> col) {
-            return C.set(v).with(col);
+            return C.Set(v).with(col);
         }
 
         @Override
         public C.Set<T> with(T element) {
-            return C.set(v, element);
+            return C.Set(v, element);
         }
 
         @Override
-        public C.Set<T> with(T element, T... elements) {
-            return C.set(v).with(element, elements);
+        public C.Set<T> with(T... elements) {
+            return C.Set(v).with(elements);
         }
 
         @Override
@@ -3861,9 +3910,9 @@ public class Osgl implements Serializable {
         @Override
         public <B> C.List<Binary<T, B>> zip(List<B> list) {
             if (list.size() == 0) {
-                return C.list();
+                return C.List();
             }
-            return C.list((Binary<T, B>)T2(v, list.get(0)));
+            return C.List((Binary<T, B>)T2(v, list.get(0)));
         }
 
         @Override
@@ -4038,7 +4087,7 @@ public class Osgl implements Serializable {
 
         @Override
         public C.Set<T> withIn(Collection<? extends T> col) {
-            return col.contains(v) ? this : C.<T>set();
+            return col.contains(v) ? this : C.<T>Set();
         }
 
         public Var<T> update(Function<T, T> changer) {
@@ -4643,6 +4692,15 @@ public class Osgl implements Serializable {
     }
 
     /**
+     * Check if an object is `null` or {@link #NONE}
+     * @param o the object to check
+     * @return `true` if `o` is `null` or `NONE`
+     */
+    public static boolean notNull(Object o) {
+        return null != o && NONE != o;
+    }
+
+    /**
      * Check if an object is {@code null} or {@link #NONE}
      *
      * @param o the object to test
@@ -4678,14 +4736,24 @@ public class Osgl implements Serializable {
      * @param o the object which will be converted into a string
      * @return a String representation of object
      */
-    public static String toString(Object o) {
+    public static String asString(Object o) {
         if (isNull(o)) {
             return "";
         }
         return o.toString();
     }
 
-    public static String toString2(Object o) {
+    /**
+     * Return String representation of an object instance.
+     *
+     * This is method has mostly the same logic with {@link #asString(Object)} except
+     * it will check if the object `o` is an array, in which case it will recursively
+     * call itself on each array elements
+     *
+     * @param o the object
+     * @return a string representation of the object
+     */
+    public static String asString2(Object o) {
         if (isNull(o)) {
             return "";
         }
@@ -4696,9 +4764,9 @@ public class Osgl implements Serializable {
                 return "[]";
             }
             sb.append("[");
-            sb.append(toString2(Array.get(o, 0)));
+            sb.append(asString2(Array.get(o, 0)));
             for (int i = 1; i < len; ++i) {
-                sb.append(", ").append(toString2(Array.get(o, i)));
+                sb.append(", ").append(asString2(Array.get(o, i)));
             }
             sb.append("]");
             return sb.toString();
@@ -4721,7 +4789,12 @@ public class Osgl implements Serializable {
     private static final int HC_INIT = 17;
     private static final int HC_FACT = 37;
 
-    public static int iterableHashCode(Iterable<?> it) {
+    /**
+     * Returns hash code of an iterable
+     * @param it the iterable
+     * @return the hash code of the iterable
+     */
+    public static int hc(Iterable<?> it) {
         int ret = HC_INIT;
         for (Object o : it) {
             ret = ret * HC_FACT + hc(o);
@@ -4729,10 +4802,20 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a boolean value
+     * @param o the boolean value
+     * @return the hash code of the boolean value
+     */
     public static int hc(boolean o) {
         return o ? 1231 : 1237;
     }
 
+    /**
+     * Returns hash code of a boolean array
+     * @param oa the boolean array
+     * @return the hash code of the boolean array
+     */
     public static int hc(boolean[] oa) {
         int ret = HC_INIT;
         for (boolean b : oa) {
@@ -4741,10 +4824,20 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a short value
+     * @param o the short value
+     * @return the hash code of the short value
+     */
     public static int hc(short o) {
         return (int) o;
     }
 
+    /**
+     * Returns hash code of a short array
+     * @param oa the short array
+     * @return the hash code of the short array
+     */
     public static int hc(short[] oa) {
         int ret = HC_INIT;
         for (short b : oa) {
@@ -4753,10 +4846,20 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a byte value
+     * @param o the byte value
+     * @return the hash code of the byte value
+     */
     public static int hc(byte o) {
         return (int) o;
     }
 
+    /**
+     * Returns hash code of a byte array
+     * @param oa the byte array
+     * @return the hash code of the byte array
+     */
     public static int hc(byte[] oa) {
         int ret = HC_INIT;
         for (byte b : oa) {
@@ -4765,10 +4868,20 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a char value
+     * @param o the char value
+     * @return the hash code of the char value
+     */
     public static int hc(char o) {
         return (int) o;
     }
 
+    /**
+     * Returns hash code of a char array
+     * @param oa the char array
+     * @return the hash code of the char array
+     */
     public static int hc(char[] oa) {
         int ret = HC_INIT;
         for (char b : oa) {
@@ -4777,10 +4890,20 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a int value
+     * @param o the int value
+     * @return the hash code of the int value
+     */
     public static int hc(int o) {
         return o;
     }
 
+    /**
+     * Returns hash code of a int array
+     * @param oa the int array
+     * @return the hash code of the int array
+     */
     public static int hc(int[] oa) {
         int ret = HC_INIT;
         for (int b : oa) {
@@ -4789,10 +4912,20 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a float value
+     * @param o the float value
+     * @return the hash code of the float value
+     */
     public static int hc(float o) {
         return Float.floatToIntBits(o);
     }
 
+    /**
+     * Returns hash code of a float array
+     * @param oa the float array
+     * @return the hash code of the float array
+     */
     public static int hc(float[] oa) {
         int ret = HC_INIT;
         for (float b : oa) {
@@ -4801,10 +4934,20 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a long value
+     * @param o the long value
+     * @return the hash code of the long value
+     */
     public static int hc(long o) {
         return (int) (o ^ (o >> 32));
     }
 
+    /**
+     * Returns hash code of a long array
+     * @param oa the long array
+     * @return the hash code of the long array
+     */
     public static int hc(long[] oa) {
         int ret = HC_INIT;
         for (long b : oa) {
@@ -4813,6 +4956,11 @@ public class Osgl implements Serializable {
         return ret;
     }
 
+    /**
+     * Returns hash code of a double value
+     * @param o the double value
+     * @return the hash code of the double value
+     */
     public static int hc(double o) {
         return hc(Double.doubleToLongBits(o));
     }
@@ -5037,44 +5185,19 @@ public class Osgl implements Serializable {
     }
 
     /**
-     * Search an element in a array
-     *
-     * @param element  the element to be located
-     * @param elements the array of element to be searched
-     * @param <T>      the type
-     * @return the location of the element inside elements, or {@code -1} if not found
+     * Print a line of message into standard out
+     * @param msg the message template
+     * @param args the message arguments
      */
-    public static <T> int search(T element, T... elements) {
-        int len = elements.length;
-        if (len == 0) return -1;
-
-        boolean c = false;
-        if (6 < len) {
-            if (null != element) {
-                c = element instanceof Comparable;
-            } else {
-                T t0 = elements[0];
-                if (t0 == null) return 0;
-                c = t0 instanceof Comparable;
-            }
-            if (c) {
-                Arrays.sort(elements);
-            }
-        }
-        if (c) {
-            return Arrays.binarySearch(elements, element);
-        } else {
-            for (int i = 0; i < len; ++i) {
-                if (Osgl.eq(element, elements[i])) return i;
-            }
-            return -1;
-        }
-    }
-
     public static void echo(String msg, Object... args) {
         System.out.println(S.fmt(msg, args));
     }
 
+    /**
+     * Print a line of message into standard err
+     * @param msg the message template
+     * @param args the message arguments
+     */
     public static void error(String msg, Object... args) {
         System.err.println(S.fmt(msg, args));
     }
@@ -5207,7 +5330,15 @@ public class Osgl implements Serializable {
         return (T) o;
     }
 
-    public static <T> T notNull(T o) {
+    /**
+     * If the object passed in is `null` then raise `NullPointerException`
+     * otherwise return the object
+     *
+     * @param o the object to be tested
+     * @param <T> the generic type of the object
+     * @return the object passed in if it is not null
+     */
+    public static <T> T ensureNotNull(T o) {
         E.NPE(o);
         return o;
     }
@@ -6191,14 +6322,14 @@ public class Osgl implements Serializable {
         } else if (type instanceof Class) {
             Class classType = (Class) type;
             if (classType.isArray()) {
-                return (List)C.list(classType.getComponentType());
+                return (List)C.List(classType.getComponentType());
             }
         }
         return null;
     }
 
     private static List<Class<?>> findArgumentTypes(ParameterizedType ptype) {
-        List<Class<?>> retList = C.newList();
+        List<Class<?>> retList = C.Mutable.List();
         Type[] ta = ptype.getActualTypeArguments();
         for (Type t: ta) {
             if (t instanceof Class) {
@@ -6444,6 +6575,24 @@ public class Osgl implements Serializable {
             throw new IllegalArgumentException();
         }
         return new boolean[size];
+    }
+
+
+    /**
+     * Locate an element in a array
+     *
+     * @param element  the element to be located
+     * @param elements the array of element to be searched
+     * @param <T>      the type
+     * @return the location of the element inside elements, or {@code -1} if not found
+     */
+    public static <T> int locate(T element, T[] elements) {
+        int len = elements.length;
+        if (len == 0) return -1;
+        for (int i = 0; i < len; ++i) {
+            if (Osgl.eq(element, elements[i])) return i;
+        }
+        return -1;
     }
 
     public static <T> T[] concat(T[] a, T t) {
@@ -6812,7 +6961,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Boolean[] asObject(boolean[] pa) {
+    public static Boolean[] asWrapped(boolean[] pa) {
         int len = pa.length;
         Boolean[] oa = new Boolean[len];
         for (int i = 0; i < len; ++i) {
@@ -6831,7 +6980,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Byte[] asObject(byte[] pa) {
+    public static Byte[] asWrapped(byte[] pa) {
         int len = pa.length;
         Byte[] oa = new Byte[len];
         for (int i = 0; i < len; ++i) {
@@ -6850,7 +6999,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Character[] asObject(char[] pa) {
+    public static Character[] asWrapped(char[] pa) {
         int len = pa.length;
         Character[] oa = new Character[len];
         for (int i = 0; i < len; ++i) {
@@ -6869,7 +7018,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Short[] asObject(short[] pa) {
+    public static Short[] asWrapped(short[] pa) {
         int len = pa.length;
         Short[] oa = new Short[len];
         for (int i = 0; i < len; ++i) {
@@ -6888,7 +7037,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Integer[] asObject(int[] pa) {
+    public static Integer[] asWrapped(int[] pa) {
         int len = pa.length;
         Integer[] oa = new Integer[len];
         for (int i = 0; i < len; ++i) {
@@ -6907,7 +7056,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Long[] asObject(long[] pa) {
+    public static Long[] asWrapped(long[] pa) {
         int len = pa.length;
         Long[] oa = new Long[len];
         for (int i = 0; i < len; ++i) {
@@ -6926,7 +7075,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Float[] asObject(float[] pa) {
+    public static Float[] asWrapped(float[] pa) {
         int len = pa.length;
         Float[] oa = new Float[len];
         for (int i = 0; i < len; ++i) {
@@ -6945,7 +7094,7 @@ public class Osgl implements Serializable {
         return pa;
     }
 
-    public static Double[] asObject(double[] pa) {
+    public static Double[] asWrapped(double[] pa) {
         int len = pa.length;
         Double[] oa = new Double[len];
         for (int i = 0; i < len; ++i) {
@@ -7030,6 +7179,22 @@ public class Osgl implements Serializable {
     });
 
     /**
+     * Pause current thread for specified ms.
+     *
+     * Note the {@link InterruptedException} raised during the
+     * pause time will be ignored and the pause state will exit
+     *
+     * @param ms milliseconds to wait
+     */
+    public static void pause(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+    }
+
+    /**
      * Execute callback asynchronously after delay specified
      *
      * @param callback     the callback function to be executed
@@ -7072,7 +7237,7 @@ public class Osgl implements Serializable {
         return clf.create(ivp);
     }
 
-    private static Set<String> standardsAnnotationMethods = C.newSet(C.list("equals", "hashCode", "toString", "annotationType", "getClass"));
+    private static Set<String> standardsAnnotationMethods = C.Mutable.Set(C.List("equals", "hashCode", "toString", "annotationType", "getClass"));
 
     private static boolean isStandardAnnotationMethod(Method m) {
         return standardsAnnotationMethods.contains(m.getName());
@@ -7084,7 +7249,7 @@ public class Osgl implements Serializable {
      * @return a Map contains annotation instance properties
      */
     public static Map<String, Object> evaluate(Annotation anno) {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new HashMap<>();
         Class<? extends Annotation> annoClass = anno.annotationType();
         Method[] ma = annoClass.getMethods();
         for (Method m : ma) {
@@ -7460,7 +7625,7 @@ public class Osgl implements Serializable {
             if (predicates.length == 0) {
                 return yes();
             }
-            return and(C.listOf(predicates));
+            return and(C.List(predicates));
         }
 
         /**
@@ -7502,7 +7667,7 @@ public class Osgl implements Serializable {
             if (predicates.length == 0) {
                 return no();
             }
-            return or(C.listOf(predicates));
+            return or(C.List(predicates));
         }
 
         /**
@@ -7575,8 +7740,8 @@ public class Osgl implements Serializable {
         }
 
         /**
-         * Returns a inverted function of {@link Bijection} which map from X to Y, and the
-         * returned function map from Y to X. This function will call {@link Bijection#invert()}
+         * Returns a inverted function of {@link Bijection} which Map from X to Y, and the
+         * returned function Map from Y to X. This function will call {@link Bijection#invert()}
          * to get the return function
          *
          * @param f   the bijection function to be inverted
@@ -8529,13 +8694,13 @@ public class Osgl implements Serializable {
          * A predefined function that when applied to an object instance, returns
          * String representation of the instance
          *
-         * @see #toString2(Object)
+         * @see #asString2(Object)
          * @since 0.2
          */
         public static final F1 AS_STRING = new F1() {
             @Override
             public Object apply(Object o) {
-                return Osgl.toString2(o);
+                return Osgl.asString2(o);
             }
         };
 

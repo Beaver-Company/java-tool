@@ -254,7 +254,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
          */
         @Override
         public C.Sequence<T> append(T t) {
-            return C.list(t);
+            return C.List(t);
         }
 
         /**
@@ -267,7 +267,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
          */
         @Override
         public C.Sequence<T> prepend(T t) {
-            return C.list(t);
+            return C.List(t);
         }
 
         /**
@@ -547,7 +547,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
 
         @Override
         public C.ReversibleSequence<T> append(T t) {
-            return C.list(t);
+            return C.List(t);
         }
 
         @Override
@@ -557,7 +557,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
 
         @Override
         public C.ReversibleSequence<T> prepend(T t) {
-            return C.list(t);
+            return C.List(t);
         }
 
         @Override
@@ -758,7 +758,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
 
         @Override
         public C.Set<T> onlyIn(Collection<? extends T> col) {
-            return C.set(col);
+            return C.Set(col);
         }
 
         @Override
@@ -773,27 +773,27 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
 
         @Override
         public C.Set<T> with(Collection<? extends T> col) {
-            return C.set(col);
+            return C.Set(col);
         }
 
         @Override
         public C.Set<T> with(T element) {
-            return C.set(element);
+            return C.Set(element);
         }
 
         @Override
-        public C.Set<T> with(T element, T... elements) {
-            return C.set(element, elements);
+        public C.Set<T> with(T... elements) {
+            return C.Set(elements);
         }
 
         @Override
         public C.Set<T> without(T element) {
-            return null;
+            return this;
         }
 
         @Override
-        public C.Set<T> without(T element, T... elements) {
-            return null;
+        public C.Set<T> without(T... elements) {
+            return this;
         }
 
         // Preserves singleton property
@@ -857,28 +857,28 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
 
         @Override
-        public Empty<T> without(T element, T... elements) {
+        public Empty<T> without(T... elements) {
             return this;
         }
 
         @Override
         public C.Set<T> with(Collection<? extends T> col) {
-            return C.set(col);
+            return C.Set(col);
         }
 
         @Override
         public C.Set<T> with(T element) {
-            return C.set(element);
+            return C.Set(element);
         }
 
         @Override
-        public C.Set<T> with(T element, T... elements) {
-            return C.set(element, elements);
+        public C.Set<T> with(T... elements) {
+            return C.Set(elements);
         }
 
         @Override
         public C.Set<T> onlyIn(Collection<? extends T> col) {
-            return C.set(col);
+            return C.Set(col);
         }
 
         @Override
@@ -896,51 +896,5 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
             return (Empty<R>) this;
         }
     }
-//
-//    static class EmptySortedSet<T> extends EmptyReversibleSequence<T> implements C.SortedSet<T>, Serializable {
-//
-//        private static final long serialVersionUID = 8142843931221131271L;
-//
-//        private EmptySortedSet() {
-//        }
-//
-//        private static final EmptySortedSet<?> INSTANCE = new EmptySortedSet();
-//
-//        @Override
-//        @SuppressWarnings("unchecked")
-//        protected EmptySortedSet<T> singleton() {
-//            return (EmptySortedSet<T>) INSTANCE;
-//        }
-//
-//        @Override
-//        public EmptySortedSet<T> accept(_.Function<? super T, ?> visitor) {
-//            return this;
-//        }
-//
-//        @Override
-//        public Comparator<? super T> comparator() {
-//            throw new UnsupportedOperationException();
-//        }
-//
-//        @Override
-//        public SortedSet<T> subSet(T fromElement, T toElement) {
-//            return this;
-//        }
-//
-//        @Override
-//        public SortedSet<T> headSet(T toElement) {
-//            return this;
-//        }
-//
-//        @Override
-//        public SortedSet<T> tailSet(T fromElement) {
-//            return this;
-//        }
-//
-//        // Preserves singleton property
-//        private Object readResolve() {
-//            return INSTANCE;
-//        }
-//    }
 
 }

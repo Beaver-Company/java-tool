@@ -3,14 +3,7 @@ package org.osgl.util;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 23/10/13
- * Time: 9:02 PM
- * To change this template use File | Settings | File Templates.
- */
-public class SingletonListIterator<T> implements ListIterator<T> {
+public class SingletonListIterator<T> extends OsglIteratorBase<T> implements ListIterator<T> {
     private final T t_;
     private volatile boolean consumed_;
 

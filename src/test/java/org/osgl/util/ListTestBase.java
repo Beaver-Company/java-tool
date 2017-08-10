@@ -18,8 +18,8 @@ import java.util.*;
  */
 public abstract class ListTestBase extends ReversibleSeqTestBase {
 
-    protected C.List<Integer> listOf(int... ia) {
-        return C.list(ia);
+    protected C.List<Integer> List(int... ia) {
+        return C.List(ia);
     }
 
     @Override
@@ -152,21 +152,21 @@ public abstract class ListTestBase extends ReversibleSeqTestBase {
         if (!isMutable()) {
             return;
         }
-        l().insert(0, C.listOf(0, 5));
+        l().insert(0, C.List(0, 5));
         eq(seqOf(0, 5, 1, 2, 3, 4, 5), data);
         setUp();
-        l().insert(1, C.listOf(0, 5));
+        l().insert(1, C.List(0, 5));
         eq(seqOf(1, 0, 5, 2, 3, 4, 5), data);
         setUp();
-        l().insert(5, C.listOf(0, 7));
+        l().insert(5, C.List(0, 7));
         eq(seqOf(1, 2, 3, 4, 5, 0, 7), data);
         setUp();
-        l().insert(-1, C.listOf(0, 7));
+        l().insert(-1, C.List(0, 7));
         eq(seqOf(1, 2, 3, 4, 0, 7, 5), data);
 
         setUp();
         try {
-            l().insert(6, C.listOf(0, 3));
+            l().insert(6, C.List(0, 3));
             fail("expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
             // pass
@@ -178,17 +178,17 @@ public abstract class ListTestBase extends ReversibleSeqTestBase {
         if (!isImmutable()) {
             return;
         }
-        C.List<Integer> l = l().insert(0, C.listOf(0, 5));
+        C.List<Integer> l = l().insert(0, C.List(0, 5));
         eq(seqOf(0, 5, 1, 2, 3, 4, 5), l);
-        l = l().insert(1, C.listOf(0, 5));
+        l = l().insert(1, C.List(0, 5));
         eq(seqOf(1, 0, 5, 2, 3, 4, 5), l);
-        l = l().insert(5, C.listOf(0, 7));
+        l = l().insert(5, C.List(0, 7));
         eq(seqOf(1, 2, 3, 4, 5, 0, 7), l);
-        l = l().insert(-1, C.listOf(0, 7));
+        l = l().insert(-1, C.List(0, 7));
         eq(seqOf(1, 2, 3, 4, 0, 7, 5), l);
         yes(l.is(C.Feature.IMMUTABLE));
         try {
-            l().insert(6, C.listOf(0, 3));
+            l().insert(6, C.List(0, 3));
             fail("expected IndexOutOfBoundsException");
         } catch (IndexOutOfBoundsException e) {
             // pass
@@ -300,7 +300,7 @@ public abstract class ListTestBase extends ReversibleSeqTestBase {
 
     @Test
     public void testUniqueByComparator() {
-        C.List<OddEvenElement> l = C.listOf(2, 2, 3, 4, 1, 5).map(OddEvenElement.F.OF_INT);
+        C.List<OddEvenElement> l = C.List(2, 2, 3, 4, 1, 5).map(OddEvenElement.F.OF_INT);
         eq(2, l.unique(new OddEvenElement.Comp()).size());
     }
 

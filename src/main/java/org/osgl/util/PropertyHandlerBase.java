@@ -35,15 +35,15 @@ abstract class PropertyHandlerBase implements PropertyHandler {
 
     @Override
     public void setObjectFactory(Osgl.Function<Class<?>, Object> factory) {
-        this.objectFactory = $.notNull(factory);
+        this.objectFactory = $.ensureNotNull(factory);
     }
 
     @Override
     public void setStringValueResolver(Osgl.Func2<String, Class<?>, ?> stringValueResolver) {
-        this.stringValueResolver = $.notNull(stringValueResolver);
+        this.stringValueResolver = $.ensureNotNull(stringValueResolver);
     }
 
     public void setNullValuePolicy(PropertyGetter.NullValuePolicy nvp) {
-        this.nullValuePolicy = $.notNull(nvp);
+        this.nullValuePolicy = $.ensureNotNull(nvp);
     }
 }

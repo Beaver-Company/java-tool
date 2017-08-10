@@ -96,8 +96,8 @@ public class C_Test extends UtilTestBase {
         return new Bar(id * 2, S.times(name, 2), id, name);
     }
 
-    List<Foo> fooList = C.list(foo(0, "Zero"), foo(1, "One"));
-    List<Bar> barList = C.list(bar(0, "Zero"), bar(1, "One"));
+    List<Foo> fooList = C.List(foo(0, "Zero"), foo(1, "One"));
+    List<Bar> barList = C.List(bar(0, "Zero"), bar(1, "One"));
 
     @Test
     public void testExtract() {
@@ -105,7 +105,7 @@ public class C_Test extends UtilTestBase {
         eq(fooList, fooExtracted);
 
         List<Integer> fooIdList = C.extract(barList, "foo.id");
-        eq(C.list(0, 1), fooIdList);
+        eq(C.List(0, 1), fooIdList);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class C_Test extends UtilTestBase {
         Map<String, Integer> jdkMap = new HashMap<>();
         jdkMap.put("abc", 3);
         jdkMap.put("ab", 2);
-        C.Map<String, Integer> osglMap = C.map(jdkMap);
+        C.Map<String, Integer> osglMap = C.Map(jdkMap);
         eq(3, osglMap.get("abc"));
     }
 

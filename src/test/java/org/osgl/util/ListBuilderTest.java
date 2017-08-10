@@ -202,7 +202,7 @@ public class ListBuilderTest extends UtilTestBase {
     public void testInsert() {
         lb.append(1, 2, 4);
         lb.add(2, 3);
-        eq(lb.toList(), C.list(1, 2, 3, 4));
+        eq(lb.toList(), C.List(1, 2, 3, 4));
     }
 
     @Test(expected = IndexOutOfBoundsException.class)

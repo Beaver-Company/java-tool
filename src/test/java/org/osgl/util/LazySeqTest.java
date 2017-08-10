@@ -31,7 +31,7 @@ public class LazySeqTest extends SequenceTestBase {
 
     @Override
     protected C.Sequence<Integer> prepareData(final int... ia) {
-        return new MyLazySeq<Integer>(Arrays.asList($.asObject(ia)), 0);
+        return new MyLazySeq<>(Arrays.asList($.asWrapped(ia)), 0);
     }
 
     @Override

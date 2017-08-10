@@ -1,6 +1,5 @@
 package org.osgl.util;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgl.TestBase;
@@ -20,7 +19,7 @@ public class IOTest extends TestBase {
     @BeforeClass
     public static void prepareContent() {
         lineNumber = 5 + N.randInt(10);
-        lines = C.newList();
+        lines = C.Mutable.List();
         for (int i = 0; i < lineNumber; ++i) {
             lines.add(S.random());
         }

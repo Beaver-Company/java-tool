@@ -24,8 +24,8 @@ public class KVStore extends HashMap<String, ValueObject> implements KV {
     }
 
     /**
-     * Create a {@code KVStore} with a (String, Object) map
-     * @param values the map in which all entries will be stored into the new KVStore instance
+     * Create a {@code KVStore} with a (String, Object) Map
+     * @param values the Map in which all entries will be stored into the new KVStore instance
      */
     public KVStore(Map<String, Object> values) {
         putValues(values);
@@ -63,9 +63,9 @@ public class KVStore extends HashMap<String, ValueObject> implements KV {
     }
 
     /**
-     * Put a map of (key, value) pair into the store. The value could be any type
+     * Put a Map of (key, value) pair into the store. The value could be any type
      * that supported by {@link ValueObject}
-     * @param kvMap a map of {key, value} pair
+     * @param kvMap a Map of {key, value} pair
      */
     @Override
     public KVStore putValues(Map<String, Object> kvMap) {
@@ -80,11 +80,11 @@ public class KVStore extends HashMap<String, ValueObject> implements KV {
      * `KVStore`. The value in the pair should be the {@link ValueObject#value()}
      * stored in the {@link ValueObject} in this `KVStore`
      *
-     * @return the map of key and raw value stored in this store
+     * @return the Map of key and raw value stored in this store
      */
     @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> map = C.newMap();
+        Map<String, Object> map = C.Mutable.Map();
         for (Map.Entry<String, ValueObject> entry : entrySet()) {
             map.put(entry.getKey(), entry.getValue().value());
         }

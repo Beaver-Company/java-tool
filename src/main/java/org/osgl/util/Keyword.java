@@ -140,7 +140,7 @@ public final class Keyword implements Comparable<Keyword> {
         }
     }
 
-    private C.List<FastStr> list = C.newList();
+    private C.List<FastStr> list = C.Mutable.List();
 
     public Keyword(CharSequence chars) {
         init(chars);

@@ -59,18 +59,25 @@ class ImmutableSet<T> extends DelegatingSet<T> {
         } else if (len == 1) {
             return $.val(data[0]);
         } else {
-            return new ImmutableSet<T>(C.listOf(data));
+            return new ImmutableSet<>(C.List(data));
         }
     }
 
     static <T> C.Set<T> of(Collection<? extends T> data) {
         if (data instanceof C.Set) {
-            C.Set<T> set = (C.Set<T>)data;
-            if (set.is(C.Feature.IMMUTABLE)) {
+            C.Set<T> set = $.cast(data);
+            if (set.is(C.Feature.IMMUTABLE) || set.is(C.Feature.READONLY)) {
                 return set;
             }
         }
-        return new ImmutableSet<T>(data);
+        return new ImmutableSet<>(data);
+    }
+
+    static <T> C.Set<T> of(C.Set<? extends T> set) {
+        if (set.is(C.Feature.IMMUTABLE) || set.is(C.Feature.READONLY)) {
+            return $.cast(set);
+        }
+        return new ImmutableSet<>(set);
     }
 
 }

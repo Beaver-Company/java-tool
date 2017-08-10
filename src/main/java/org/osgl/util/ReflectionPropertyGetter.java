@@ -19,7 +19,7 @@ public class ReflectionPropertyGetter extends ReflectionPropertyHandler implemen
                                     Class entityClass, Method m, Field f,
                                     ReflectionPropertyHandlerFactory factory) {
         super(objectFactory, stringValueResolver, entityClass, m, f);
-        this.factory = $.notNull(factory);
+        this.factory = $.ensureNotNull(factory);
     }
 
     public ReflectionPropertyGetter(Osgl.Function<Class<?>, Object> objectFactory,
@@ -28,13 +28,13 @@ public class ReflectionPropertyGetter extends ReflectionPropertyHandler implemen
                                     Class entityClass, Method m, Field f,
                                     ReflectionPropertyHandlerFactory factory) {
         super(objectFactory, stringValueResolver, nullValuePolicy, entityClass, m, f);
-        this.factory = $.notNull(factory);
+        this.factory = $.ensureNotNull(factory);
     }
 
     public ReflectionPropertyGetter(Class entityClass, Method m, Field f,
                                     ReflectionPropertyHandlerFactory factory) {
         super(entityClass, m, f);
-        this.factory = $.notNull(factory);
+        this.factory = $.ensureNotNull(factory);
     }
 
     public ReflectionPropertyGetter(NullValuePolicy nullValuePolicy,

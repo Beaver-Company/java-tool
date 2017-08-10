@@ -131,7 +131,7 @@ class DelegatingList<T> extends ListBase<T> implements C.List<T>, Serializable {
         if (list instanceof DelegatingList) {
             list = ((DelegatingList<T>)list).data;
         }
-        return new DelegatingList<T>(list, true);
+        return new DelegatingList<>(list, true);
     }
 
     static <T> C.List<T> wrap(java.util.List<T> list, C.Feature f1) {

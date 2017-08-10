@@ -2,14 +2,7 @@ package org.osgl.util;
 
 import java.util.ListIterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 27/10/13
- * Time: 9:13 AM
- * To change this template use File | Settings | File Templates.
- */
-class CompositeListIterator<T> implements ListIterator<T> {
+class CompositeListIterator<T> extends OsglIteratorBase<T> implements ListIterator<T> {
     private final ListIterator<T> left_;
     private final ListIterator<T> right_;
     private boolean leftOver_;

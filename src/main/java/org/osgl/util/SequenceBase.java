@@ -124,7 +124,7 @@ extends TraversableBase<T> implements C.Sequence<T> {
 
     /**
      * Delegate to {@link TraversableBase#findOne(org.osgl.Osgl.Function)}
-     * @param predicate the function map the element to Boolean
+     * @param predicate the function Map the element to Boolean
      * @return {@inheritDoc}
      */
     @Override

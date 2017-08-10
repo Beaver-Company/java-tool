@@ -44,7 +44,7 @@ public class Generics {
      */
     public static List<Type> typeParamImplementations(Class theClass, Class rootClass) {
         if (rootClass.getTypeParameters().length == 0) {
-            return C.list();
+            return C.List();
         }
         try {
             return typeParamImplementations(theClass, rootClass, new ArrayList<Type>());
@@ -174,7 +174,7 @@ public class Generics {
     public static void main(String[] args) {
         Class c = Serializable.class;
         System.out.println(c.getGenericSuperclass());
-        System.out.println($.toString2(c.getGenericInterfaces()));
+        System.out.println($.asString2(c.getGenericInterfaces()));
     }
 
 

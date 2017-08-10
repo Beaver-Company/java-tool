@@ -5,14 +5,7 @@ import org.osgl.$;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 10/11/13
- * Time: 8:07 PM
- * To change this template use File | Settings | File Templates.
- */
-class ZippedIterator<A, B> implements Iterator<$.Binary<A, B>> {
+class ZippedIterator<A, B> extends OsglIteratorBase<$.Binary<A, B>> implements Iterator<$.Binary<A, B>> {
     private Iterator<A> a;
     private Iterator<B> b;
     private $.Option<A> defA = $.none();

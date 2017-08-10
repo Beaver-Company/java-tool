@@ -2,14 +2,7 @@ package org.osgl.util;
 
 import java.util.Iterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 6/10/13
- * Time: 10:37 AM
- * To change this template use File | Settings | File Templates.
- */
-public class DelegatingIterator<T> implements Iterator<T> {
+public class DelegatingIterator<T> extends OsglIteratorBase<T> implements Iterator<T> {
     private final Iterator<? extends T> itr_;
     protected final boolean readOnly;
 

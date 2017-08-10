@@ -840,7 +840,7 @@ implements C.List<T>, RandomAccess, Serializable {
         int size = size();
         if (n < 0) {
             n = -n;
-            if (n >= size) return C.list();
+            if (n >= size) return C.List();
             return take(size - n);
         }
         if (0 == n) {
@@ -1003,15 +1003,23 @@ implements C.List<T>, RandomAccess, Serializable {
         throw new UnsupportedOperationException();
     }
 
+    static FastStr of(char[] chars) {
+        return FastStr.of(chars);
+    }
+
+    static FastStr of(Character[] chars) {
+        return FastStr.of(chars);
+    }
+
     static <T> C.List<T> of(T[] data) {
-        E.NPE(data);
         int len = data.length;
-        if (len == 0) {
-            return Nil.list();
-        } else if (len == 1) {
-            return $.val(data[0]);
-        } else {
-            return new ImmutableList<>(data);
+        switch (len) {
+            case 0:
+                return Nil.list();
+            case 1:
+                return $.val(data[0]);
+            default:
+                return new ImmutableList<>(data);
         }
     }
 
@@ -1133,7 +1141,7 @@ class ImmutableStringList extends ImmutableList<String> implements S.List {
         if (strings instanceof Collection) {
             return of((Collection) strings);
         }
-        return of(C.list(strings));
+        return of(C.List(strings));
     }
 
 

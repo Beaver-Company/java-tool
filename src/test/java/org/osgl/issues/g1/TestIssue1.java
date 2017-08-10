@@ -12,11 +12,11 @@ import java.util.List;
 public class TestIssue1 extends TestBase {
     @Test
     public void test() {
-        List<Foo> foos = C.newList();
+        List<Foo> foos = C.Mutable.List();
         foos.add(new Bar());
         foos.add(new Zee());
 
-        C.List<Foo> l = C.list(foos);
+        C.List<Foo> l = C.List(foos);
         yes(l.size() == 2);
         yes(l.is(C.Feature.READONLY));
     }

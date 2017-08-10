@@ -13,9 +13,9 @@ public class SimpleObjectFactory extends Osgl.F1<Class<?>, Object> {
     @Override
     public Object apply(Class<?> aClass) throws NotAppliedException, Osgl.Break {
         if (List.class.isAssignableFrom(aClass)) {
-            return C.newList();
+            return C.Mutable.List();
         } else if (Map.class.isAssignableFrom(aClass)) {
-            return C.newMap();
+            return C.Mutable.Map();
         }
         return Osgl.newInstance(aClass);
     }

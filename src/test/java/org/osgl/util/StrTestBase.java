@@ -240,7 +240,7 @@ public abstract class StrTestBase<T extends StrBase<T>> extends StrTestUtil<T> {
 
     @Test
     public void testAppendList() {
-        C.List<Character> list = C.list('1', '2');
+        C.List<Character> list = C.List('1', '2');
         T t = abc.append(list);
         ceq("abc12", t);
     }
@@ -274,7 +274,7 @@ public abstract class StrTestBase<T extends StrBase<T>> extends StrTestUtil<T> {
 
     @Test
     public void testPrependCharList() {
-        C.List<Character> list = C.list('1', '2');
+        C.List<Character> list = C.List('1', '2');
         T t = abc.prepend(list);
         ceq("12abc", t);
     }
@@ -412,7 +412,7 @@ public abstract class StrTestBase<T extends StrBase<T>> extends StrTestUtil<T> {
 
         eq(1, 码农码代码戏码农.indexOf("农码代"));
         eq(-1, 码农码代码戏码农.indexOf("码代码", 3));
-        C.List<Character> list = C.list('码', '代', '码');
+        C.List<Character> list = C.List('码', '代', '码');
         eq(2, 码农码代码戏码农.indexOf(list));
         eq(2, 码农码代码戏码农.indexOf(list, 1));
         eq(-1, 码农码代码戏码农.indexOf(list, 3));
@@ -446,7 +446,7 @@ public abstract class StrTestBase<T extends StrBase<T>> extends StrTestUtil<T> {
         eq(1, 码农码代码戏码农.lastIndexOf("农码代"));
         eq(-1, 码农码代码戏码农.lastIndexOf("码代码", 1));
 
-        C.List<Character> list = C.list('码', '农');
+        C.List<Character> list = C.List('码', '农');
         eq(6, 码农码代码戏码农.lastIndexOf(list));
         eq(0, 码农码代码戏码农.lastIndexOf(list, 1));
 

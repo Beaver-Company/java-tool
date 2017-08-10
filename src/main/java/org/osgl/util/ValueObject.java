@@ -33,7 +33,7 @@ public class ValueObject implements Serializable {
         String toJSONString(T o);
     }
 
-    private static Map<Class, Codec> codecRegistry = C.newMap();
+    private static Map<Class, Codec> codecRegistry = C.Mutable.Map();
 
     @SuppressWarnings("unchecked")
     private static enum Type {
@@ -410,7 +410,7 @@ public class ValueObject implements Serializable {
     }
 
     public ValueObject(String s) {
-        sVal = $.notNull(s);
+        sVal = $.ensureNotNull(s);
         type = Type.STRING;
     }
 
@@ -473,7 +473,7 @@ public class ValueObject implements Serializable {
     }
 
     public String stringValue() {
-        return $.notNull(sVal);
+        return $.ensureNotNull(sVal);
     }
 
     public <T extends Enum> T enumValue() {

@@ -91,7 +91,11 @@ public class S {
     }
 
     /**
-     * Determine if a string is all blank or empty or null
+     * Determine if a string is all blank or empty or null.
+     *
+     * The way to determine if a string is all blank is to call
+     * {@link String#trim()} and compare the result with an empty
+     * string
      *
      * @param s the string to be checked
      * @return true if the string is null or empty or all blanks
@@ -390,7 +394,7 @@ public class S {
      * @throws IllegalArgumentException if the separator is empty or `null`
      */
     public static List fastSplit(String string, String separator) {
-        E.illegalArgumentIf(S.isEmpty(separator), "seperator must not be empty string or null");
+        E.illegalArgumentIf(S.isEmpty(separator), "separator must not be empty string or null");
         if (S.isEmpty(string)) {
             return ImmutableStringList.of(EMPTY_ARRAY);
         }
@@ -698,7 +702,7 @@ public class S {
         private $.Tuple<String, String> wrapper;
         private boolean separateFix;
         private _IterableJoiner(Iterable<?> iterable) {
-            this.iterable = $.notNull(iterable);
+            this.iterable = $.ensureNotNull(iterable);
         }
 
         public _IterableJoiner by(String separator) {

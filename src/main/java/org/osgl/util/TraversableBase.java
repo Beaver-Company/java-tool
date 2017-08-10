@@ -32,12 +32,12 @@ TraversableBase<T> extends FeaturedBase implements C.Traversable<T> {
     /**
      * Sub class can override this method to provide more efficient algorithm to
      * generate hash code. The default implementation use
-     * {@link $#iterableHashCode(Iterable)} to generate the hash code
+     * {@link $#hc(Iterable)} to generate the hash code
      *
      * @return hash code of this traversal
      */
     protected int generateHashCode() {
-        return $.iterableHashCode(this);
+        return $.hc(this);
     }
 
 
@@ -144,7 +144,7 @@ TraversableBase<T> extends FeaturedBase implements C.Traversable<T> {
      * an option describing the element. If no element applied to the predicate
      * then {@link $.Option#NONE} is returned
      *
-     * @param predicate the function map element to Boolean
+     * @param predicate the function Map element to Boolean
      * @return an option describing the element match the predicate or none
      *         if no such element found in the traversal
      */

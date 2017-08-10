@@ -47,9 +47,9 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
             return lb.toSet();
         } else {
             if (0 == sz) {
-                return C.newSet();
+                return C.Mutable.Set();
             }
-            C.Set<T> set = C.newSet();
+            C.Set<T> set = C.Mutable.Set();
             forEach($.visitor($.predicate(predicate).ifThen(C.F.addTo(set))));
             return set;
         }
@@ -70,23 +70,23 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
             }
             ListBuilder<R> lb = new ListBuilder<>(sz);
             forEach($.visitor($.f1(mapper).andThen(C.F.addTo(lb))));
-            return C.set(lb.toList());
+            return C.Set(lb.toList());
         } else {
             if (0 == sz) {
-                return C.newSet();
+                return C.Mutable.Set();
             }
-            C.List<R> l = C.newSizedList(sz);
+            C.List<R> l = C.Mutable.sizedList(sz);
             forEach($.visitor($.f1(mapper).andThen(C.F.addTo(l))));
-            return C.set(l);
+            return C.Set(l);
         }
     }
 
     @Override
     public <R> C.Set<R> flatMap($.Function<? super T, ? extends Iterable<? extends R>> mapper) {
-        C.Set<R> set = C.newSet();
+        C.Set<R> set = C.Mutable.Set();
         for (T t : this) {
             Iterable<? extends R> iterable = mapper.apply(t);
-            set.addAll(C.list(iterable));
+            set.addAll(C.List(iterable));
         }
         return set;
     }
@@ -167,7 +167,7 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
 
     @Override
     public C.Set<T> onlyIn(Collection<? extends T> col) {
-        C.Set<T> others = C.newSet(col);
+        C.Set<T> others = C.Mutable.Set(col);
         others.removeAll(this);
         if (isImmutable()) {
             return ImmutableSet.of(others);
@@ -177,7 +177,7 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
 
     @Override
     public C.Set<T> withIn(Collection<? extends T> col) {
-        C.Set<T> others = C.newSet(col);
+        C.Set<T> others = C.Mutable.Set(col);
         others.retainAll(this);
         if (isImmutable()) {
             return ImmutableSet.of(others);
@@ -187,7 +187,7 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
 
     @Override
     public C.Set<T> without(Collection<? super T> col) {
-        C.Set<T> copy = C.newSet(this);
+        C.Set<T> copy = C.Mutable.Set(this);
         copy.removeAll(col);
         if (isImmutable()) {
             return ImmutableSet.of(copy);
@@ -197,7 +197,7 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
 
     @Override
     public C.Set<T> with(Collection<? extends T> col) {
-        C.Set<T> copy = C.newSet(this);
+        C.Set<T> copy = C.Mutable.Set(this);
         copy.addAll(col);
         if (isImmutable()) {
             return ImmutableSet.of(copy);
@@ -207,27 +207,52 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
 
     @Override
     public C.Set<T> with(T element) {
-        C.Set<T> copy = C.newSet(this);
+        if (this.isMutable()) {
+            this.add(element);
+            return this;
+        }
+        C.Set<T> copy = C.Mutable.Set(this);
         copy.add(element);
-        return copy;
+        return C.Set(copy);
     }
 
     @Override
-    public C.Set<T> with(T element, T... elements) {
-        C.Set<T> copy = C.newSet(this);
-        copy.add(element);
-        copy.addAll(C.listOf(elements));
-        return copy;
+    public C.Set<T> with(T... elements) {
+        if (this.isMutable()) {
+            this.addAll(C.List(elements));
+            return this;
+        }
+        C.Set<T> copy = C.Mutable.Set(this);
+        copy.addAll(C.List(elements));
+        return C.Set(copy);
     }
 
     @Override
     public C.Set<T> without(T element) {
-        return null;
+        if (!contains(element)) {
+            return this;
+        }
+        if (this.isMutable()) {
+            this.remove(element);
+            return this;
+        }
+        C.Set<T> copy = C.Mutable.Set(this);
+        copy.remove(element);
+        return C.Set(copy);
     }
 
     @Override
-    public C.Set<T> without(T element, T... elements) {
-        return null;
+    public C.Set<T> without(T... elements) {
+        if (elements.length == 0) {
+            return this;
+        }
+        if (this.isMutable()) {
+            this.removeAll(C.List(elements));
+            return this;
+        }
+        C.Set<T> copy = C.Mutable.Set(this);
+        copy.removeAll(C.List(elements));
+        return C.Set(copy);
     }
 
     // --- Featured methods

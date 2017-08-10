@@ -546,7 +546,7 @@ public class Str extends StrBase<Str> {
         for (int i = 0; i < len; ++i) {
             ssa[i] = of(sa[i]);
         }
-        return C.listOf(ssa);
+        return C.List(ssa);
     }
 
     @Override

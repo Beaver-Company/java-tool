@@ -4,13 +4,6 @@ import org.osgl.$;
 
 import java.util.Iterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 23/10/13
- * Time: 8:51 PM
- * To change this template use File | Settings | File Templates.
- */
 class CompositeIterator<T> extends StatefulIterator<T> {
     private final Iterator<? extends T> left_;
     private final Iterator<? extends T> right_;
