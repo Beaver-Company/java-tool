@@ -176,6 +176,11 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
     }
 
     @Override
+    public C.Set<T> complement(Collection<? extends T> col) {
+        return onlyIn(col);
+    }
+
+    @Override
     public C.Set<T> withIn(Collection<? extends T> col) {
         C.Set<T> others = C.Mutable.Set(col);
         others.retainAll(this);
@@ -186,6 +191,11 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
     }
 
     @Override
+    public C.Set<T> intersection(Collection<? extends T> col) {
+        return withIn(col);
+    }
+
+    @Override
     public C.Set<T> without(Collection<? super T> col) {
         C.Set<T> copy = C.Mutable.Set(this);
         copy.removeAll(col);
@@ -193,6 +203,11 @@ public abstract class SetBase<T> extends AbstractSet<T> implements C.Set<T> {
             return ImmutableSet.of(copy);
         }
         return copy;
+    }
+
+    @Override
+    public C.Set<T> difference(Collection<? super T> col) {
+        return without(col);
     }
 
     @Override

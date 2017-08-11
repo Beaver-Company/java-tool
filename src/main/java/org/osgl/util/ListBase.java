@@ -967,7 +967,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     @Override
     public C.Sequence<T> append(Iterator<? extends T> iterator) {
         if (isLazy()) {
-            return CompositeSeq.of(this, C.seq(iterator));
+            return CompositeSeq.of(this, C.Sequence(iterator));
         }
         return unLazyAppend(iterator);
     }
@@ -1100,7 +1100,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
             return this;
         }
         if (isLazy()) {
-            return CompositeSeq.of(C.seq(iterator), this);
+            return CompositeSeq.of(C.Sequence(iterator), this);
         }
         return unLazyAppend(iterator);
     }
@@ -1108,7 +1108,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     @Override
     public C.Sequence<T> prepend(Enumeration<? extends T> enumeration) {
         if (isLazy()) {
-            return CompositeSeq.of(C.seq(enumeration), this);
+            return CompositeSeq.of(C.Sequence(enumeration), this);
         }
         return unLazyAppend(enumeration);
     }

@@ -323,7 +323,7 @@ public class S {
      * @return the string if it is not blank
      * @throws IllegalArgumentException if the string `s` is blank
      */
-    public static String ensureNotBlank(String s) {
+    public static String assertNotBlank(String s) {
         E.illegalArgumentIf(isBlank(s));
         return s;
     }
@@ -336,7 +336,7 @@ public class S {
      * @return the string if it is not empty
      * @throws IllegalArgumentException if the string `s` is empty
      */
-    public static String ensureNotEmpty(String s) {
+    public static String assertNotEmpty(String s) {
         E.illegalArgumentIf(isEmpty(s));
         return s;
     }
@@ -745,7 +745,7 @@ public class S {
         private $.Tuple<String, String> wrapper;
         private boolean separateFix;
         private _IterableJoiner(Iterable<?> iterable) {
-            this.iterable = $.ensureNotNull(iterable);
+            this.iterable = $.assertNotNull(iterable);
         }
 
         public _IterableJoiner by(String separator) {
@@ -1022,7 +1022,7 @@ public class S {
     public static class _StripStringState {
         private String toBeStripped;
         private _StripStringState(String s) {
-            toBeStripped = S.ensureNotEmpty(s);
+            toBeStripped = S.assertNotEmpty(s);
         }
         public String of(String wrapper) {
             return stripOf(toBeStripped, wrapper, wrapper);

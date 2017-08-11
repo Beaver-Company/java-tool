@@ -2141,7 +2141,7 @@ public class C {
             private K key;
 
             private _Builder(K key) {
-                this.key = $.ensureNotNull(key);
+                this.key = $.assertNotNull(key);
             }
 
             public <BV> Map<K, BV> to(V val) {
@@ -2479,8 +2479,7 @@ public class C {
         Set<T> forEach($.Visitor<? super T> visitor);
 
         /**
-         * Returns a set contains all elements in the {@code col}
-         * collection specified but not in this set
+         * Alias of {@link #complement(Collection)}
          *
          * @param col the collection in which elements should
          *            be included from the result set
@@ -2490,8 +2489,17 @@ public class C {
         Set<T> onlyIn(Collection<? extends T> col);
 
         /**
-         * Returns a set contains only elements in both {@code col}
-         * collection specified and this set
+         * Returns a set contains all elements in the {@code col}
+         * collection specified but not in this set
+         *
+         * @param col the collection in which elements should
+         *            be included from the result set
+         * @return a set contains elements only in the col
+         */
+        Set<T> complement(Collection<? extends T> col);
+
+        /**
+         * Alias of {@link #intersection(Collection)}
          *
          * @param col the collection in which elements should
          *            be included from the result set
@@ -2499,6 +2507,25 @@ public class C {
          */
         Set<T> withIn(Collection<? extends T> col);
 
+        /**
+         * Returns a set contains only elements in both {@code col}
+         * collection specified and this set
+         *
+         * @param col the collection in which elements should
+         *            be included from the result set
+         * @return a set contains elements in both col and this set
+         */
+        Set<T> intersection(Collection<? extends T> col);
+
+
+        /**
+         * Alias of {@link #difference(Collection)}
+         *
+         * @param col the collection in which elements should
+         *            be excluded from the result set
+         * @return a set contains elements only in this set
+         */
+        Set<T> without(Collection<? super T> col);
 
         /**
          * Returns a set contains all elements in this set and not in
@@ -2508,7 +2535,7 @@ public class C {
          *            be excluded from the result set
          * @return a set contains elements only in this set
          */
-        Set<T> without(Collection<? super T> col);
+        Set<T> difference(Collection<? super T> col);
 
         /**
          * Returns a set contains all elements in this set and all
@@ -3401,18 +3428,18 @@ public class C {
      * @return the sequence
      */
     @SuppressWarnings("unchecked")
-    public static <T> Sequence<T> seq(Iterable<? extends T> iterable) {
+    public static <T> Sequence<T> Sequence(Iterable<? extends T> iterable) {
         if (iterable instanceof Sequence) {
             return ((Sequence<T>) iterable);
         }
         return IterableSeq.of(iterable);
     }
 
-    public static <T> Sequence<T> seq(Iterator<? extends T> iterator) {
+    public static <T> Sequence<T> Sequence(Iterator<? extends T> iterator) {
         return IteratorSeq.of(iterator);
     }
 
-    public static <T> Sequence<T> seq(Enumeration<? extends T> enumeration) {
+    public static <T> Sequence<T> Sequence(Enumeration<? extends T> enumeration) {
         return IteratorSeq.of(new EnumerationIterator<T>(enumeration));
     }
 

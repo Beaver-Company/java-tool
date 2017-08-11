@@ -9,16 +9,16 @@ class MapPropertyHandler extends PropertyHandlerBase {
     protected final Class<?> valType;
 
     public MapPropertyHandler(Class<?> keyType, Class<?> valType) {
-        this.keyType = $.ensureNotNull(keyType);
-        this.valType = $.ensureNotNull(valType);
+        this.keyType = $.assertNotNull(keyType);
+        this.valType = $.assertNotNull(valType);
     }
 
     public MapPropertyHandler(PropertyGetter.NullValuePolicy nullValuePolicy,
                               Class<?> keyType,
                               Class<?> valType) {
         super(nullValuePolicy);
-        this.keyType = $.ensureNotNull(keyType);
-        this.valType = $.ensureNotNull(valType);
+        this.keyType = $.assertNotNull(keyType);
+        this.valType = $.assertNotNull(valType);
     }
 
     public MapPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
@@ -26,8 +26,8 @@ class MapPropertyHandler extends PropertyHandlerBase {
                               Class<?> keyType,
                               Class<?> valType) {
         super(objectFactory, stringValueResolver);
-        this.keyType = $.ensureNotNull(keyType);
-        this.valType = $.ensureNotNull(valType);
+        this.keyType = $.assertNotNull(keyType);
+        this.valType = $.assertNotNull(valType);
     }
 
     public MapPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
@@ -36,8 +36,8 @@ class MapPropertyHandler extends PropertyHandlerBase {
                               Class<?> keyType,
                               Class<?> valType) {
         super(objectFactory, stringValueResolver, nullValuePolicy);
-        this.keyType = $.ensureNotNull(keyType);
-        this.valType = $.ensureNotNull(valType);
+        this.keyType = $.assertNotNull(keyType);
+        this.valType = $.assertNotNull(valType);
     }
 
     protected Object keyFrom(Object index) {

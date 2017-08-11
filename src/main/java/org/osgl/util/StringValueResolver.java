@@ -26,7 +26,7 @@ public abstract class StringValueResolver<T> extends $.F1<String, T> {
     }
 
     protected StringValueResolver(Class<T> targetType) {
-        this.targetType = $.ensureNotNull(targetType);
+        this.targetType = $.assertNotNull(targetType);
     }
 
     public abstract T resolve(String value);

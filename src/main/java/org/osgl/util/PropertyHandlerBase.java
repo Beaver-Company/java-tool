@@ -35,15 +35,15 @@ abstract class PropertyHandlerBase implements PropertyHandler {
 
     @Override
     public void setObjectFactory(Lang.Function<Class<?>, Object> factory) {
-        this.objectFactory = $.ensureNotNull(factory);
+        this.objectFactory = $.assertNotNull(factory);
     }
 
     @Override
     public void setStringValueResolver(Lang.Func2<String, Class<?>, ?> stringValueResolver) {
-        this.stringValueResolver = $.ensureNotNull(stringValueResolver);
+        this.stringValueResolver = $.assertNotNull(stringValueResolver);
     }
 
     public void setNullValuePolicy(PropertyGetter.NullValuePolicy nvp) {
-        this.nullValuePolicy = $.ensureNotNull(nvp);
+        this.nullValuePolicy = $.assertNotNull(nvp);
     }
 }

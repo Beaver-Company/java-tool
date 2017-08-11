@@ -1,27 +1,94 @@
 package org.osgl.util.converter;
 
 import org.osgl.$;
+import org.osgl.util.C;
+import org.osgl.util.E;
+import org.osgl.util.N;
 
-import java.util.*;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class TypeConverterRegistry {
 
+    private static final Map<Class, Object> NULL_VALS = C.Map(
+            boolean.class, false,
+            char.class, '\0',
+            byte.class, 0,
+            short.class, 0,
+            int.class, 0,
+            float.class, 0,
+            long.class, 0,
+            double.class, 0
+    );
+
+    public static final $.TypeConverter<Void, Object> NULL_CONVERTER = new $.TypeConverter<Void, Object>(Void.class, Object.class) {
+        @Override
+        public Object convert(Void aVoid) {
+            return null;
+        }
+    };
+
     public static final TypeConverterRegistry INSTANCE = new TypeConverterRegistry();
 
-    private SortedMap<$.Pair<Class, Class>, $.TypeConverter> paths = new TreeMap<>();
+    private Map<$.Pair<Class, Class>, $.TypeConverter> paths = new HashMap<>();
+
+    public TypeConverterRegistry() {
+        registerBuiltInConverters();
+    }
 
     public <FROM, TO> $.TypeConverter<FROM, TO> get(Class<FROM> fromType, Class<TO> toType) {
-        return $.cast(paths.get($.Pair(fromType, toType)));
+        $.TypeConverter<FROM, TO> converter = $.cast(paths.get($.Pair(fromType, toType)));
+        if (null == converter && Void.class == fromType) {
+            return $.cast(NULL_CONVERTER);
+        }
+        return converter;
     }
 
     public TypeConverterRegistry register($.TypeConverter typeConverter) {
         for ($.Pair<Class, Class> key : allKeyOf(typeConverter)) {
             if (!paths.containsKey(key)) {
-                paths.put(key, typeConverter);
+                addIntoPath(key, typeConverter);
             }
         }
         buildPaths(typeConverter);
         return this;
+    }
+
+    private void registerBuiltInConverters() {
+        for (Class<? extends Number> numberClass: N.NUMBER_CLASSES) {
+            addIntoPath(keyOf(numberClass, Number.class), new $.TypeConverter(numberClass, Number.class) {
+                @Override
+                public Object convert(Object o) {
+                    return o;
+                }
+            });
+        }
+        for (Field field : $.TypeConverter.class.getFields()) {
+            if ($.TypeConverter.class.isAssignableFrom(field.getType())) {
+                try {
+                    $.TypeConverter converter = $.cast(field.get(null));
+                    register(converter);
+                } catch (IllegalAccessException e) {
+                    throw E.unexpected(e);
+                }
+            }
+        }
+        for (final Map.Entry<Class, Object> nullValEntry : NULL_VALS.entrySet()) {
+            register(new $.TypeConverter<Void, Object>(Void.class, nullValEntry.getKey()) {
+                @Override
+                public Object convert(Void aVoid) {
+                    return nullValEntry.getValue();
+                }
+            });
+        }
+        register(NULL_CONVERTER);
+    }
+
+    private $.Pair<Class, Class> keyOf(Class<?> from, Class<?> to) {
+        return $.cast($.Pair(from, to));
     }
 
     private $.Pair<Class, Class> keyOf($.TypeConverter typeConverter) {
@@ -35,32 +102,46 @@ public class TypeConverterRegistry {
         do {
             set.add($.Pair(fromType, toType));
             toType = toType.getSuperclass();
-        } while (Object.class != toType);
-        Class objectClass = Object.class;
-        set.add($.Pair(fromType, objectClass));
+        } while (Object.class != toType && null != toType);
         return set;
     }
 
     private void buildPaths($.TypeConverter typeConverter) {
         Class fromType = typeConverter.fromType;
-        for ($.TypeConverter upstream : upstreams(fromType)) {
+        Set<$.TypeConverter> upstreams = upstreams(fromType);
+        for ($.TypeConverter upstream : upstreams) {
             $.TypeConverter chained = new ChainedConverter(upstream, typeConverter);
             $.Pair<Class, Class> key = keyOf(chained);
-            $.TypeConverter current = paths.get(chained);
-            if (isShorterPath(chained, current)) {
-                paths.put(key, chained);
+            $.TypeConverter current = paths.get(key);
+            if (null == current || isShorterPath(chained, current)) {
+                if (typeConverter.fromType.isAssignableFrom(upstream.fromType)){
+                    addIntoPath(key, typeConverter);
+                } else {
+                    addIntoPath(key, chained);
+                }
             }
         }
     }
 
-    private List<$.TypeConverter> upstreams(Class toType) {
-        List<$.TypeConverter> list = new ArrayList<>();
+    private Set<$.TypeConverter> upstreams(Class toType) {
+        Set<$.TypeConverter> set = new HashSet<>();
         for (Map.Entry<$.Pair<Class, Class>, $.TypeConverter> entry : paths.entrySet()) {
             if (toType.isAssignableFrom(entry.getKey().right())) {
-                list.add(entry.getValue());
+                set.add(entry.getValue());
             }
         }
-        return list;
+        return set;
+    }
+
+    private void addIntoPath($.Pair<Class, Class> key, $.TypeConverter converter) {
+        paths.put(key, converter);
+        Class<?> toType = key.right();
+        if (Number.class.isAssignableFrom(toType)) {
+            Class<?> primitiveToType = $.primitiveTypeOf(toType);
+            if (null != primitiveToType && toType != primitiveToType) {
+                addIntoPath(key.set2(primitiveToType), converter);
+            }
+        }
     }
 
 

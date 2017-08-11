@@ -331,7 +331,7 @@ implements C.List<T>, RandomAccess, Serializable {
     @Override
     public C.Sequence<T> append(Iterator<? extends T> iterator) {
         if (isLazy()) {
-            return CompositeSeq.of(this, C.seq(iterator));
+            return CompositeSeq.of(this, C.Sequence(iterator));
         }
         ListBuilder<T> lb = new ListBuilder<T>(size() * 2);
         lb.append(this).append(iterator);
@@ -341,7 +341,7 @@ implements C.List<T>, RandomAccess, Serializable {
     @Override
     public C.Sequence<T> append(Enumeration<? extends T> enumeration) {
         if (isLazy()) {
-            return CompositeSeq.of(this, C.seq(enumeration));
+            return CompositeSeq.of(this, C.Sequence(enumeration));
         }
         ListBuilder<T> lb = new ListBuilder<T>(size() * 2);
         lb.append(this).append(enumeration);

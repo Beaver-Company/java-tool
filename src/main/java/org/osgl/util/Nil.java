@@ -369,7 +369,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
             if (!iterable.iterator().hasNext()) {
                 return this;
             }
-            return C.seq(iterable);
+            return C.Sequence(iterable);
         }
 
         @Override
@@ -377,7 +377,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
             if (!iterator.hasNext()) {
                 return this;
             }
-            return C.seq(iterator);
+            return C.Sequence(iterator);
         }
 
         @Override
@@ -385,17 +385,17 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
             if (!enumeration.hasMoreElements()) {
                 return this;
             }
-            return C.seq(enumeration);
+            return C.Sequence(enumeration);
         }
 
         @Override
         public C.Sequence<T> append(Iterator<? extends T> iterator) {
-            return C.seq(iterator);
+            return C.Sequence(iterator);
         }
 
         @Override
         public C.Sequence<T> append(Enumeration<? extends T> enumeration) {
-            return C.seq(enumeration);
+            return C.Sequence(enumeration);
         }
 
         // Preserves singleton property
@@ -762,12 +762,27 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
 
         @Override
+        public C.Set<T> complement(Collection<? extends T> col) {
+            return C.Set(col);
+        }
+
+        @Override
         public C.Set<T> withIn(Collection<? extends T> col) {
             return this;
         }
 
         @Override
+        public C.Set<T> intersection(Collection<? extends T> col) {
+            return this;
+        }
+
+        @Override
         public C.Set<T> without(Collection<? super T> col) {
+            return this;
+        }
+
+        @Override
+        public C.Set<T> difference(Collection<? super T> col) {
             return this;
         }
 
@@ -852,6 +867,11 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
 
         @Override
+        public C.Set<T> difference(Collection<? super T> col) {
+            return this;
+        }
+
+        @Override
         public Empty<T> without(T element) {
             return this;
         }
@@ -882,7 +902,17 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
 
         @Override
+        public C.Set<T> complement(Collection<? extends T> col) {
+            return C.Set(col);
+        }
+
+        @Override
         public Empty<T> withIn(Collection<? extends T> col) {
+            return this;
+        }
+
+        @Override
+        public C.Set<T> intersection(Collection<? extends T> col) {
             return this;
         }
 

@@ -11,6 +11,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -2586,24 +2589,78 @@ public class Lang implements Serializable {
      * @param <FROM> the generic type of input
      * @param <TO>   the generic type of output
      */
+    @SuppressWarnings("unused")
     public static abstract class TypeConverter<FROM, TO> extends Transformer<FROM, TO> {
 
-        public final Class<FROM> fromType;
-        public final Class<TO> toType;
+        public static final Object HINT_CASE_INSENSITIVE = new Object();
+
+        public Class<FROM> fromType;
+        public Class<TO> toType;
 
         public TypeConverter(Class<FROM> fromType, Class<TO> toType) {
             this.fromType = fromType;
             this.toType = toType;
         }
 
-        @Override
-        public final TO transform(FROM from) {
-            return null;
+        protected TypeConverter() {
+            exploreTypes();
         }
 
+        private void exploreTypes() {
+            List<Type> types = Generics.typeParamImplementations(getClass(), TypeConverter.class);
+            int sz = types.size();
+            E.illegalArgumentIf(sz < 2, "expected at least two type parameters");
+            fromType = Generics.classOf(types.get(0));
+            toType = Generics.classOf(types.get(1));
+        }
+
+
+        @Override
+        public final TO transform(FROM from) {
+            return convert(from);
+        }
+
+        @Override
+        public String toString() {
+            return fromType + " -> " + toType;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            TypeConverter<?, ?> that = (TypeConverter<?, ?>) o;
+
+            if (fromType != null ? !fromType.equals(that.fromType) : that.fromType != null) return false;
+            return toType != null ? toType.equals(that.toType) : that.toType == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = fromType != null ? fromType.hashCode() : 0;
+            result = 31 * result + (toType != null ? toType.hashCode() : 0);
+            return result;
+        }
+
+        /**
+         * Convert value into `TO` type
+         * @param from the from value
+         * @return the converted value
+         */
         public abstract TO convert(FROM from);
 
-        public static TypeConverter<?, String> ANY_TO_STRING = new TypeConverter<Object, String>(Object.class, String.class) {
+        /**
+         * Convert value into `TO` type with hint
+         * @param from the from value
+         * @param hint the convert hint (e.g. date format)
+         * @return the converted value
+         */
+        public TO convert(FROM from, Object hint) {
+            return convert(from);
+        }
+
+        public static TypeConverter<Object, String> ANY_TO_STRING = new TypeConverter<Object, String>(Object.class, String.class) {
             @Override
             public String convert(Object o) {
                 return S.string(o);
@@ -2666,27 +2723,295 @@ public class Lang implements Serializable {
             }
         };
 
-        public static <ENUM extends Enum> TypeConverter<String, ENUM> stringToEnum(final Class<ENUM> enumClass) {
+        public static TypeConverter<String, BigInteger> STRING_TO_BIG_INT = new TypeConverter<String, BigInteger>(String.class, BigInteger.class) {
+            @Override
+            public BigInteger convert(String s) {
+                return new BigInteger(s);
+            }
+        };
+
+        public static TypeConverter<String, BigDecimal> STRING_TO_BIG_DEC = new TypeConverter<String, BigDecimal>(String.class, BigDecimal.class) {
+            @Override
+            public BigDecimal convert(String s) {
+                return new BigDecimal(s);
+            }
+        };
+
+        public static TypeConverter<String, Date> STRING_TO_DATE = new TypeConverter<String, Date>(String.class, Date.class) {
+            private SimpleDateFormat format = new SimpleDateFormat();
+            @Override
+            public Date convert(String s) {
+                return convert(s, format);
+            }
+
+            @Override
+            public Date convert(String s, Object hint) {
+                if (null == hint) {
+                    return convert(s);
+                }
+                SimpleDateFormat format = new SimpleDateFormat(hint.toString());
+                return convert(s, format);
+            }
+
+            private Date convert(String s, DateFormat format) {
+                try {
+                    return format.parse(s);
+                } catch (ParseException e) {
+                    throw E.unexpected(e);
+                }
+            }
+        };
+
+        public static TypeConverter<Date, String> DATE_TO_STRING = new TypeConverter<Date, String>(Date.class, String.class) {
+            private SimpleDateFormat format = new SimpleDateFormat();
+            @Override
+            public String convert(Date date) {
+                return convert(date, format);
+            }
+
+            @Override
+            public String convert(Date date, Object hint) {
+                if (null == hint) {
+                    return convert(date);
+                }
+                SimpleDateFormat format = new SimpleDateFormat(hint.toString());
+                return convert(date, format);
+            }
+
+            private String convert(Date date, DateFormat format) {
+                return format.format(date);
+            }
+        };
+
+        public static <ENUM extends Enum<ENUM>> TypeConverter<String, ENUM> stringToEnum(final Class<ENUM> enumClass) {
             return new TypeConverter<String, ENUM>(String.class, enumClass) {
                 @Override
                 public ENUM convert(String s) {
                     return Enum.valueOf(enumClass, s);
                 }
+
+                @Override
+                public ENUM convert(String s, Object hint) {
+                    if (HINT_CASE_INSENSITIVE != hint) {
+                        return convert(s);
+                    }
+                    Enum[] enums = enumClass.getEnumConstants();
+                    for (Enum e : enums) {
+                        if (e.name().equalsIgnoreCase(s)) {
+                            return (ENUM)e;
+                        }
+                    }
+                    throw new IllegalArgumentException("No enum constant " + enumClass.getCanonicalName() + "." + s);
+                }
             };
         }
+
+        public static TypeConverter<Number, Byte> NUM_TO_BYTE = new TypeConverter<Number, Byte>(Number.class, Byte.class) {
+            @Override
+            public Byte convert(Number number) {
+                return number.byteValue();
+            }
+        };
+
+        public static TypeConverter<Number, Short> NUM_TO_SHORT = new TypeConverter<Number, Short>(Number.class, Short.class) {
+            @Override
+            public Short convert(Number number) {
+                return number.shortValue();
+            }
+        };
+
+        public static TypeConverter<Number, Integer> NUM_TO_INT = new TypeConverter<Number, Integer>(Number.class, Integer.class) {
+            @Override
+            public Integer convert(Number number) {
+                return number.intValue();
+            }
+        };
+
+        public static TypeConverter<Number, Float> NUM_TO_FLOAT = new TypeConverter<Number, Float>(Number.class, Float.class) {
+            @Override
+            public Float convert(Number number) {
+                return number.floatValue();
+            }
+        };
+
+        public static TypeConverter<Number, Long> NUM_TO_LONG = new TypeConverter<Number, Long>(Number.class, Long.class) {
+            @Override
+            public Long convert(Number number) {
+                return number.longValue();
+            }
+        };
+
+        public static TypeConverter<Number, Double> NUM_TO_DOUBLE = new TypeConverter<Number, Double>(Number.class, Double.class) {
+            @Override
+            public Double convert(Number number) {
+                return number.doubleValue();
+            }
+        };
+
+        public static TypeConverter<Number, BigInteger> NUM_TO_BIG_INT = new TypeConverter<Number, BigInteger>(Number.class, BigInteger.class) {
+            @Override
+            public BigInteger convert(Number number) {
+                if (number instanceof BigInteger) {
+                    return (BigInteger) number;
+                }
+                if (number instanceof BigDecimal) {
+                    return ((BigDecimal) number).toBigInteger();
+                }
+                return BigInteger.valueOf(number.longValue());
+            }
+        };
+
+        public static TypeConverter<Number, BigDecimal> NUM_TO_BIG_DEC = new TypeConverter<Number, BigDecimal>(Number.class, BigDecimal.class) {
+            @Override
+            public BigDecimal convert(Number number) {
+                if (number instanceof BigDecimal) {
+                    return (BigDecimal) number;
+                }
+                if (number instanceof BigInteger) {
+                    return new BigDecimal((BigInteger) number);
+                }
+                return BigDecimal.valueOf(number.doubleValue());
+            }
+        };
     }
 
     public static class _ConvertStage<FROM> {
         private FROM from;
+        private Object defVal;
+        private Object hint;
+        private Class<?> fromType;
+
         private _ConvertStage(FROM from) {
-            this.from = ensureNotNull(from);
+            this.from = from;
+            this.fromType = null == from ? Void.class : from.getClass();
+        }
+
+        public _ConvertStage defaultTo(Object defVal) {
+            this.defVal = assertNotNull(defVal);
+            return this;
+        }
+
+        public _ConvertStage hint(Object hint) {
+            this.hint = assertNotNull(hint);
+            return this;
+        }
+
+        public _ConvertStage caseInsensitivie() {
+            return hint(TypeConverter.HINT_CASE_INSENSITIVE);
         }
 
         public <TO> TO to(Class<TO> toType) {
-            TypeConverter<FROM, TO> converter = $.cast(TypeConverterRegistry.INSTANCE.get(from.getClass(), toType));
-            E.unexpectedIf(null == converter, "Unable to find converter from %s to %s", from.getClass(), toType);
-            return converter.convert(from);
+            if (fromType == toType || toType.isAssignableFrom(fromType)) {
+                return $.cast(from);
+            }
+            if (null == from && null != defVal) {
+                return (TO) defVal;
+            }
+            TypeConverterRegistry registry = TypeConverterRegistry.INSTANCE;
+            if (Enum.class.isAssignableFrom(toType)) {
+                $.TypeConverter<String, Enum> enumConverter = TypeConverter.stringToEnum((Class<Enum>)toType);
+                return (TO) enumConverter.convert(TypeConverter.ANY_TO_STRING.convert(from), hint);
+            }
+            TypeConverter<FROM, TO> converter = $.cast(registry.get(fromType, toType));
+            if (null == converter) {
+                if (null != defVal) {
+                    return (TO)defVal;
+                } else {
+                    throw new IllegalArgumentException(S.fmt("Unable to find converter from %s to %s", fromType, toType));
+                }
+            }
+            TO to = null == hint ? converter.convert(from) : converter.convert(from, hint);
+            return null == to ? (TO)defVal : to;
         }
+
+        public boolean toBool() {
+            return to(boolean.class);
+        }
+
+        public boolean toBooleanPrimitive() {
+            return toBool();
+        }
+
+        public Boolean toBoolean() {
+            return to(Boolean.class);
+        }
+
+        public char toChar() {
+            return to(char.class);
+        }
+
+        public char toCharacterPrimitive() {
+            return toChar();
+        }
+
+        public Character toCharacter() {
+            return to(Character.class);
+        }
+
+        public byte toBytePrimitive() {
+            return to(byte.class);
+        }
+
+        public Byte toByte() {
+            return to(Byte.class);
+        }
+
+        public short toShortPrimitive() {
+            return to(short.class);
+        }
+
+        public Short toShort() {
+            return to(Short.class);
+        }
+
+        public int toInt() {
+            return to(int.class);
+        }
+
+        public int toIntegerPrimitive() {
+            return toInt();
+        }
+
+        public Integer toInteger() {
+            return to(Integer.class);
+        }
+
+        public float toFloatPrimitive() {
+            return to(float.class);
+        }
+
+        public Float toFloat() {
+            return to(Float.class);
+        }
+
+        public long toLongPrimitive() {
+            return to(long.class);
+        }
+
+        public Long toLong() {
+            return to(Long.class);
+        }
+
+        public double toDoublePrimitive() {
+            return to(double.class);
+        }
+
+        public Double toDouble() {
+            return to(Double.class);
+        }
+
+        public Date toDate() {
+            return to(Date.class);
+        }
+
+        public String toString() {
+            return to(String.class);
+        }
+
+    }
+
+    public static <FROM> _ConvertStage<FROM> convert(FROM from) {
+        return new _ConvertStage(from);
     }
 
     @SuppressWarnings("unused")
@@ -3995,6 +4320,11 @@ public class Lang implements Serializable {
         }
 
         @Override
+        public C.Set<T> difference(Collection<? super T> col) {
+            return without(col);
+        }
+
+        @Override
         public C.ListOrSet<T> without(T element) {
             if (Lang.eq(v, element)) return C.empty();
             return this;
@@ -4017,6 +4347,11 @@ public class Lang implements Serializable {
                 set.remove(v);
             }
             return set;
+        }
+
+        @Override
+        public C.Set<T> complement(Collection<? extends T> col) {
+            return onlyIn(col);
         }
 
         @Override
@@ -4245,6 +4580,11 @@ public class Lang implements Serializable {
         @Override
         public C.Set<T> withIn(Collection<? extends T> col) {
             return col.contains(v) ? this : C.<T>Set();
+        }
+
+        @Override
+        public C.Set<T> intersection(Collection<? extends T> col) {
+            return withIn(col);
         }
 
         public Var<T> update(Function<T, T> changer) {
@@ -5524,7 +5864,7 @@ public class Lang implements Serializable {
      * @param <T> the generic type of the object
      * @return the object passed in if it is not null
      */
-    public static <T> T ensureNotNull(T o) {
+    public static <T> T assertNotNull(T o) {
         E.NPE(o);
         return o;
     }
@@ -5556,7 +5896,7 @@ public class Lang implements Serializable {
         return obj;
     }
 
-    private static Map<Object, Class> __primitiveTypes = new HashMap<Object, Class>();
+    private static Map<Object, Class> __primitiveTypes = new HashMap<>();
 
     static {
         __primitiveTypes.put("int", int.class);
@@ -5614,8 +5954,8 @@ public class Lang implements Serializable {
         __primitiveInstances.put(double.class, 0d);
     }
 
-    private static Map<Class, Class> __primitiveToWrappers = new HashMap<Class, Class>();
-    private static Map<Class, Class> __wrapperToPrmitives = new HashMap<Class, Class>();
+    private static Map<Class, Class> __primitiveToWrappers = new HashMap<>();
+    private static Map<Class, Class> __wrapperToPrmitives = new HashMap<>();
 
     static {
         __primitiveToWrappers.put(int.class, Integer.class);

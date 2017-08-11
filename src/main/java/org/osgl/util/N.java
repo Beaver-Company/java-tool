@@ -7,10 +7,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The namespace under which number relevant structures, functions and logics are
@@ -21,7 +20,7 @@ public class N {
     N() {
     }
 
-    public static enum Type {
+    public enum Type {
         BYTE(1) {
             @Override
             Number add(Number a, Number b) {
@@ -952,6 +951,20 @@ public class N {
             return new Num(Integer.parseInt(s));
         }
     }
+
+    public static final List<Class<? extends Number>> NUMBER_CLASSES = $.cast(C.List(
+            Byte.class,
+            Short.class,
+            Integer.class,
+            Float.class,
+            Long.class,
+            Double.class,
+            AtomicInteger.class,
+            AtomicLong.class,
+            BigInteger.class,
+            BigDecimal.class,
+            Num.class
+    ));
 
     public final static class F {
 

@@ -183,7 +183,7 @@ extends TraversableBase<T> implements C.Sequence<T> {
 
     @Override
     public C.Sequence<T> append(Iterable<? extends T> iterable) {
-        return append(C.seq(iterable));
+        return append(C.Sequence(iterable));
     }
 
     @Override
@@ -199,7 +199,7 @@ extends TraversableBase<T> implements C.Sequence<T> {
         if (!iterator.hasNext()) {
             return this;
         }
-        return CompositeSeq.of(this, C.seq(iterator));
+        return CompositeSeq.of(this, C.Sequence(iterator));
     }
 
     @Override
@@ -207,7 +207,7 @@ extends TraversableBase<T> implements C.Sequence<T> {
         if (!enumeration.hasMoreElements()) {
             return this;
         }
-        return CompositeSeq.of(this, C.seq(enumeration));
+        return CompositeSeq.of(this, C.Sequence(enumeration));
     }
 
     @Override
@@ -220,7 +220,7 @@ extends TraversableBase<T> implements C.Sequence<T> {
         if (!iterable.iterator().hasNext()) {
             return this;
         }
-        return prepend(C.seq(iterable));
+        return prepend(C.Sequence(iterable));
     }
 
     @Override
@@ -228,7 +228,7 @@ extends TraversableBase<T> implements C.Sequence<T> {
         if (!iterator.hasNext()) {
             return this;
         }
-        return prepend(C.seq(iterator));
+        return prepend(C.Sequence(iterator));
     }
 
     @Override
@@ -236,7 +236,7 @@ extends TraversableBase<T> implements C.Sequence<T> {
         if (!enumeration.hasMoreElements()) {
             return this;
         }
-        return prepend(C.seq(enumeration));
+        return prepend(C.Sequence(enumeration));
     }
 
     @Override

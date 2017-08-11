@@ -9,7 +9,7 @@ class EnumerationIterator<T> extends IteratorBase<T> implements Iterator<T> {
     private Enumeration<? extends T> e;
 
     EnumerationIterator(Enumeration<? extends T> enumeration) {
-        e = $.ensureNotNull(enumeration);
+        e = $.assertNotNull(enumeration);
     }
 
     @Override

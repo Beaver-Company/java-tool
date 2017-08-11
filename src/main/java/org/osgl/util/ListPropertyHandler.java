@@ -8,19 +8,19 @@ class ListPropertyHandler extends PropertyHandlerBase {
     protected final Class<?> itemType;
 
     ListPropertyHandler(Class<?> itemType) {
-        this.itemType = $.ensureNotNull(itemType);
+        this.itemType = $.assertNotNull(itemType);
     }
 
     ListPropertyHandler(PropertyGetter.NullValuePolicy nullValuePolicy, Class<?> itemType) {
         super(nullValuePolicy);
-        this.itemType = $.ensureNotNull(itemType);
+        this.itemType = $.assertNotNull(itemType);
     }
 
     ListPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
                         Lang.Func2<String, Class<?>, ?> stringValueResolver,
                         Class<?> itemType) {
         super(objectFactory, stringValueResolver);
-        this.itemType = $.ensureNotNull(itemType);
+        this.itemType = $.assertNotNull(itemType);
     }
 
     ListPropertyHandler(Lang.Function<Class<?>, Object> objectFactory,
@@ -28,7 +28,7 @@ class ListPropertyHandler extends PropertyHandlerBase {
                         PropertyGetter.NullValuePolicy nullValuePolicy,
                         Class<?> itemType) {
         super(objectFactory, stringValueResolver, nullValuePolicy);
-        this.itemType = $.ensureNotNull(itemType);
+        this.itemType = $.assertNotNull(itemType);
     }
 
 }
