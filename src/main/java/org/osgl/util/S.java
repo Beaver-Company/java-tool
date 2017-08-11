@@ -591,6 +591,12 @@ public class S {
         public boolean integer() {
             return N.isInt(s);
         }
+        public boolean wrappedWith(String left, String right) {
+            return s.length() >= (left.length() + right.length()) && s.startsWith(left) && s.endsWith(right);
+        }
+        public boolean wrappedWith($.Tuple<String, String> wrapper) {
+            return wrappedWith(wrapper.left(), wrapper.right());
+        }
     }
 
     public static _Is is(Object content) {
@@ -630,6 +636,22 @@ public class S {
         public String endWith(char suffix) {
             return ensureEndsWith(s, suffix);
         }
+
+        public String wrappedWith(String left, String right) {
+            return ensureWrappedWith(s, left, right);
+        }
+
+        public String wrappedWith($.Tuple<String, String> wrapper) {
+            return ensureWrappedWith(s, wrapper);
+        }
+
+        public String strippedOff(String left, String right) {
+            return ensureStrippedOff(s, left, right);
+        }
+
+        public String strippedOff($.Tuple<String, String> wrapper) {
+            return ensureStrippedOff(s, wrapper);
+        }
     }
 
     public static _Ensure ensure(Object object) {
@@ -650,6 +672,36 @@ public class S {
 
     public static String ensureEndsWith(String string, char suffix) {
         return endsWith(string, suffix) ? string : newSizedBuffer(string.length() + 1).append(string).append(suffix).toString();
+    }
+
+    public static String ensureWrappedWith(String string, String left, String right) {
+        String retVal = string(string);
+        if (!retVal.startsWith(left)) {
+            retVal = left + retVal;
+        }
+        if (!retVal.endsWith(right)) {
+            retVal = retVal + right;
+        }
+        return retVal;
+    }
+
+    public static String ensureWrappedWith(String string, $.Tuple<String, String> wrapper) {
+        return ensureWrappedWith(string, wrapper.left(), wrapper.right());
+    }
+
+    public static String ensureStrippedOff(String string, String left, String right) {
+        String retVal = string(string);
+        if (retVal.startsWith(left)) {
+            retVal = retVal.substring(left.length());
+        }
+        if (retVal.endsWith(right)) {
+            retVal = retVal.substring(0, retVal.length() - right.length());
+        }
+        return retVal;
+    }
+
+    public static String ensureStrippedOff(String string, $.Tuple<String, String> wrapper) {
+        return ensureStrippedOff(string, wrapper.left(), wrapper.right());
     }
 
     public static String pathConcat(String prefix, char sep, String suffix) {

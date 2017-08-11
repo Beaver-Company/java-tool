@@ -5728,43 +5728,105 @@ public class Lang implements Serializable {
         System.err.println(S.fmt(msg, args));
     }
 
+    /**
+     * Alias of {@link #assertNotNull(Object, Object)}
+     *
+     * @param t1 the first candidate
+     * @param def1 the second candidate
+     * @param <T> the return result type
+     * @return the result as described above
+     */
     public static <T> T ifNullThen(T t1, T def1) {
-        return ensureGet(t1, def1);
+        return assertNotNull(t1, def1);
     }
 
-    public static <T> T ensureGet(T t1, T def1) {
+    /**
+     * Return `t1` if it is not null otherwise return `def1`
+     *
+     * This function will make sure non-null value returned or it
+     * will throw out {@link NullPointerException} if the last
+     * value is still null
+     *
+     * @param t1 the first candidate
+     * @param def1 the second candidate
+     * @param <T> the return result type
+     * @return the result as described above
+     */
+    public static <T> T assertNotNull(T t1, T def1) {
         if (null != t1) {
             return t1;
         }
-        E.NPE(def1);
-        return def1;
+        return assertNotNull(def1);
     }
 
+    /**
+     * Alias of {@link #assertNotNull(Object, Lang.F0)}
+     * @param t1 the first candidate
+     * @param def1 the function that when called will return the second candidate
+     * @param <T> the return result type
+     * @return the result as described above
+     */
     public static <T> T ifNullThen(T t1, F0<T> def1) {
-        return ensureGet(t1, def1);
+        return assertNotNull(t1, def1);
     }
 
-    public static <T> T ensureGet(T t1, F0<T> def1) {
-        if (null != t1) {
-            return t1;
-        }
-        t1 = def1.apply();
-        E.NPE(t1);
-        return t1;
+    /**
+     * Return `t1` if it is not null otherwise return result of `def1` function call
+     *
+     * This function will make sure non-null value returned or it
+     * will throw out {@link NullPointerException} if the last
+     * value is still null
+     *
+     * @param t1 the first candidate
+     * @param def1 the function that when called will return the second candidate
+     * @param <T> the return result type
+     * @return the result as described above
+     */
+    public static <T> T assertNotNull(T t1, F0<T> def1) {
+        return (null == t1) ? assertNotNull(def1.apply()) : t1;
     }
 
-    public static <T> T ensureGet(T t1, T def1, T def2) {
+    /**
+     * Return `t1` if it is not null otherwise check on `def1`, if
+     * `def1` is null then return `def2`
+     *
+     * This function will make sure non-null value returned or it
+     * will throw out {@link NullPointerException} if the last
+     * value is still null
+     *
+     * @param t1 the first candidate
+     * @param def1 the second candidate
+     * @param def2 the third candidate
+     * @param <T> the return result type
+     * @return the result as described above
+     */
+    public static <T> T assertNotNull(T t1, T def1, T def2) {
         if (null != t1) {
             return t1;
         }
         if (null != def1) {
             return def1;
         }
-        E.npeIf(null == def2);
-        return def2;
+        return assertNotNull(def2);
     }
 
-    public static <T> T ensureGet(T t1, T def1, T def2, T def3) {
+    /**
+     * Return `t1` if it is not null otherwise check on `def1`, if
+     * `def1` is null then check on `def2`, if `def2` is null then
+     * return `def3`
+     *
+     * This function will make sure non-null value returned or it
+     * will throw out {@link NullPointerException} if the last
+     * value is still null
+     *
+     * @param t1 the first candidate
+     * @param def1 the second candidate
+     * @param def2 the third candidate
+     * @param def3 the forth candidate
+     * @param <T> the return result type
+     * @return the result as described above
+     */
+    public static <T> T assertNotNull(T t1, T def1, T def2, T def3) {
         if (null != t1) {
             return t1;
         }
@@ -5774,11 +5836,24 @@ public class Lang implements Serializable {
         if (null != def2) {
             return def2;
         }
-        E.npeIf(null == def3);
-        return def2;
+        return assertNotNull(def3);
     }
 
-    public static <T> T ensureGet(T t1, List<T> defs) {
+    /**
+     * Return `t1` if it is not null otherwise check the supplied
+     * default value list one by one and return the first element
+     * that is not null
+     *
+     * This function will make sure non-null value returned or it
+     * will throw out {@link NullPointerException} if the last
+     * value is still null
+     *
+     * @param t1 the first candidate
+     * @param defs the candidate list
+     * @param <T> the return result type
+     * @return the result as described above
+     */
+    public static <T> T assertNotNull(T t1, List<T> defs) {
         if (null != t1) {
             return t1;
         }
@@ -5790,6 +5865,14 @@ public class Lang implements Serializable {
         throw new NullPointerException();
     }
 
+    /**
+     * Apply function for `n` times with initial value specified
+     * @param func the function
+     * @param initVal the initial value
+     * @param n the times to apply the function, must be positive integer
+     * @param <T> the return value type
+     * @return the result of the function calls
+     */
     public static <T> T times(Function<T, T> func, T initVal, int n) {
         if (n < 0) {
             throw E.invalidArg("the number of times must not be negative");
@@ -5804,29 +5887,88 @@ public class Lang implements Serializable {
         return retVal;
     }
 
-    public static <T> Meta<T> meta(T t) {
-        return new Meta<T>(t);
+    public static _IsClass is(Object t) {
+        return new _IsClass(t);
     }
 
-    // ---
-    public static class Meta<T> {
-        private T o;
+    public static _IsClass is(Class<?> c) {
+        return new _IsClass(c);
+    }
 
-        public Meta(T obj) {
-            E.NPE(obj);
-            o = obj;
+    public static _IsReflectMember is(Member member) {
+        return new _IsReflectMember(member);
+    }
+
+    public static class _IsModifier {
+        private int m;
+        protected _IsModifier(int modifiers) {
+            m = modifiers;
+        }
+        public boolean static_() {
+            return Modifier.isStatic(m);
         }
 
-        public boolean is(Class<?> clz) {
-            return clz.isAssignableFrom(o.getClass());
+        public boolean interface_() {
+            return Modifier.isInterface(m);
         }
 
-        public boolean isNot(Class<?> clz) {
-            return !is(clz);
+        public boolean public_() {
+            return Modifier.isPublic(m);
+        }
+
+        public boolean abstract_() {
+            return Modifier.isAbstract(m);
+        }
+    }
+
+    public static class _IsReflectMember extends _IsModifier {
+        public _IsReflectMember(Member member) {
+            super(member.getModifiers());
+        }
+    }
+
+    public static class _IsClass extends _IsModifier {
+        private Class<?> c;
+
+        public _IsClass(Object obj) {
+            this((obj instanceof Class ? (Class)obj : obj.getClass()));
+        }
+
+        public _IsClass(Class<?> clazz) {
+            super(clazz.getModifiers());
+            c = clazz;
+        }
+
+        public boolean instanceOf(Class<?> clz) {
+            return clz.isAssignableFrom(c);
+        }
+
+        public boolean notInstanceOf(Class<?> clz) {
+            return !instanceOf(clz);
         }
 
         public boolean kindOf(Object object) {
-            return is(object.getClass());
+            return instanceOf(object.getClass());
+        }
+
+        public boolean array() {
+            return c.isArray();
+        }
+
+        public boolean iterable() {
+            return instanceOf(Iterable.class);
+        }
+
+        public boolean collection() {
+            return instanceOf(Collection.class);
+        }
+
+        public boolean list() {
+            return instanceOf(List.class);
+        }
+
+        public boolean set() {
+            return instanceOf(Set.class);
         }
 
     }

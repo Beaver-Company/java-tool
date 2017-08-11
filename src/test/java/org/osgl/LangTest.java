@@ -7,9 +7,7 @@ import org.osgl.util.converter.TypeConverterRegistry;
 
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class LangTest extends TestBase {
 
@@ -170,6 +168,21 @@ public class LangTest extends TestBase {
         TypeConverterRegistry.INSTANCE.register(new MyConverter());
         String id = S.random();
         eq(new MyTo(id), $.convert(new MyFrom(id)).to(MyTo.class));
+    }
+
+    @Test
+    public void testIs() {
+        List<String> list = new ArrayList<>(C.List("a", "b", "c"));
+        yes($.is(list).list());
+        no($.is(list).set());
+        no($.is(list).array());
+        no($.is(list).instanceOf(LinkedList.class));
+        yes($.is(list).public_());
+        yes($.is(List.class).abstract_());
+        yes($.is(List.class).interface_());
+
+        List<Integer> list2 = new ArrayList<>();
+        yes($.is(list2).kindOf(list));
     }
 
 }

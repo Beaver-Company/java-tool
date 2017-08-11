@@ -224,4 +224,21 @@ public class STest extends UtilTestBase {
         s = "/" + content + "/";
         eq(content, S.strip(s).of("/"));
     }
+
+    @Test
+    public void testIs() {
+        no(S.is("abc").blank());
+        yes(S.is("").empty());
+        no(S.is(" ").empty());
+        yes(S.is(" ").blank());
+        yes(S.is("[abc]").startWith("["));
+        no(S.is("[abc]").endWith(".json"));
+        yes(S.is("[abc]").wrappedWith("[", "]"));
+        yes(S.is("[abc]").wrappedWith(S.SQUARE_BRACKETS));
+    }
+
+    @Test
+    public void testEnsure() {
+        S.ensure("abc").endWith()
+    }
 }
