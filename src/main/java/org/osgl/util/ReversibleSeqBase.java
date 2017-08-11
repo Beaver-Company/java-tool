@@ -125,7 +125,7 @@ abstract class ReversibleSeqBase<T> extends SequenceBase<T> implements C.Reversi
 
     @Override
     public <R> C.ReversibleSequence<R> flatMap($.Function<? super T, ? extends Iterable<? extends R>> mapper) {
-        return FlatMappedRSeq.of(this, mapper);
+        return FlatMappedReversibleSeq.of(this, mapper);
     }
 
     @Override

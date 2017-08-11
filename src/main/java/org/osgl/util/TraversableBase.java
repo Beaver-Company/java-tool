@@ -150,12 +150,7 @@ TraversableBase<T> extends FeaturedBase implements C.Traversable<T> {
      */
     @Override
     public $.Option<T> findOne($.Function<? super T, Boolean> predicate) {
-        for (T t : this) {
-            if (predicate.apply(t)) {
-                return $.some(t);
-            }
-        }
-        return $.none();
+        return C.findOne(this, predicate);
     }
 
     @Override
@@ -186,6 +181,11 @@ TraversableBase<T> extends FeaturedBase implements C.Traversable<T> {
     @Override
     public <R> C.Traversable<R> map($.Function<? super T, ? extends R> mapper) {
         return MappedTrav.of(this, mapper);
+    }
+
+    @Override
+    public <R> C.Traversable<R> extract(String property) {
+        return $.cast(map($.F.extractor(property)));
     }
 
     @Override

@@ -4,18 +4,11 @@ import org.osgl.$;
 
 import java.util.Iterator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 9/11/13
- * Time: 5:20 PM
- * To change this template use File | Settings | File Templates.
- */
-class FlatMappedRSeq<T, R> extends ReversibleSeqBase<R> {
+class FlatMappedReversibleSeq<T, R> extends ReversibleSeqBase<R> {
     private C.ReversibleSequence<? extends T> data;
     private $.F1<? super T, ? extends Iterable<? extends R>> mapper;
 
-    FlatMappedRSeq(C.ReversibleSequence<? extends T> rseq, $.Function<? super T, ? extends Iterable<? extends R>> mapper) {
+    FlatMappedReversibleSeq(C.ReversibleSequence<? extends T> rseq, $.Function<? super T, ? extends Iterable<? extends R>> mapper) {
         E.NPE(rseq, mapper);
         this.data = rseq;
         this.mapper = $.f1(mapper);
@@ -38,6 +31,6 @@ class FlatMappedRSeq<T, R> extends ReversibleSeqBase<R> {
 
     static <T, R> C.ReversibleSequence<R>
     of(C.ReversibleSequence<? extends T> data, $.Function<? super T, ? extends Iterable<? extends R>> mapper) {
-        return new FlatMappedRSeq<T, R>(data, mapper);
+        return new FlatMappedReversibleSeq<T, R>(data, mapper);
     }
 }

@@ -641,12 +641,20 @@ public class S {
             return ensureWrappedWith(s, left, right);
         }
 
+        public String wrappedWith(String wrapper) {
+            return ensureWrappedWith(s, wrapper, wrapper);
+        }
+
         public String wrappedWith($.Tuple<String, String> wrapper) {
             return ensureWrappedWith(s, wrapper);
         }
 
         public String strippedOff(String left, String right) {
             return ensureStrippedOff(s, left, right);
+        }
+
+        public String strippedOff(String wrapper) {
+            return ensureStrippedOff(s, wrapper, wrapper);
         }
 
         public String strippedOff($.Tuple<String, String> wrapper) {

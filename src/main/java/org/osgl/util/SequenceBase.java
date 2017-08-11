@@ -259,6 +259,11 @@ extends TraversableBase<T> implements C.Sequence<T> {
     }
 
     @Override
+    public <R> C.Sequence<R> extract(String property) {
+        return C.lazyExtract(this, property);
+    }
+
+    @Override
     public <R> C.Sequence<R> map($.Function<? super T, ? extends R> mapper) {
         return MappedSeq.of(this, mapper);
     }

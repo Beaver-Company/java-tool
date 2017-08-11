@@ -3,7 +3,7 @@ package org.osgl.util;
 import java.io.Serializable;
 import java.util.*;
 
-class DelegatingSet<T> extends SetBase<T> implements C.Set<T>, Serializable {
+class DelegatingSet<T> extends SetBase<T> implements Serializable {
 
     protected Set<T> data;
 

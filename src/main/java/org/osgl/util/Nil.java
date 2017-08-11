@@ -31,14 +31,17 @@ import java.util.*;
  */
 abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Collection<T>, Serializable {
 
+    private static final long serialVersionUID = -5058901899659394002L;
+
     public static final EmptySequence SEQUENCE = EmptySequence.INSTANCE;
     public static final EmptyReversibleSequence REVERSIBLE_SEQUENCE = EmptyReversibleSequence.INSTANCE;
     public static final EmptyRange RANGE = EmptyRange.INSTANCE;
     public static final EmptyList LIST = EmptyList.INSTANCE;
     public static final Empty EMPTY = Empty.INSTANCE;
-    private static final long serialVersionUID = -5058901899659394002L;
-    public static EmptySet SET = EmptySet.INSTANCE;
+    public static final EmptySet SET = EmptySet.INSTANCE;
     public static final C.Map EMPTY_MAP = new C.Map(true);
+    public static final Object[] EMPTY_OBJECT_ARRAY = $.EMPTY_OBJECT_ARRAY;
+    public static final String[] EMPTY_STRING_ARRAY = S.EMPTY_ARRAY;
 
     //    public static final EmptySet SET = EmptySet.INSTANCE;
 //
@@ -186,6 +189,11 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
     @Override
     public Nil<T> filter($.Function<? super T, Boolean> predicate) {
         return this;
+    }
+
+    @Override
+    public <R> C.Sequence<R> extract(String property) {
+        return Nil.list();
     }
 
     @Override
@@ -696,6 +704,94 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
             return $.T2(empty, empty);
         }
 
+        @Override
+        public C.List<T> filter(Lang.Function<? super T, Boolean> predicate) {
+            return Nil.list();
+        }
+
+        @Override
+        public <R> C.List<R> extract(String property) {
+            return Nil.list();
+        }
+
+        @Override
+        public C.List<T> dropWhile(Lang.Function<? super T, Boolean> predicate) {
+            return Nil.list();
+        }
+
+        @Override
+        public C.List<T> drop(int n) {
+            return this;
+        }
+
+        @Override
+        public C.List<T> tail(int n) {
+            return this;
+        }
+
+        @Override
+        public C.List<T> tail() {
+            return this;
+        }
+
+        @Override
+        public C.List<T> take(int n) {
+            return this;
+        }
+
+        @Override
+        protected void forEachLeft(Lang.Visitor<? super T> visitor) throws Lang.Break {
+        }
+
+        @Override
+        protected void forEachRight(Lang.Visitor<? super T> visitor) throws Lang.Break {
+        }
+
+        @Override
+        public Lang.Option<T> findOne(Lang.Function<? super T, Boolean> predicate) {
+            return Lang.Option.none();
+        }
+
+        @Override
+        public T head() throws NoSuchElementException {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public T last() throws NoSuchElementException {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public int size() throws UnsupportedOperationException {
+            return 0;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return false;
+        }
+
+        @Override
+        public Object[] toArray() {
+            return EMPTY_OBJECT_ARRAY;
+        }
+
+        @Override
+        public <T1> T1[] toArray(T1[] a) {
+            return a;
+        }
+
+        @Override
+        public <R> C.List<R> map(Lang.Function<? super T, ? extends R> mapper) {
+            return Nil.list();
+        }
+
+        @Override
+        public <R> C.List<R> flatMap(Lang.Function<? super T, ? extends Iterable<? extends R>> mapper) {
+            return Nil.list();
+        }
+
         // Preserves singleton property
         private Object readResolve() {
             return INSTANCE;
@@ -717,7 +813,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
     }
 
-    static class EmptySet<T> extends ImmutableSet<T> implements C.Set<T>, Serializable {
+    static class EmptySet<T> extends ImmutableSet<T> {
 
         private static final long serialVersionUID = 4142843931316831861L;
         private static final EmptySet<?> INSTANCE = new EmptySet();
@@ -811,6 +907,36 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
             return this;
         }
 
+        @Override
+        public Object[] toArray() {
+            return $.EMPTY_OBJECT_ARRAY;
+        }
+
+        @Override
+        public <R> R reduce(R identity, Lang.Func2<R, T, R> accumulator) {
+            return identity;
+        }
+
+        @Override
+        public C.Set<T> filter(Lang.Function<? super T, Boolean> predicate) {
+            return this;
+        }
+
+        @Override
+        public <R> C.List<R> map(Lang.Function<? super T, ? extends R> mapper) {
+            return Nil.list();
+        }
+
+        @Override
+        public <R> C.List<R> flatMap(Lang.Function<? super T, ? extends Iterable<? extends R>> mapper) {
+            return Nil.list();
+        }
+
+        @Override
+        public <R> C.List<R> extract(String property) {
+            return Nil.list();
+        }
+
         // Preserves singleton property
         private Object readResolve() {
             return INSTANCE;
@@ -867,7 +993,7 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
 
         @Override
-        public C.Set<T> difference(Collection<? super T> col) {
+        public Empty<T> difference(Collection<? super T> col) {
             return this;
         }
 
@@ -912,19 +1038,55 @@ abstract class Nil<T> extends SequenceBase<T> implements C.Traversable<T>, Colle
         }
 
         @Override
-        public C.Set<T> intersection(Collection<? extends T> col) {
+        public Empty<T> intersection(Collection<? extends T> col) {
             return this;
         }
 
         @Override
         public <R> Empty<R> map($.Function<? super T, ? extends R> mapper) {
-            return (Empty<R>) this;
+            return Nil.empty();
         }
 
         @Override
         public <R> Empty<R> flatMap($.Function<? super T, ? extends Iterable<? extends R>> mapper) {
-            return (Empty<R>) this;
+            return Nil.empty();
         }
+
+        @Override
+        protected <T1> Empty<T1> singleton() {
+            return INSTANCE;
+        }
+
+        @Override
+        public <R> Empty<R> extract(String property) {
+            return empty();
+        }
+
+        @Override
+        public Empty<T> dropWhile(Lang.Function<? super T, Boolean> predicate) {
+            return this;
+        }
+
+        @Override
+        public Empty<T> drop(int n) {
+            return this;
+        }
+
+        @Override
+        public Empty<T> tail(int n) {
+            return this;
+        }
+
+        @Override
+        public Empty<T> tail() {
+            return this;
+        }
+
+        @Override
+        public Empty<T> take(int n) {
+            return this;
+        }
+
     }
 
 }

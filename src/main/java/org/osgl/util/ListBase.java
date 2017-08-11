@@ -30,13 +30,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     }
 
     protected void forEachLeft($.Visitor<? super T> visitor) throws $.Break {
-        for (T t : this) {
-            try {
-                visitor.apply(t);
-            } catch (NotAppliedException e) {
-                // ignore
-            }
-        }
+        C.forEach(iterator(), visitor);
     }
 
     protected void forEachLeft($.IndexedVisitor<Integer, ? super T> indexedVisitor) throws $.Break {
@@ -50,14 +44,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     }
 
     protected void forEachRight($.Visitor<? super T> visitor) throws $.Break {
-        Iterator<T> itr = reverseIterator();
-        while (itr.hasNext()) {
-            try {
-                visitor.apply(itr.next());
-            } catch (NotAppliedException e) {
-                // ignore
-            }
-        }
+        C.forEach(reverseIterator(), visitor);
     }
 
     protected void forEachRight($.IndexedVisitor<Integer, ? super T> indexedVisitor) throws $.Break {
@@ -278,35 +265,22 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
 
     @Override
     public boolean allMatch($.Function<? super T, Boolean> predicate) {
-        return !anyMatch($.F.negate(predicate));
+        return C.allMatch(this, predicate);
     }
 
     @Override
     public boolean anyMatch($.Function<? super T, Boolean> predicate) {
-        return findOne(predicate).isDefined();
+        return C.anyMatch(this, predicate);
     }
 
     @Override
     public boolean noneMatch($.Function<? super T, Boolean> predicate) {
-        return !anyMatch(predicate);
+        return C.noneMatch(this, predicate);
     }
 
     @Override
     public $.Option<T> findOne(final $.Function<? super T, Boolean> predicate) {
-        try {
-            forEach(new $.Visitor<T>() {
-                @Override
-                public void visit(T t) throws $.Break {
-                    if (predicate.apply(t)) {
-                        throw new $.Break(t);
-                    }
-                }
-            });
-            return $.none();
-        } catch ($.Break b) {
-            T t = b.get();
-            return $.some(t);
-        }
+        return C.findOne(this, predicate);
     }
 
     // --- eof Traversal methods
@@ -522,6 +496,11 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     }
 
     @Override
+    public <R> C.List<R> extract(String property) {
+        return C.extract(this, property);
+    }
+
+    @Override
     public <R> C.List<R> flatMap($.Function<? super T, ? extends Iterable<? extends R>> mapper
     ) {
         boolean immutable = isImmutable();
@@ -553,7 +532,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
             if (0 == sz) {
                 return Nil.list();
             }
-            ListBuilder<T> lb = new ListBuilder<T>(sz);
+            ListBuilder<T> lb = new ListBuilder<>(sz);
             forEach($.visitor($.predicate(predicate).ifThen(C.F.addTo(lb))));
             return lb.toList();
         } else {
@@ -850,7 +829,7 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
     public C.List<T> tail() {
         int sz = size();
         if (0 == sz) {
-            throw new UnsupportedOperationException();
+            return this;
         }
         if (isImmutable()) {
             return subList(1, sz);
@@ -1191,21 +1170,12 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
 
     @Override
     public <R> R reduceLeft(R identity, $.Func2<R, T, R> accumulator) {
-        R ret = identity;
-        for (T t : this) {
-            ret = accumulator.apply(ret, t);
-        }
-        return ret;
+        return C.reduce(iterator(), identity, accumulator);
     }
 
     @Override
     public <R> R reduceRight(R identity, $.Func2<R, T, R> accumulator) {
-        R ret = identity;
-        Iterator<T> i = reverseIterator();
-        while (i.hasNext()) {
-            ret = accumulator.apply(ret, i.next());
-        }
-        return ret;
+        return C.reduce(reverseIterator(), identity, accumulator);
     }
 
     @Override
@@ -1213,25 +1183,14 @@ public abstract class ListBase<T> extends AbstractList<T> implements C.List<T> {
         return reduceLeft(accumulator);
     }
 
-    private $.Option<T> reduceIterator(Iterator<T> itr, $.Func2<T, T, T> accumulator) {
-        if (!itr.hasNext()) {
-            return $.none();
-        }
-        T ret = itr.next();
-        while (itr.hasNext()) {
-            ret = accumulator.apply(ret, itr.next());
-        }
-        return $.some(ret);
-    }
-
     @Override
     public $.Option<T> reduceLeft($.Func2<T, T, T> accumulator) {
-        return reduceIterator(iterator(), accumulator);
+        return C.reduce(iterator(), accumulator);
     }
 
     @Override
     public $.Option<T> reduceRight($.Func2<T, T, T> accumulator) {
-        return reduceIterator(reverseIterator(), accumulator);
+        return C.reduce(reverseIterator(), accumulator);
     }
 
     private $.Option<T> findIterator(Iterator<T> itr, $.Function<? super T, Boolean> predicate) {

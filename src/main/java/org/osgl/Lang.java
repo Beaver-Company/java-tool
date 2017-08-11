@@ -7995,6 +7995,8 @@ public class Lang implements Serializable {
     public static final boolean IS_64 = VM.IS_64;
     public static final OS OS = org.osgl.util.OS.get();
 
+    public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+
     /**
      * The namespace to aggregate predefined core functions
      */
@@ -9451,6 +9453,16 @@ public class Lang implements Serializable {
                 }
             };
         }
+
+        public static <PROPERTY> $.Transformer<Object, PROPERTY> extractor(final String property) {
+            return new $.Transformer<Object, PROPERTY>() {
+                @Override
+                public PROPERTY transform(Object element) {
+                    return (PROPERTY) $.getProperty(element, property);
+                }
+            };
+        }
+
     }
 
 }

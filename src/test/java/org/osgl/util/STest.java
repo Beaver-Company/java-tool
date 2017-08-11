@@ -1,6 +1,7 @@
 package org.osgl.util;
 
 import org.junit.Test;
+import org.osgl.$;
 
 public class STest extends UtilTestBase {
     @Test
@@ -239,6 +240,13 @@ public class STest extends UtilTestBase {
 
     @Test
     public void testEnsure() {
-        S.ensure("abc").endWith()
+        eq("[abc]", S.ensure("abc").wrappedWith(S.SQUARE_BRACKETS));
+        eq("(xyz)", S.ensure("xyz").wrappedWith(S.PARENTHESES));
+        eq("(xyz)", S.ensure("xyz").wrappedWith($.Pair("(", ")")));
+        eq("|abc|", S.ensure("abc").wrappedWith("|"));
+        eq("[abc]", S.ensure("[abc").wrappedWith(S.SQUARE_BRACKETS));
+        eq("(xyz)", S.ensure("xyz)").wrappedWith(S.PARENTHESES));
+        eq("|abc|", S.ensure("|abc|").wrappedWith("|"));
+        eq("abc.json", S.ensure("abc").endWith(".json"));
     }
 }

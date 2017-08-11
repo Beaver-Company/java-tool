@@ -65,10 +65,10 @@ public abstract class SequenceTestBase extends TraversableTestBase {
         eq(seqOf(2, 3), data().tail());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test
     public void testEmptyTail() {
         data = prepareEmptyData();
-        data().tail();
+        eq(data, data().tail());
     }
 
     @Test
@@ -170,12 +170,6 @@ public abstract class SequenceTestBase extends TraversableTestBase {
     public void testAcceptLeft() {
         data = prepareData(1, 2, 3, 4, 5);
         $.Var<Integer> var = $.var(0);
-//        data().acceptLeft(new _.Visitor<Integer>() {
-//            @Override
-//            public void visit(Integer integer) throws _.Break {
-//                bag[0] = bag[0] + integer;
-//            }
-//        });
         data().acceptLeft($.visitor(var.f.updater(N.F.addTwo(Integer.class))));
         eq(5 * 6 / 2, var.get());
     }

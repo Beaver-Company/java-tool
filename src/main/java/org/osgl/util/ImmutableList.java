@@ -836,7 +836,7 @@ implements C.List<T>, RandomAccess, Serializable {
     }
 
     @Override
-    public C.List<T> drop(int n) throws IndexOutOfBoundsException {
+    public C.List<T> drop(int n) {
         int size = size();
         if (n < 0) {
             n = -n;
@@ -868,7 +868,7 @@ implements C.List<T>, RandomAccess, Serializable {
     public C.List<T> tail() {
         int sz = size();
         if (sz == 0) {
-            throw new UnsupportedOperationException();
+            return this;
         }
         return subList(1, sz);
     }

@@ -207,6 +207,24 @@ public class C {
         <R> Traversable<R> map($.Function<? super T, ? extends R> mapper);
 
         /**
+         * Extract property from elements in the traversable and return an new traversable
+         * consists of the extracted properties.
+         *
+         * The property specification is an extended Java bean property, examples:
+         *
+         * ```
+         * username
+         * address.street
+         * order.product.id
+         * ```
+         *
+         * @param property the property specification
+         * @param <R> the type of the property value
+         * @return a new traversable as described above
+         */
+        <R> Traversable<R> extract(String property);
+
+        /**
          * Returns a traversable consisting of the results of replacing each element of this
          * stream with the contents of the iterable produced by applying the provided mapping
          * function to each element. If the result of the mapping function is {@code null},
@@ -429,13 +447,14 @@ public class C {
         /**
          * Returns the rest part of the {@code Sequence} except the first element
          *
+         * If the sequence is empty then return the sequence itself
+         *
          * @return a {@code Sequence} without the first element
-         * @throws UnsupportedOperationException if the {@code Sequence} is empty
          * @see #head()
          * @see ReversibleSequence#tail(int)
          * @since 0.2
          */
-        Sequence<T> tail() throws UnsupportedOperationException;
+        Sequence<T> tail();
 
         /**
          * Returns a {@code Sequence} consisting the first {@code n} elements from this {@code Sequence} if
@@ -496,15 +515,14 @@ public class C {
          *     assertEquals(C.list(1, 2, 3, 4, 5), seq.drop(0));
          *     assertEquals(C.list(), seq.drop(100));
          * </pre>
-         * <p>Note this method does NOT modify the current sequence, instead it returns an new sequence structure
-         * containing the elements as required</p>
+         * <p>Note this method does NOT modify the current sequence, instead it returns an new sequence structure containing the elements as required</p>
          *
          * @param n specify the number of elements to be taken from the head of this {@code Sequence}
          *          must not less than 0
          * @return a {@code Sequence} consisting of the elements of this {@code Sequence} except the first {@code n} ones
          * @since 0.2
          */
-        Sequence<T> drop(int n) throws IllegalArgumentException;
+        Sequence<T> drop(int n) ;
 
         /**
          * Returns a {@code Sequence} consisting of the elements from this sequence with leading elements
@@ -2478,6 +2496,8 @@ public class C {
         @Override
         Set<T> forEach($.Visitor<? super T> visitor);
 
+        // - Set calculation
+
         /**
          * Alias of {@link #complement(Collection)}
          *
@@ -2582,6 +2602,8 @@ public class C {
          * @return a set without the element specified
          */
         Set<T> without(T... elements);
+
+        // - eof Set calculation
 
     }
 
@@ -3409,6 +3431,21 @@ public class C {
     }
 
     /**
+     * Returns a List from given iterable. If the iterable is of List type
+     * already then return the iterable directly. Otherwise create an
+     * immutable list from the iterable
+     * @param iterable the iterable
+     * @param <T> the iterable element type
+     * @return a List instance as described above
+     */
+    public static <T> List<T> toList(Iterable<? extends T> iterable) {
+        if (iterable instanceof List) {
+            return $.cast(iterable);
+        }
+        return List(iterable);
+    }
+
+    /**
      * Returns a single element immutable List
      * @param t the element
      * @param <T> the generic type of the element
@@ -3443,31 +3480,15 @@ public class C {
         return IteratorSeq.of(new EnumerationIterator<T>(enumeration));
     }
 
-
-    public static <PROPERTY> C.List<PROPERTY> extract(java.util.Collection<?> collection, final String propertyPath) {
-        if (collection.isEmpty()) {
-            return C.List();
-        }
-        $.Transformer<Object, PROPERTY> extractor = new $.Transformer<Object, PROPERTY>() {
-            @Override
-            public PROPERTY transform(Object element) {
-                return (PROPERTY) $.getProperty(element, propertyPath);
-            }
-        };
-        return C.List(collection).map(extractor);
+    public static <PROPERTY> C.List<PROPERTY> extract(Iterable<?> iterable, final String propertyPath) {
+        return $.cast(C.toList(iterable).map($.F.extractor(propertyPath)));
     }
 
     public static <PROPERTY> Sequence<PROPERTY> lazyExtract(Iterable<?> iterable, final String propertyPath) {
-        $.Transformer<Object, PROPERTY> extractor = new $.Transformer<Object, PROPERTY>() {
-            @Override
-            public PROPERTY transform(Object element) {
-                return (PROPERTY) $.getProperty(element, propertyPath);
-            }
-        };
-        return transform(iterable, extractor);
+        return $.cast(transform(iterable, $.F.extractor(propertyPath)));
     }
 
-    public static <T, R> Sequence<R> transform(Iterable<T> seq, $.Function<? super T, ? extends R> mapper) {
+    public static <T, R> Sequence<R> transform(Iterable<? extends T> seq, $.Function<? super T, ? extends R> mapper) {
         if (seq instanceof ReversibleSequence) {
             return transform((ReversibleSequence<T>) seq, mapper);
         }
@@ -3477,6 +3498,19 @@ public class C {
     public static <T, R> ReversibleSequence<R> transform(ReversibleSequence<T> seq, $.Function<? super T, ? extends R> mapper
     ) {
         return new ReversibleMappedSeq<>(seq, mapper);
+    }
+
+    public static <T, R> Sequence<R> flatMap(Iterable<? extends T> seq, $.Function<? super T, ? extends Iterable<? extends R>> mapper
+    ) {
+        if (seq instanceof ReversibleSequence) {
+            return flatMap((ReversibleSequence<? extends T>) seq, mapper);
+        }
+        return new FlatMappedSeq<>(seq, mapper);
+    }
+
+    public static <T, R> ReversibleSequence<R> flatMap(ReversibleSequence<? extends T> seq, $.Function<? super T, ? extends Iterable<? extends R>> mapper
+    ) {
+        return new FlatMappedReversibleSeq<>(seq, mapper);
     }
 
     public static <T> Sequence<T> filter(Sequence<T> seq, $.Function<? super T, Boolean> predicate) {
@@ -3893,6 +3927,45 @@ public class C {
         return $.T2(mapEntry.getKey(), mapEntry.getValue());
     }
 
+    static <T> $.Option<T> reduce(Iterator<? extends T> itr, $.Func2<T, T, T> accumulator) {
+        T ret = itr.next();
+        while (itr.hasNext()) {
+            ret = accumulator.apply(ret, itr.next());
+        }
+        return $.some(ret);
+    }
+
+    static <T, R> R reduce(Iterator<? extends T> itr, R identity, $.Func2<R, T, R> accumulator) {
+        R ret = identity;
+        while (itr.hasNext()) {
+            ret = accumulator.apply(ret, itr.next());
+        }
+        return ret;
+    }
+
+    static <T> $.Option<T> findOne(Iterable<? extends T> iterable, final $.Function<? super T, Boolean> predicate) {
+        for (T element: iterable) {
+            if (predicate.apply(element)) {
+                return $.some(element);
+            }
+        }
+        return $.none();
+    }
+
+    static <T> boolean allMatch(Iterable<? extends T> iterable, $.Function<? super T, Boolean> predicate) {
+        return !anyMatch(iterable, $.F.negate(predicate));
+    }
+
+    static <T> boolean anyMatch(Iterable<? extends T> iterable, $.Function<? super T, Boolean> predicate) {
+        return findOne(iterable, predicate).isDefined();
+    }
+
+    static <T> boolean noneMatch(Iterable<? extends T> iterable, $.Function<? super T, Boolean> predicate) {
+        return !anyMatch(iterable, predicate);
+    }
+
+
+
     // --- eof utility methods ---
 
     // --- Mutable collection/Map constructors
@@ -4106,6 +4179,10 @@ public class C {
          */
         public static <T> List<T> List(Collection<? extends T> col) {
             return new DelegatingList<>(col);
+        }
+
+        public static <T> Set<T> Set() {
+            return new DelegatingSet<>();
         }
 
         /**
