@@ -571,6 +571,28 @@ public class N {
         }
     }
 
+    public static class XY extends $.T2<Integer, Integer> {
+        public XY(Integer x, Integer y) {
+            super(x, y);
+        }
+        public int x() {
+            return _1;
+        }
+        public int y() {
+            return _2;
+        }
+    }
+
+    public static class Coordinate2D extends XY {
+        public Coordinate2D(Integer x, Integer y) {
+            super(x, y);
+        }
+    }
+
+    public static Coordinate2D XY(int x, int y) {
+        return new Coordinate2D(x, y);
+    }
+
     private static Map<Class<? extends Number>, Type> _m;
 
     static {
@@ -612,6 +634,91 @@ public class N {
      * diameter.
      */
     public static final double PI = 3.14159265358979323846;
+
+    public static int assertPositive(int n) {
+        org.osgl.util.E.illegalArgumentIf(n < 1, "positive int required");
+        return n;
+    }
+
+    public static int assertNonNegative(int n) {
+        org.osgl.util.E.illegalArgumentIf(n < 0, "non negative int required");
+        return n;
+    }
+
+    public static int assertNegative(int n) {
+        org.osgl.util.E.illegalArgumentIf(n > -1, "negative int required");
+        return n;
+    }
+
+    public static class _IntAssert {
+        private int n;
+        private _IntAssert(int n) {
+            this.n = n;
+        }
+        public int positive() {
+            return assertPositive(n);
+        }
+        public int negative() {
+            return assertNegative(n);
+        }
+        public int equalTo(int x) {
+            org.osgl.util.E.illegalArgumentIf(n == x, "n[%s] should be equal to %s", n, x);
+            return n;
+        }
+        public int eq(int x) {
+            return equalTo(x);
+        }
+        public int notEqualTo(int x) {
+            org.osgl.util.E.illegalArgumentIf(n != x, "n[%s] should not be equal to %s", n, x);
+            return n;
+        }
+        public int neq(int x) {
+            return notEqualTo(x);
+        }
+        public int greaterThan(int x) {
+            org.osgl.util.E.illegalArgumentIf(n <= x, "n[%s] should be greater than %s", n, x);
+            return n;
+        }
+        public int gt(int x) {
+            return greaterThan(x);
+        }
+        public int greaterThanOrEqualTo(int x) {
+            org.osgl.util.E.illegalArgumentIf(n < x, "n[%s] should be greater than or equal to %s", n, x);
+            return n;
+        }
+        public int gte(int x) {
+            return greaterThan(x);
+        }
+        public int lessThan(int x) {
+            org.osgl.util.E.illegalArgumentIf(n >= x, "n[%s] should be less than %s", n, x);
+            return n;
+        }
+        public int lt(int x) {
+            return lessThan(x);
+        }
+        public int lessThanOrEqualTo(int x) {
+            org.osgl.util.E.illegalArgumentIf(n > x, "n[%s] should be less than or equal to %s", n, x);
+            return n;
+        }
+        public int lte(int x) {
+            return lessThan(x);
+        }
+    }
+
+    public static _IntAssert assert_(int n) {
+        return new _IntAssert(n);
+    }
+
+    public static float assertAlpha(float f) {
+        org.osgl.util.E.illegalArgumentIf(f > 1 || f < 0, "alpha [%s] should be between 0 and 1", f);
+        return f;
+    }
+    public static class _FloatAssert {
+        private float f;
+        private _FloatAssert(float f) {
+            this.f = f;
+        }
+    }
 
     public static double exp(double a) {
         return StrictMath.exp(a); // default impl. delegates to StrictMath

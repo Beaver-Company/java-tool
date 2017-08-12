@@ -24,6 +24,9 @@ import org.osgl.exception.NotAppliedException;
 import org.osgl.storage.ISObject;
 import org.osgl.storage.impl.SObject;
 
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,6 +49,28 @@ public class IO {
         try {
             closeable.close();
         } catch (Exception e) {
+            // ignore
+        }
+    }
+
+    public static void flush(Flushable flushable) {
+        if (null == flushable) {
+            return;
+        }
+        try {
+            flushable.flush();
+        } catch (IOException e) {
+            // ignore
+        }
+    }
+
+    public static void flush(ImageInputStream flushable) {
+        if (null == flushable) {
+            return;
+        }
+        try {
+            flushable.flush();
+        } catch (IOException e) {
             // ignore
         }
     }
@@ -100,6 +125,26 @@ public class IO {
         } catch (FileNotFoundException e) {
             throw E.ioException(e);
         }
+    }
+
+    public static ImageOutputStream imgOs(File file) {
+        return Img.os(file);
+    }
+
+    public static ImageOutputStream imgOs(OutputStream os) {
+        return Img.os(os);
+    }
+
+    public static BufferedImage readImg(InputStream is) {
+        return Img.read(is);
+    }
+
+    public static BufferedImage readImg(URL url) {
+        return Img.read(url);
+    }
+
+    public static BufferedImage readImg(File file) {
+        return Img.read(file);
     }
 
     /**
