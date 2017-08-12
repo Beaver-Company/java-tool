@@ -12,14 +12,13 @@ import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 
+import static org.osgl.Lang.assertNotNull;
 import static org.osgl.util.N.assertNonNegative;
-import static org.osgl.util.N.assert_;
+import static org.osgl.util.N.assertNotNaN;
+import static org.osgl.util.N.assertPositive;
 
 /**
  * Image utilities
@@ -30,16 +29,49 @@ import static org.osgl.util.N.assert_;
 public enum Img {
     ;
 
-    public static final String DEF_MIME_TYPE = "image/jpeg";
+    /**
+     * The default image MIME type when not specified
+     *
+     * The value is `image/png`
+     */
+    public static final String DEF_MIME_TYPE = "image/png";
+
+    public static final String GIF_MIME_TYPE = "image/gif";
+
+    public static final String PNG_MIME_TYPE = "image/png";
+
+    public static final String JPG_MIME_TYPE = "image/jpeg";
+
+    /**
+     * Byte array of a tracking pixel image in gif format
+     */
+    public static final byte[] TRACKING_PIXEL_BYTES = new _Processor(F.TRACKING_PIXEL).toByteArray(GIF_MIME_TYPE);
+
+    /**
+     * Base64 string of a tracking pixel image in gif format
+     */
+    public static final String TRACKING_PIXEL_BASE64 = toBase64(TRACKING_PIXEL_BYTES, GIF_MIME_TYPE);
 
     /**
      * Base class for image operator function which provides source width, height, ratio parameters
      * on demand
      */
     public abstract static class Processor extends $.Producer<BufferedImage> {
+        /**
+         * The source image
+         */
         protected BufferedImage source;
+        /**
+         * The source image width
+         */
         protected int sourceWidth;
+        /**
+         * The source image height
+         */
         protected int sourceHeight;
+        /**
+         * The source image width/height ratio
+         */
         protected double sourceRatio;
 
         protected Processor() {
@@ -50,14 +82,39 @@ public enum Img {
             return run();
         }
 
+        /**
+         * Sub class shall implement the image process logic in
+         * this method
+         *
+         * @return the processed image from {@link #source source image}
+         */
         protected abstract BufferedImage run();
 
+        /**
+         * Set source image. This method will calculate and cache the following
+         * parameters about the source image:
+         *
+         * * {@link #sourceWidth}
+         * * {@link #sourceHeight}
+         * * {@link #sourceRatio}
+         *
+         * @param source the source image
+         * @return this Processor instance
+         */
         public Processor source(BufferedImage source) {
-            this.source = $.assertNotNull(source);
+            this.source = assertNotNull(source);
             this.sourceWidth = source.getWidth();
             this.sourceHeight = source.getHeight();
             this.sourceRatio = (double) this.sourceWidth / this.sourceHeight;
             return this;
+        }
+
+        public _Processor process(InputStream is) {
+            return new _Processor(is).transform(this);
+        }
+
+        public _Processor process(BufferedImage source) {
+            return new _Processor(source).transform(this);
         }
     }
 
@@ -67,8 +124,18 @@ public enum Img {
         Processor worker;
         float compressionQuality = Float.NaN;
 
+        /**
+         * Construct a _Processor using a function that when applied will
+         * return the source image for the processor
+         *
+         * @param source the function that generate a BufferedImage instance
+         */
+        public _Processor($.Func0<BufferedImage> source) {
+            this.source = assertNotNull(source.apply());
+        }
+
         private _Processor(BufferedImage source) {
-            this.source = $.assertNotNull(source);
+            this.source = assertNotNull(source);
         }
 
         private _Processor(InputStream source) {
@@ -79,13 +146,30 @@ public enum Img {
             this.source = null != source ? source : read(is);
         }
 
-        public T transform(Processor operator) {
-            this.worker = $.assertNotNull(operator);
-            return me();
+        protected _Processor() {}
+
+        public _Processor transform(Processor operator) {
+            assertNotNull(operator);
+            if (null == this.worker) {
+                this.worker = operator;
+                return me();
+            } else {
+                return pipeline().transform(operator);
+            }
         }
 
         public T compressionQuality(float compressionQuality) {
             this.compressionQuality = N.assertAlpha(compressionQuality);
+            return me();
+        }
+
+        public T source(InputStream is) {
+            this.source = read(is);
+            return me();
+        }
+
+        public T source(BufferedImage source) {
+            this.source = assertNotNull(source);
             return me();
         }
 
@@ -128,6 +212,24 @@ public enum Img {
             writer.dispose();
         }
 
+        public byte[] toByteArray() {
+            return toByteArray(DEF_MIME_TYPE);
+        }
+
+        public byte[] toByteArray(String mimeType) {
+            ByteArrayOutputStream baos = IO.baos();
+            writeTo(baos, mimeType(mimeType));
+            return baos.toByteArray();
+        }
+
+        public String toBase64() {
+            return toBase64(DEF_MIME_TYPE);
+        }
+
+        public String toBase64(String mimeType) {
+            return Img.toBase64(toByteArray(mimeType), mimeType);
+        }
+
         private BufferedImage target() {
             if (null == target) {
                 doJob();
@@ -146,7 +248,7 @@ public enum Img {
 
         private synchronized void doJob() {
             preTransform();
-            target = worker.source(source).produce();
+            target = null == worker ? source : worker.source(source).produce();
         }
 
         protected void preTransform() {
@@ -161,11 +263,17 @@ public enum Img {
         private int w;
         private int h;
         private boolean keepRatio;
+        private float scale = Float.NaN;
 
         private _Resize(int w, int h, InputStream is, BufferedImage source) {
             super(is, source);
-            this.w = assertNonNegative(w);
-            this.h = assertNonNegative(h);
+            this.w = assertPositive(w);
+            this.h = assertPositive(h);
+        }
+
+        private _Resize(float scale, InputStream is, BufferedImage source) {
+            super(is, source);
+            this.scale = assertPositive(scale);
         }
 
         public _Resize keepRatio() {
@@ -175,7 +283,11 @@ public enum Img {
 
         @Override
         protected void preTransform() {
-            transform(new Resizer(w, h, keepRatio));
+            transform(resizer());
+        }
+
+        private Resizer resizer() {
+            return Float.isNaN(scale) ? new Resizer(w, h, keepRatio) : new Resizer(scale);
         }
     }
 
@@ -193,8 +305,8 @@ public enum Img {
             super(is, source);
             this.x1 = assertNonNegative(x1);
             this.y1 = assertNonNegative(y1);
-            this.x2 = assertNonNegative(x2);
-            this.y2 = assertNonNegative(y2);
+            this.x2 = x2;
+            this.y2 = y2;
         }
 
         public _Crop from(int x, int y) {
@@ -204,8 +316,8 @@ public enum Img {
         }
 
         public _Crop to(int x, int y) {
-            x2 = assert_(x).gte(x1);
-            y2 = assert_(y).gte(y1);
+            x2 = x;
+            y2 = y;
             return this;
         }
 
@@ -234,12 +346,12 @@ public enum Img {
         }
 
         public _Watermarker color(Color color) {
-            this.color = $.assertNotNull(color);
+            this.color = assertNotNull(color);
             return this;
         }
 
         public _Watermarker font(Font font) {
-            this.font = $.assertNotNull(font);
+            this.font = assertNotNull(font);
             return this;
         }
 
@@ -275,11 +387,15 @@ public enum Img {
         private BufferedImage source;
 
         private _Load(InputStream is) {
-            this.is = $.assertNotNull(is);
+            this.is = assertNotNull(is);
         }
 
         private _Load(BufferedImage source) {
-            this.source = $.assertNotNull(source);
+            this.source = assertNotNull(source);
+        }
+
+        public _Resize resize(float scale) {
+            return new _Resize(scale, is, source);
         }
 
         public _Resize resize(int w, int h) {
@@ -342,11 +458,22 @@ public enum Img {
      * Encode an image to base64 using a data: URI
      *
      * @param inputStream The image input stream
-     * @param mimeType    the mime type, if not specified then default to {@link #DEF_MIME_TYPE}
+     * @param mimeType The mime type, if not specified then default to {@link #DEF_MIME_TYPE}
      * @return The base64 encoded value
      */
     public static String toBase64(InputStream inputStream, String mimeType) {
-        return "data:" + mimeType(mimeType) + ";base64," + Codec.encodeBase64(IO.readContent(inputStream));
+        return toBase64(IO.readContent(inputStream), mimeType);
+    }
+
+    /**
+     * Encode an image to base64 using a data: URI
+     *
+     * @param bytes The image byte array
+     * @param mimeType the mime type, if not specified then default to {@link #DEF_MIME_TYPE}
+     * @return The base64 encoded value
+     */
+    public static String toBase64(byte[] bytes, String mimeType) {
+        return "data:" + mimeType(mimeType) + ";base64," + Codec.encodeBase64(bytes);
     }
 
     private static String mimeType(File target) {
@@ -362,11 +489,11 @@ public enum Img {
             // this is a mime type string
             return hint;
         }
-        if (hint.endsWith("png")) {
-            mimeType = "image/png";
+        if (hint.endsWith("jpeg") || hint.endsWith("jpg")) {
+            mimeType = JPG_MIME_TYPE;
         }
         if (hint.endsWith("gif")) {
-            mimeType = "image/gif";
+            mimeType = GIF_MIME_TYPE;
         }
         return mimeType;
     }
@@ -415,43 +542,56 @@ public enum Img {
     private static class Resizer extends Processor {
         int w;
         int h;
+        float scale = Float.NaN;
         boolean keepRatio;
 
         public Resizer(int w, int h, boolean keepRatio) {
-            this.w = N.assertNonNegative(w);
-            this.h = N.assertNonNegative(h);
+            this.w = assertNonNegative(w);
+            this.h = assertNonNegative(h);
             this.keepRatio = keepRatio;
+        }
+
+        public Resizer(float scale) {
+            this.scale = assertNotNaN(scale);
+            this.keepRatio = true;
         }
 
         @Override
         protected BufferedImage run() {
-            int maxWidth = w;
-            int maxHeight = h;
+            int w = this.w;
+            int h = this.h;
+            final int maxWidth = w;
+            final int maxHeight = h;
 
-            if (w < 0 && h < 0) {
-                w = sourceWidth;
-                h = sourceHeight;
-            }
+            if (Float.isNaN(scale)) {
+                if (w < 0 && h < 0) {
+                    w = sourceWidth;
+                    h = sourceHeight;
+                }
 
-            double ratio = sourceRatio;
+                final double ratio = this.sourceRatio;
 
-            if (w < 0 && h > 0) {
-                w = (int) (h * ratio);
-            }
-            if (w > 0 && h < 0) {
-                h = (int) (w / ratio);
-            }
-
-            if (keepRatio) {
-                h = (int) (w / ratio);
-                if (h > maxHeight) {
-                    h = maxHeight;
+                if (w < 0 && h > 0) {
                     w = (int) (h * ratio);
                 }
-                if (w > maxWidth) {
-                    w = maxWidth;
+                if (w > 0 && h < 0) {
                     h = (int) (w / ratio);
                 }
+
+                if (keepRatio) {
+                    h = (int) (w / ratio);
+                    if (h > maxHeight) {
+                        h = maxHeight;
+                        w = (int) (h * ratio);
+                    }
+                    if (w > maxWidth) {
+                        w = maxWidth;
+                        h = (int) (w / ratio);
+                    }
+                }
+            } else {
+                w = (int) (sourceWidth * scale);
+                h = (int) (sourceHeight * scale);
             }
 
             // out
@@ -491,8 +631,22 @@ public enum Img {
 
         @Override
         protected BufferedImage run() {
+            int x2 = this.x2;
+            x2 = x2 < 0 ? sourceWidth + x2 : x2;
+            int y2 = this.y2;
+            y2 = y2 < 0 ? sourceHeight + y2 : y2;
+
             int width = x2 - x1;
             int height = y2 - y1;
+
+            if (width < 0) {
+                x1 = x2;
+                width = -width;
+            }
+            if (height < 0) {
+                y1 = y2;
+                height = -height;
+            }
 
             // out
             BufferedImage target = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -553,4 +707,19 @@ public enum Img {
         }
     };
 
+    public enum F {
+        ;
+        /**
+         * A function that generate a transparent tracking pixel
+         */
+        public static $.Producer<BufferedImage> TRACKING_PIXEL = new $.Producer<BufferedImage>() {
+            @Override
+            public BufferedImage produce() {
+                BufferedImage trackPixel = new BufferedImage(1, 1, BufferedImage.TYPE_4BYTE_ABGR);
+                Color transparent = new Color(0, 0, 0, 0);
+                trackPixel.setRGB(0, 0, transparent.getRGB());
+                return trackPixel;
+            }
+        };
+    }
 }

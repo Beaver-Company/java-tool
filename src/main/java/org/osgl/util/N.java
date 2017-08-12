@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.osgl.util.E.illegalArgumentIf;
+
 /**
  * The namespace under which number relevant structures, functions and logics are
  * defined
@@ -636,17 +638,22 @@ public class N {
     public static final double PI = 3.14159265358979323846;
 
     public static int assertPositive(int n) {
-        org.osgl.util.E.illegalArgumentIf(n < 1, "positive int required");
+        illegalArgumentIf(n < 1, "positive int required");
+        return n;
+    }
+
+    public static float assertPositive(float n) {
+        illegalArgumentIf(n <= 0.0f, "positive float required");
         return n;
     }
 
     public static int assertNonNegative(int n) {
-        org.osgl.util.E.illegalArgumentIf(n < 0, "non negative int required");
+        illegalArgumentIf(n < 0, "non negative int required");
         return n;
     }
 
     public static int assertNegative(int n) {
-        org.osgl.util.E.illegalArgumentIf(n > -1, "negative int required");
+        illegalArgumentIf(n > -1, "negative int required");
         return n;
     }
 
@@ -662,42 +669,42 @@ public class N {
             return assertNegative(n);
         }
         public int equalTo(int x) {
-            org.osgl.util.E.illegalArgumentIf(n == x, "n[%s] should be equal to %s", n, x);
+            illegalArgumentIf(n == x, "n[%s] should be equal to %s", n, x);
             return n;
         }
         public int eq(int x) {
             return equalTo(x);
         }
         public int notEqualTo(int x) {
-            org.osgl.util.E.illegalArgumentIf(n != x, "n[%s] should not be equal to %s", n, x);
+            illegalArgumentIf(n != x, "n[%s] should not be equal to %s", n, x);
             return n;
         }
         public int neq(int x) {
             return notEqualTo(x);
         }
         public int greaterThan(int x) {
-            org.osgl.util.E.illegalArgumentIf(n <= x, "n[%s] should be greater than %s", n, x);
+            illegalArgumentIf(n <= x, "n[%s] should be greater than %s", n, x);
             return n;
         }
         public int gt(int x) {
             return greaterThan(x);
         }
         public int greaterThanOrEqualTo(int x) {
-            org.osgl.util.E.illegalArgumentIf(n < x, "n[%s] should be greater than or equal to %s", n, x);
+            illegalArgumentIf(n < x, "n[%s] should be greater than or equal to %s", n, x);
             return n;
         }
         public int gte(int x) {
             return greaterThan(x);
         }
         public int lessThan(int x) {
-            org.osgl.util.E.illegalArgumentIf(n >= x, "n[%s] should be less than %s", n, x);
+            illegalArgumentIf(n >= x, "n[%s] should be less than %s", n, x);
             return n;
         }
         public int lt(int x) {
             return lessThan(x);
         }
         public int lessThanOrEqualTo(int x) {
-            org.osgl.util.E.illegalArgumentIf(n > x, "n[%s] should be less than or equal to %s", n, x);
+            illegalArgumentIf(n > x, "n[%s] should be less than or equal to %s", n, x);
             return n;
         }
         public int lte(int x) {
@@ -716,7 +723,12 @@ public class N {
      * @throws IllegalArgumentException if the number is beyond the range
      */
     public static float assertAlpha(float f) {
-        org.osgl.util.E.illegalArgumentIf(f > 1 || f < 0, "f [%s] should be between 0 and 1 inclusive", f);
+        illegalArgumentIf(f > 1 || f < 0, "f [%s] should be between 0 and 1 inclusive", f);
+        return f;
+    }
+
+    public static float assertNotNaN(float f) {
+        illegalArgumentIf(Float.isNaN(f), "f shall not be NaN");
         return f;
     }
 

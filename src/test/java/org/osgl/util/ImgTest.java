@@ -12,6 +12,11 @@ public class ImgTest {
         return IO.is(url);
     }
 
+    private static InputStream img2() {
+        URL url = ImgTest.class.getResource("/img/img2.jpg");
+        return IO.is(url);
+    }
+
     static void testCrop() {
         Img.source(img1()).crop(N.XY(30, 30), N.XY(100, 100)).writeTo(new File("/tmp/img1_crop.gif"));
     }
@@ -22,6 +27,19 @@ public class ImgTest {
 
     static void testResizeKeepRatio() {
         Img.source(img1()).resize(100, 200).keepRatio().writeTo(new File("/tmp/img1_resize_keep_ratio.png"));
+    }
+
+    private static void testResizeByScale() {
+        Img.source(img2()).resize(0.5f).writeTo("/tmp/img2_resize_scale.png");
+    }
+
+    private static void testResizeToZero() {
+        try {
+            Img.source(img2()).resize(0.0f).writeTo("/tmp/img2_resize_zero.png");
+            E.unexpected("IllegalArgumentException expected");
+        } catch (IllegalArgumentException e) {
+            // pass
+        }
     }
 
     static void testWatermarkWithDefSetting() {
@@ -50,8 +68,24 @@ public class ImgTest {
                 .writeTo("/tmp/img1_pipeline.png");
     }
 
+    private static void testProcessJPEGfile() {
+        Img.source(img2())
+                .resize(640, 480)
+                .pipeline()
+                .crop(50, 50, -50, -50)
+                .pipeline()
+                .watermark("HELLO OSGL")
+                .writeTo("/tmp/img2_pipeline.jpg");
+    }
+
+    private static void testGenerateTrackingPixel() {
+        new Img._Processor(Img.F.TRACKING_PIXEL).writeTo("/tmp/tracking_pixel.gif");
+    }
+
     public static void main(String[] args) {
+        testResizeToZero();
         testResize();
+        testResizeByScale();
         testResizeKeepRatio();
         testCrop();
         testWatermarkWithDefSetting();
@@ -59,6 +93,8 @@ public class ImgTest {
         testCompress();
         testCopy();
         testPipeline();
+        testProcessJPEGfile();
+        testGenerateTrackingPixel();
     }
 
 }

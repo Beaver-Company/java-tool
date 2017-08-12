@@ -42,6 +42,41 @@ import java.util.zip.ZipOutputStream;
 // Some code come from Play!Framework IO.java, under Apache License 2.0
 public class IO {
 
+    private static class BlackHole extends OutputStream {
+
+        static final BlackHole INSTANCE = new BlackHole();
+
+        @Override
+        public void write(byte[] b) throws IOException {
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+        }
+
+        @Override
+        public void flush() throws IOException {
+        }
+
+        @Override
+        public void close() throws IOException {
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+        }
+    }
+
+    /**
+     * An output stream that anything written into it is lost
+     */
+    public static final OutputStream BLACK_HOLE = BlackHole.INSTANCE;
+
+    /**
+     * Alias of {@link #BLACK_HOLE}
+     */
+    public static final OutputStream NULL_OS = BLACK_HOLE;
+
     public static void close(Closeable closeable) {
         if (closeable == null) {
             return;
@@ -107,11 +142,38 @@ public class IO {
     }
 
     /**
+     * This API is obsolete. Please use {@link #baos()} instead
+     *
      * Returns a byte array output stream
      * @return an output stream
      */
+    @Deprecated
     public static OutputStream os() {
+        return baos();
+    }
+
+    /**
+     * Returns a byte array output stream
+     * @return an output stream
+     */
+    public static ByteArrayOutputStream baos() {
         return new ByteArrayOutputStream();
+    }
+
+    /**
+     * Alias of {@link #BLACK_HOLE}
+     * @return {@link #BLACK_HOLE}
+     */
+    public static OutputStream nullOs() {
+        return NULL_OS;
+    }
+
+    /**
+     * Returns an output stream that anything write into it disappear (lost)
+     * @return a black hole output stream
+     */
+    public static OutputStream blackHole() {
+        return BlackHole.INSTANCE;
     }
 
     /**
