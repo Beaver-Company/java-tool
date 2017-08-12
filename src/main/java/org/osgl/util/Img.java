@@ -61,22 +61,36 @@ public enum Img {
         }
     }
 
-    public static class _Operator {
+    public static class _Processor<T extends _Processor> {
         BufferedImage source;
         volatile BufferedImage target;
         Processor worker;
+        float compressionQuality = Float.NaN;
 
-        private _Operator(BufferedImage source) {
+        private _Processor(BufferedImage source) {
             this.source = $.assertNotNull(source);
         }
 
-        private _Operator(InputStream source) {
+        private _Processor(InputStream source) {
             this.source = read(source);
         }
 
-        public _Operator transform(Processor operator) {
+        private _Processor(InputStream is, BufferedImage source) {
+            this.source = null != source ? source : read(is);
+        }
+
+        public T transform(Processor operator) {
             this.worker = $.assertNotNull(operator);
-            return this;
+            return me();
+        }
+
+        public T compressionQuality(float compressionQuality) {
+            this.compressionQuality = N.assertAlpha(compressionQuality);
+            return me();
+        }
+
+        public _Load pipeline() {
+            return new _Load(target());
         }
 
         public void writeTo(String fileName) {
@@ -92,13 +106,19 @@ public enum Img {
         }
 
         public void writeTo(OutputStream os, String mimeType) {
-            BufferedImage target = target();
             ImageWriter writer = ImageIO.getImageWritersByMIMEType(mimeType(mimeType)).next();
+            dropAlphaChannelIfJPEG(writer);
             ImageWriteParam params = writer.getDefaultWriteParam();
+
+            if (!Float.isNaN(compressionQuality) && params.canWriteCompressed()) {
+                params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                params.setCompressionType(params.getCompressionTypes()[0]);
+                params.setCompressionQuality(compressionQuality);
+            }
 
             ImageOutputStream ios = os(os);
             writer.setOutput(ios);
-            IIOImage image = new IIOImage(target, null, null);
+            IIOImage image = new IIOImage(target(), null, null);
             try {
                 writer.write(null, image, params);
             } catch (IOException e) {
@@ -115,6 +135,15 @@ public enum Img {
             return target;
         }
 
+        public void dropAlphaChannelIfJPEG(ImageWriter writer) {
+            if (writer.getClass().getSimpleName().toUpperCase().contains("JPEG")) {
+                BufferedImage src = source;
+                BufferedImage convertedImg = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+                convertedImg.getGraphics().drawImage(src, 0, 0, null);
+                source = convertedImg;
+            }
+        }
+
         private synchronized void doJob() {
             preTransform();
             target = worker.source(source).produce();
@@ -122,15 +151,19 @@ public enum Img {
 
         protected void preTransform() {
         }
+
+        private T me() {
+            return $.cast(this);
+        }
     }
 
-    public static class _Resize extends _Operator {
+    public static class _Resize extends _Processor<_Resize> {
         private int w;
         private int h;
         private boolean keepRatio;
 
-        private _Resize(int w, int h, InputStream is) {
-            super(is);
+        private _Resize(int w, int h, InputStream is, BufferedImage source) {
+            super(is, source);
             this.w = assertNonNegative(w);
             this.h = assertNonNegative(h);
         }
@@ -146,18 +179,18 @@ public enum Img {
         }
     }
 
-    public static class _Crop extends _Operator {
+    public static class _Crop extends _Processor<_Crop> {
         private int x1;
         private int y1;
         private int x2;
         private int y2;
 
-        private _Crop(InputStream is) {
-            super(is);
+        private _Crop(InputStream is, BufferedImage source) {
+            super(is, source);
         }
 
-        private _Crop(int x1, int y1, int x2, int y2, InputStream is) {
-            super(is);
+        private _Crop(int x1, int y1, int x2, int y2, InputStream is, BufferedImage source) {
+            super(is, source);
             this.x1 = assertNonNegative(x1);
             this.y1 = assertNonNegative(y1);
             this.x2 = assertNonNegative(x2);
@@ -186,7 +219,7 @@ public enum Img {
         }
     }
 
-    public static class _Watermarker extends _Operator {
+    public static class _Watermarker extends _Processor<_Watermarker> {
 
         Color color = Color.LIGHT_GRAY;
         Font font = new Font("Arial", Font.BOLD, 28);
@@ -195,8 +228,8 @@ public enum Img {
         int offsetX;
         int offsetY;
 
-        private _Watermarker(String text, InputStream inputStream) {
-            super(inputStream);
+        private _Watermarker(String text, InputStream inputStream, BufferedImage source) {
+            super(inputStream, source);
             this.text = S.assertNotBlank(text);
         }
 
@@ -239,25 +272,30 @@ public enum Img {
 
     public static class _Load {
         private InputStream is;
+        private BufferedImage source;
 
         private _Load(InputStream is) {
             this.is = $.assertNotNull(is);
         }
 
+        private _Load(BufferedImage source) {
+            this.source = $.assertNotNull(source);
+        }
+
         public _Resize resize(int w, int h) {
-            return new _Resize(w, h, is());
+            return new _Resize(w, h, is, source);
         }
 
         public _Resize resize($.Tuple<Integer, Integer> dimension) {
-            return new _Resize(dimension.left(), dimension.right(), is());
+            return new _Resize(dimension.left(), dimension.right(), is, source);
         }
 
         public _Resize resize(Dimension dimension) {
-            return new _Resize(dimension.width, dimension.height, is());
+            return new _Resize(dimension.width, dimension.height, is, source);
         }
 
         public _Crop crop(int x1, int y1, int x2, int y2) {
-            return new _Crop(x1, y1, x2, y2, is());
+            return new _Crop(x1, y1, x2, y2, is, source);
         }
 
         public _Crop crop($.Tuple<Integer, Integer> leftTop, $.Tuple<Integer, Integer> rightBottom) {
@@ -265,19 +303,21 @@ public enum Img {
         }
 
         public _Watermarker watermark(String text) {
-            return new _Watermarker(text, is());
+            return new _Watermarker(text, is, source);
         }
 
-        public _Operator transform(Processor processor) {
-            return new _Operator(is).transform(processor);
+        public _Processor compress(float compressionQuality) {
+            return new _Processor(is, source).compressionQuality(compressionQuality).transform(COPIER);
         }
 
-        private InputStream is() {
-            E.illegalStateIf(null == this.is, "already consumed");
-            InputStream is = this.is;
-            this.is = null;
-            return is;
+        public _Processor copy() {
+            return new _Processor(is, source).transform(COPIER);
         }
+
+        public _Processor transform(Processor processor) {
+            return new _Processor(is, source).transform(processor);
+        }
+
     }
 
     public static _Load source(InputStream is) {
@@ -505,5 +545,12 @@ public enum Img {
         }
 
     }
+
+    private static Processor COPIER = new Processor() {
+        @Override
+        protected BufferedImage run() {
+            return source;
+        }
+    };
 
 }

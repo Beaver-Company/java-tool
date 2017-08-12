@@ -709,10 +709,17 @@ public class N {
         return new _IntAssert(n);
     }
 
+    /**
+     * Image alpha float range is 0.0f to 1.0f inclusive
+     * @param f the float number to be tested
+     * @return the float number if fall in image alpha float rage
+     * @throws IllegalArgumentException if the number is beyond the range
+     */
     public static float assertAlpha(float f) {
-        org.osgl.util.E.illegalArgumentIf(f > 1 || f < 0, "alpha [%s] should be between 0 and 1", f);
+        org.osgl.util.E.illegalArgumentIf(f > 1 || f < 0, "f [%s] should be between 0 and 1 inclusive", f);
         return f;
     }
+
     public static class _FloatAssert {
         private float f;
         private _FloatAssert(float f) {

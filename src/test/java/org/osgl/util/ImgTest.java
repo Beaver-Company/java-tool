@@ -32,12 +32,33 @@ public class ImgTest {
         Img.source(img1()).watermark("CONFIDENTIAL").offsetY(-200).color(Color.DARK_GRAY).writeTo("/tmp/img1_watermark.png");
     }
 
+    private static void testCompress() {
+        Img.source(img1()).compress(0.01f).writeTo("/tmp/img1_compress.jpeg");
+    }
+
+    private static void testCopy() {
+        Img.source(img1()).copy().writeTo("/tmp/img1_copy.jpeg");
+    }
+
+    private static void testPipeline() {
+        Img.source(img1())
+                .resize(300, 400)
+                .pipeline()
+                .crop(50, 50, 250, 350)
+                .pipeline()
+                .watermark("HELLO OSGL")
+                .writeTo("/tmp/img1_pipeline.png");
+    }
+
     public static void main(String[] args) {
         testResize();
         testResizeKeepRatio();
         testCrop();
         testWatermarkWithDefSetting();
         testWatermark();
+        testCompress();
+        testCopy();
+        testPipeline();
     }
 
 }
