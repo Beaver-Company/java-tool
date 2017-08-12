@@ -269,21 +269,18 @@ public enum Img {
             super(is, source);
             this.w = assertPositive(w);
             this.h = assertPositive(h);
+            this.worker = resizer();
         }
 
         private _Resize(float scale, InputStream is, BufferedImage source) {
             super(is, source);
             this.scale = assertPositive(scale);
+            this.worker = resizer();
         }
 
         public _Resize keepRatio() {
             this.keepRatio = true;
             return this;
-        }
-
-        @Override
-        protected void preTransform() {
-            transform(resizer());
         }
 
         private Resizer resizer() {
@@ -307,6 +304,7 @@ public enum Img {
             this.y1 = assertNonNegative(y1);
             this.x2 = x2;
             this.y2 = y2;
+            this.worker = new Cropper(x1, y1, x2, y2);
         }
 
         public _Crop from(int x, int y) {
@@ -324,11 +322,6 @@ public enum Img {
         public _Crop from($.Tuple<Integer, Integer> leftTop) {
             return from(leftTop._1, leftTop._2);
         }
-
-        @Override
-        protected void preTransform() {
-            transform(new Cropper(x1, y1, x2, y2));
-        }
     }
 
     public static class _Watermarker extends _Processor<_Watermarker> {
@@ -343,6 +336,7 @@ public enum Img {
         private _Watermarker(String text, InputStream inputStream, BufferedImage source) {
             super(inputStream, source);
             this.text = S.assertNotBlank(text);
+            this.worker = new WaterMarker(text, offsetX, offsetY, color, font, alpha);
         }
 
         public _Watermarker color(Color color) {
@@ -374,11 +368,6 @@ public enum Img {
         public _Watermarker offsetX(int offsetX) {
             this.offsetX = offsetX;
             return this;
-        }
-
-        @Override
-        protected void preTransform() {
-            transform(new WaterMarker(text, offsetX, offsetY, color, font, alpha));
         }
     }
 

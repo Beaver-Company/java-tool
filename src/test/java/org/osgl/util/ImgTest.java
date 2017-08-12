@@ -1,6 +1,7 @@
 package org.osgl.util;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -83,8 +84,31 @@ public class ImgTest {
         IO.write(Img.TRACKING_PIXEL_BYTES, new File("/tmp/tracking_pixel.gif"));
     }
 
+    private static class Sunglass extends Img.Processor {
+        private float alpha = 0.3f;
+
+        Sunglass() {}
+        Sunglass(float alpha) {this.alpha = alpha;}
+
+        @Override
+        protected BufferedImage run() {
+            int w = sourceWidth;
+            int h = sourceHeight;
+            BufferedImage target = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = target.createGraphics();
+            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+            g.drawImage(source, 0, 0, w, h, null);
+            return target;
+        }
+    }
+    private static void testCustomizedProcessor() {
+        // style A
+        new Sunglass(0.7f).process(img2()).pipeline().resize(0.5f).writeTo("/tmp/img2_sunglass_style_a.jpg");
+        // style B
+        Img.source(img2()).resize(0.3f).transform(new Sunglass()).writeTo("/tmp/img2_sunglass_style_b.jpg");
+    }
+
     public static void main(String[] args) {
-        testResizeToZero();
         testResize();
         testResizeByScale();
         testResizeKeepRatio();
@@ -96,6 +120,8 @@ public class ImgTest {
         testPipeline();
         testProcessJPEGfile();
         testGenerateTrackingPixel();
+        testCustomizedProcessor();
+        testResizeToZero();
     }
 
 }
