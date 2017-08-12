@@ -29,10 +29,6 @@ public class ImgTest {
         Img.source(img1()).resize(100, 200).keepRatio().writeTo(new File("/tmp/img1_resize_keep_ratio.png"));
     }
 
-    private static void testResizeByScale() {
-        Img.source(img2()).resize(0.5f).writeTo("/tmp/img2_resize_scale.png");
-    }
-
     private static void testResizeToZero() {
         try {
             Img.source(img2()).resize(0.0f).writeTo("/tmp/img2_resize_zero.png");
@@ -68,6 +64,11 @@ public class ImgTest {
                 .writeTo("/tmp/img1_pipeline.png");
     }
 
+
+    private static void testResizeByScale() {
+        Img.source(img2()).resize(0.5f).writeTo("/tmp/img2_resize_scale.png");
+    }
+
     private static void testProcessJPEGfile() {
         Img.source(img2())
                 .resize(640, 480)
@@ -79,7 +80,7 @@ public class ImgTest {
     }
 
     private static void testGenerateTrackingPixel() {
-        new Img._Processor(Img.F.TRACKING_PIXEL).writeTo("/tmp/tracking_pixel.gif");
+        IO.write(Img.TRACKING_PIXEL_BYTES, new File("/tmp/tracking_pixel.gif"));
     }
 
     public static void main(String[] args) {

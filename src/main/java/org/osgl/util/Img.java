@@ -707,6 +707,9 @@ public enum Img {
         }
     };
 
+    /**
+     * The namespace for functions
+     */
     public enum F {
         ;
         /**
