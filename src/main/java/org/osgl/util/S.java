@@ -7,8 +7,12 @@ import org.osgl.exception.NotAppliedException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 
 import static java.lang.Character.highSurrogate;
 import static java.lang.Character.lowSurrogate;
@@ -77,6 +81,7 @@ public class S {
 
     /**
      * A handy alias for {@link MessageFormat#format(String, Object...)}
+     *
      * @param tmpl the message template
      * @param args the message arguments
      * @return the formatted string
@@ -319,6 +324,7 @@ public class S {
      * Throw IllegalArgumentException if the string specified
      * {@link #isBlank(String) is blank}, otherwise return
      * the string specified
+     *
      * @param s the string to be tested
      * @return the string if it is not blank
      * @throws IllegalArgumentException if the string `s` is blank
@@ -332,6 +338,7 @@ public class S {
      * Throw IllegalArgumentException if the string specified
      * {@link #isEmpty(String)}  is empty}, otherwise return
      * the string specified
+     *
      * @param s the string to be tested
      * @return the string if it is not empty
      * @throws IllegalArgumentException if the string `s` is empty
@@ -561,39 +568,55 @@ public class S {
 
     public static class _Is {
         private String s;
+
         private _Is(Object object) {
             this.s = string(object);
         }
+
         public boolean empty() {
             return s.isEmpty();
         }
+
         public boolean blank() {
             return s.trim().isEmpty();
         }
+
         public boolean contain(CharSequence content) {
             return s.contains(content);
         }
+
         public boolean startWith(String prefix, int toffset) {
             return s.startsWith(prefix, toffset);
         }
+
         public boolean startWith(String prefix) {
             return s.startsWith(prefix);
         }
+
         public boolean endWith(String suffix) {
             return s.endsWith(suffix);
         }
-        public boolean equalTo(CharSequence content) {
+
+        public boolean contentEqualTo(CharSequence content) {
             return s.contentEquals(content);
         }
+
+        public boolean eq(CharSequence content) {
+            return contentEqualTo(content);
+        }
+
         public boolean numeric() {
             return N.isNumeric(s);
         }
+
         public boolean integer() {
             return N.isInt(s);
         }
+
         public boolean wrappedWith(String left, String right) {
             return s.length() >= (left.length() + right.length()) && s.startsWith(left) && s.endsWith(right);
         }
+
         public boolean wrappedWith($.Tuple<String, String> wrapper) {
             return wrappedWith(wrapper.left(), wrapper.right());
         }
@@ -621,18 +644,23 @@ public class S {
 
     public static class _Ensure {
         private String s;
+
         private _Ensure(Object object) {
             this.s = string(object);
         }
+
         public String startWith(String prefix) {
             return ensureStartsWith(s, prefix);
         }
+
         public String startWith(char prefix) {
             return ensureStartsWith(s, prefix);
         }
+
         public String endWith(String suffix) {
             return ensureEndsWith(s, suffix);
         }
+
         public String endWith(char suffix) {
             return ensureEndsWith(s, suffix);
         }
@@ -710,6 +738,74 @@ public class S {
 
     public static String ensureStrippedOff(String string, $.Tuple<String, String> wrapper) {
         return ensureStrippedOff(string, wrapper.left(), wrapper.right());
+    }
+
+    public static class _Replace {
+        private String text;
+        private String literal;
+        private Pattern pattern;
+
+        private _Replace(String text, String literal) {
+            this.text = string(text);
+            this.literal = string(literal);
+        }
+
+        private _Replace(String text, Pattern pattern) {
+            this.text = string(text);
+            this.pattern = pattern;
+        }
+
+        public _Replace usingRegEx() {
+            this.pattern = Pattern.compile(literal);
+            return this;
+        }
+
+        public String with(String replacement) {
+            if (null != pattern) {
+                return pattern.matcher(text).replaceAll(replacement);
+            } else {
+                if (text.length() < literal.length()) {
+                    return text;
+                }
+                // TODO implement fast string literal replacement logic here
+            }
+        }
+    }
+
+    public static class _ReplaceChar {
+        private String text;
+        private char toBeReplaced;
+        private _ReplaceChar(String s, char toBeReplaced) {
+            this.text = string(s);
+            this.toBeReplaced = toBeReplaced;
+        }
+        public String with(char replacement) {
+            return text.replace(toBeReplaced, replacement);
+        }
+    }
+
+    public static class _Have {
+        private String s;
+        private _Have(Object s) {
+            this.s = string(s);
+        }
+        public _Replace replace(String literal) {
+            return new _Replace(s, literal);
+        }
+        public _Replace replace(Pattern pattern) {
+            return new _Replace(s, pattern);
+        }
+        public _ReplaceChar replace(char c) {
+            return new _ReplaceChar(s, c);
+        }
+    }
+
+    public static _Have have(Object o) {
+        return new _Have(o);
+    }
+
+    public static _Have take(Object o) {
+        return new _Have(o);
     }
 
     public static String pathConcat(String prefix, char sep, String suffix) {
@@ -804,6 +900,7 @@ public class S {
         private String suffix;
         private $.Tuple<String, String> wrapper;
         private boolean separateFix;
+
         private _IterableJoiner(Iterable<?> iterable) {
             this.iterable = $.assertNotNull(iterable);
         }
@@ -907,47 +1004,60 @@ public class S {
         private String content;
         private String separator;
         private $.Tuple<String, String> wrapper;
+
         private _StringRepeater(String content) {
             this.content = content;
         }
+
         public _StringRepeater joinedBy(String separator) {
             this.separator = separator;
             return this;
         }
+
         public _StringRepeater wrapWith($.Tuple<String, String> wrapper) {
             this.wrapper = wrapper;
             return this;
         }
+
         public _StringRepeater wrapWith(String wrapper) {
             this.wrapper = binary(wrapper, wrapper);
             return this;
         }
+
         public _StringRepeater wrapWith(String left, String right) {
             this.wrapper = binary(left, right);
             return this;
         }
+
         public String times(int times) {
             String content = null == wrapper ? this.content : wrap(this.content, wrapper);
             return null == separator ? S.times(content, times) : S.join(separator, content, times);
         }
+
         public String x(int times) {
             return times(times);
         }
+
         public String forOneTime() {
             return content;
         }
+
         public String forTwoTimes() {
             return x(2);
         }
+
         public String forThreeTimes() {
             return x(3);
         }
+
         public String forFourTimes() {
             return x(4);
         }
+
         public String forFiveTimes() {
             return x(5);
         }
+
         public String forTimes(int times) {
             return x(times);
         }
@@ -1022,30 +1132,39 @@ public class S {
 
     public static class _CharRepeater {
         private char c;
+
         private _CharRepeater(char c) {
             this.c = c;
         }
+
         public String times(int times) {
             return S.times(c, times);
         }
+
         public String x(int times) {
             return S.times(c, times);
         }
+
         public String forOneTime() {
             return String.valueOf(c);
         }
+
         public String forTwoTimes() {
             return x(2);
         }
+
         public String forThreeTimes() {
             return x(3);
         }
+
         public String forFourTimes() {
             return x(4);
         }
+
         public String forFiveTimes() {
             return x(5);
         }
+
         public String forTimes(int times) {
             return x(times);
         }
@@ -1081,18 +1200,23 @@ public class S {
      */
     public static class _StripStringState {
         private String toBeStripped;
+
         private _StripStringState(String s) {
             toBeStripped = S.assertNotEmpty(s);
         }
+
         public String of(String wrapper) {
             return stripOf(toBeStripped, wrapper, wrapper);
         }
+
         public String of($.Tuple<String, String> wrapper) {
             return stripOf(toBeStripped, wrapper.left(), wrapper.right());
         }
+
         public String of(String left, String right) {
             return stripOf(toBeStripped, left, right);
         }
+
         private static String stripOf(String s, String left, String right) {
             if (s.startsWith(left)) {
                 s = s.substring(left.length());
@@ -1118,9 +1242,11 @@ public class S {
 
     public static class _WrapStringBuilder {
         private String content;
+
         private _WrapStringBuilder(String content) {
             this.content = content;
         }
+
         private _WrapStringBuilder(Object content) {
             this.content = string(content);
         }
@@ -1169,7 +1295,8 @@ public class S {
         }
         int textLen = text.length();
         char[] ca = new char[textLen + 2];
-        ca[0] = left; ca[textLen + 1] = right;
+        ca[0] = left;
+        ca[textLen + 1] = right;
         System.arraycopy(text.toCharArray(), 0, ca, 1, textLen);
         return String.valueOf(ca);
     }
@@ -1203,7 +1330,7 @@ public class S {
      * instead
      *
      * @param content the content object
-     * @param mark the quotation mark
+     * @param mark    the quotation mark
      * @return a string that wrap the content string with quotation mark
      */
     @Deprecated
@@ -1216,7 +1343,7 @@ public class S {
      * instead
      *
      * @param content the content object
-     * @param mark the quotation mark
+     * @param mark    the quotation mark
      * @return a string that wrap the content string with quotation mark
      */
     @Deprecated
@@ -1232,7 +1359,7 @@ public class S {
      * instead
      *
      * @param content the content object
-     * @param mark the quotation mark
+     * @param mark    the quotation mark
      * @return a string that wrap the content string with quotation mark
      */
     @Deprecated
@@ -1244,7 +1371,7 @@ public class S {
      * This method is deprecated. Please use {@link #wrap(String, char)}
      * instead
      *
-     * @param s the content string
+     * @param s    the content string
      * @param mark the quotation mark
      * @return a string that wrap the content string with quotation mark
      */
@@ -1258,33 +1385,43 @@ public class S {
 
     public static class _Cut {
         private String s;
+
         private _Cut(Object object) {
             s = string(object);
         }
+
         public String by(int chars) {
             return maxLength(s, chars);
         }
+
         public String first(int chars) {
             return maxLength(s, chars);
         }
+
         public String last(int chars) {
             return S.last(s, chars);
         }
+
         public String before(String search) {
             return S.before(s, search);
         }
+
         public String beforeFirst(String search) {
             return S.before(s, search, false);
         }
+
         public String beforeLast(String search) {
             return S.before(s, search, true);
         }
+
         public String after(String search) {
             return S.after(s, search);
         }
+
         public String afterFirst(String search) {
             return S.after(s, search, true);
         }
+
         public String afterLast(String search) {
             return S.after(s, search, false);
         }
@@ -4561,6 +4698,7 @@ public class S {
         public Triple(String _1, String _2, String _3) {
             super(_1, _2, _3);
         }
+
         public Triple($.Triple<String, String, String> t3) {
             super(t3._1, t3._2, t3._3);
         }
@@ -4581,6 +4719,7 @@ public class S {
         public Quadruple(String _1, String _2, String _3, String _4) {
             super(_1, _2, _3, _4);
         }
+
         public Quadruple($.Quadruple<String, String, String, String> t4) {
             super(t4._1, t4._2, t4._3, t4._4);
         }
@@ -4600,6 +4739,7 @@ public class S {
         public Quintuple(String _1, String _2, String _3, String _4, String _5) {
             super(_1, _2, _3, _4, _5);
         }
+
         public Quintuple($.Quintuple<String, String, String, String, String> t5) {
             super(t5._1, t5._2, t5._3, t5._4, t5._5);
         }
@@ -4647,7 +4787,7 @@ public class S {
         return ImmutableStringList.of(new String[]{s1, s2});
     }
 
-    public static List list(String s1, String s2, String ... sa) {
+    public static List list(String s1, String s2, String... sa) {
         return ImmutableStringList.of($.concat(new String[]{s1, s2}, sa));
     }
 
