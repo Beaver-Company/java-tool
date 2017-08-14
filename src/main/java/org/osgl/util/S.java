@@ -4,7 +4,6 @@ import org.osgl.$;
 import org.osgl.Lang;
 import org.osgl.OsglConfig;
 import org.osgl.exception.NotAppliedException;
-import org.osgl.util.algo.StringReplace;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -747,7 +746,7 @@ public class S {
         private String literal;
         private Pattern pattern;
         private boolean jdk;
-        private StringReplace replacer = OsglConfig.DEF_STRING_REPLACE;
+        private $.Func3<char[], char[], char[], char[]> replacer = OsglConfig.DEF_STRING_REPLACE;
 
         private _Replace(String text, String literal) {
             this.text = string(text);
@@ -769,6 +768,11 @@ public class S {
             return this;
         }
 
+        public _Replace withReplacer($.Func3<char[], char[], char[], char[]> replacer) {
+            this.replacer = $.requireNotNull(replacer);
+            return this;
+        }
+
         public String with(String replacement) {
             if (null != pattern) {
                 return pattern.matcher(text).replaceAll(replacement);
@@ -780,9 +784,10 @@ public class S {
                     return text.replace(literal, replacement);
                 }
                 char[] text = Unsafe.bufOf(this.text);
-                char[] target = Unsafe.bufOf(this.literal);
-                char[] replace = Unsafe.bufOf(replacement);
-                return Unsafe.stringOf(this.replacer.apply(text, target, replace));
+                char[] target = this.literal.toCharArray();
+                char[] replace = replacement.toCharArray();
+                char[] result = this.replacer.apply(text, target, replace);
+                return (result == text) ? this.text : Unsafe.stringOf(result);
             }
         }
     }

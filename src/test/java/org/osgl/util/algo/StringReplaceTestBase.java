@@ -55,11 +55,9 @@ public abstract class StringReplaceTestBase<LOGIC extends StringReplace> extends
     }
 
     protected void verify() {
-        eq(String.valueOf(text).replace(String.valueOf(target), String.valueOf(replacement)),
-                String.valueOf(replacer.replace(text, target, replacement)));
+        char[] replaced = replacer.replace(text, target, replacement);
+        String s = text == replaced ? String.valueOf(text) : String.valueOf(replaced);
+        eq(String.valueOf(text).replace(String.valueOf(target), String.valueOf(replacement)), s);
     }
 
-    public static void main(String[] args) {
-        System.out.println("aaa".replace("aa", "b"));
-    }
 }

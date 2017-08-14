@@ -18,11 +18,20 @@ public abstract class StringSearch implements $.Func3<char[], char[], Integer, I
      *         in the text region specified then it returns it's index in the text; otherwise
      *         an negative number, typically `-1` is returned
      */
-    protected abstract int search(char[] text, char[] target, int from);
+    public abstract int search(char[] text, char[] target, int from);
 
     @Override
     public final Integer apply(char[] text, char[] target, Integer from) throws NotAppliedException, Lang.Break {
         return search(text, target, from);
+    }
+
+    public static StringSearch wrap(final $.Func3<char[], char[], Integer, Integer> searchLogic) {
+        return $.requireNotNull(searchLogic) instanceof StringSearch ? (StringSearch) searchLogic : new StringSearch() {
+            @Override
+            public int search(char[] text, char[] target, int from) {
+                return searchLogic.apply(text, target, from);
+            }
+        };
     }
 
     /**
@@ -30,7 +39,7 @@ public abstract class StringSearch implements $.Func3<char[], char[], Integer, I
      */
     public static class SimpleStringSearch extends StringSearch {
         @Override
-        protected int search(char[] text, char[] target, int from) {
+        public int search(char[] text, char[] target, int from) {
             if (from < 0) {
                 from = 0;
             }
