@@ -47,8 +47,7 @@ public abstract class StringSearch implements $.Func3<char[], char[], Integer, I
             if (txtLen - from < targetLen) {
                 return -1;
             }
-            int id = S.indexOf(text, 0, txtLen, target, 0, targetLen, from);
-            return id < 0 ? id : id;
+            return  S.indexOf(text, 0, txtLen, target, 0, targetLen, from);
         }
     }
 }

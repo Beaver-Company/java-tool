@@ -749,12 +749,12 @@ public class S {
         private $.Func3<char[], char[], char[], char[]> replacer = OsglConfig.DEF_STRING_REPLACE;
 
         private _Replace(String text, String literal) {
-            this.text = string(text);
+            this.text = text;
             this.literal = string(literal);
         }
 
         private _Replace(String text, Pattern pattern) {
-            this.text = string(text);
+            this.text = text;
             this.pattern = pattern;
         }
 
@@ -768,7 +768,7 @@ public class S {
             return this;
         }
 
-        public _Replace withReplacer($.Func3<char[], char[], char[], char[]> replacer) {
+        public _Replace replacer($.Func3<char[], char[], char[], char[]> replacer) {
             this.replacer = $.requireNotNull(replacer);
             return this;
         }
@@ -809,6 +809,9 @@ public class S {
         private _Have(Object s) {
             this.s = string(s);
         }
+        private _Have(String s) {
+            this.s = null == s ? "" : s;
+        }
         public _Replace replace(String literal) {
             return new _Replace(s, literal);
         }
@@ -824,8 +827,16 @@ public class S {
         return new _Have(o);
     }
 
+    public static _Have have(String s) {
+        return new _Have(s);
+    }
+
     public static _Have take(Object o) {
         return new _Have(o);
+    }
+
+    public static _Have take(String s) {
+        return new _Have(s);
     }
 
     public static String pathConcat(String prefix, char sep, String suffix) {
@@ -3087,6 +3098,7 @@ public class S {
             if (srcBegin > srcEnd)
                 throw new StringIndexOutOfBoundsException("srcBegin > srcEnd");
             System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
+            consume();
         }
 
         /**
