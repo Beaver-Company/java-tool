@@ -1,6 +1,7 @@
 package org.osgl.util;
 
 import org.osgl.$;
+import org.osgl.Lang;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -15,10 +16,10 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 
-import static org.osgl.Lang.assertNotNull;
-import static org.osgl.util.N.assertNonNegative;
-import static org.osgl.util.N.assertNotNaN;
-import static org.osgl.util.N.assertPositive;
+import static org.osgl.Lang.requireNotNull;
+import static org.osgl.util.N.requireNonNegative;
+import static org.osgl.util.N.requireNotNaN;
+import static org.osgl.util.N.requirePositive;
 
 /**
  * Image utilities
@@ -102,7 +103,7 @@ public enum Img {
          * @return this Processor instance
          */
         public Processor source(BufferedImage source) {
-            this.source = assertNotNull(source);
+            this.source = Lang.requireNotNull(source);
             this.sourceWidth = source.getWidth();
             this.sourceHeight = source.getHeight();
             this.sourceRatio = (double) this.sourceWidth / this.sourceHeight;
@@ -131,11 +132,11 @@ public enum Img {
          * @param source the function that generate a BufferedImage instance
          */
         public _Processor($.Func0<BufferedImage> source) {
-            this.source = assertNotNull(source.apply());
+            this.source = Lang.requireNotNull(source.apply());
         }
 
         private _Processor(BufferedImage source) {
-            this.source = assertNotNull(source);
+            this.source = Lang.requireNotNull(source);
         }
 
         private _Processor(InputStream source) {
@@ -149,7 +150,7 @@ public enum Img {
         protected _Processor() {}
 
         public _Processor transform(Processor operator) {
-            assertNotNull(operator);
+            Lang.requireNotNull(operator);
             if (null == this.worker) {
                 this.worker = operator;
                 return me();
@@ -159,7 +160,7 @@ public enum Img {
         }
 
         public T compressionQuality(float compressionQuality) {
-            this.compressionQuality = N.assertAlpha(compressionQuality);
+            this.compressionQuality = N.requireAlpha(compressionQuality);
             return me();
         }
 
@@ -169,7 +170,7 @@ public enum Img {
         }
 
         public T source(BufferedImage source) {
-            this.source = assertNotNull(source);
+            this.source = Lang.requireNotNull(source);
             return me();
         }
 
@@ -267,14 +268,14 @@ public enum Img {
 
         private _Resize(int w, int h, InputStream is, BufferedImage source) {
             super(is, source);
-            this.w = assertPositive(w);
-            this.h = assertPositive(h);
+            this.w = requirePositive(w);
+            this.h = requirePositive(h);
             this.worker = resizer();
         }
 
         private _Resize(float scale, InputStream is, BufferedImage source) {
             super(is, source);
-            this.scale = assertPositive(scale);
+            this.scale = N.requirePositive(scale);
             this.worker = resizer();
         }
 
@@ -300,16 +301,16 @@ public enum Img {
 
         private _Crop(int x1, int y1, int x2, int y2, InputStream is, BufferedImage source) {
             super(is, source);
-            this.x1 = assertNonNegative(x1);
-            this.y1 = assertNonNegative(y1);
+            this.x1 = requireNonNegative(x1);
+            this.y1 = requireNonNegative(y1);
             this.x2 = x2;
             this.y2 = y2;
             this.worker = new Cropper(x1, y1, x2, y2);
         }
 
         public _Crop from(int x, int y) {
-            x1 = assertNonNegative(x);
-            y1 = assertNonNegative(y);
+            x1 = requireNonNegative(x);
+            y1 = requireNonNegative(y);
             return this;
         }
 
@@ -335,22 +336,22 @@ public enum Img {
 
         private _Watermarker(String text, InputStream inputStream, BufferedImage source) {
             super(inputStream, source);
-            this.text = S.assertNotBlank(text);
+            this.text = S.requireNotBlank(text);
             this.worker = new WaterMarker(text, offsetX, offsetY, color, font, alpha);
         }
 
         public _Watermarker color(Color color) {
-            this.color = assertNotNull(color);
+            this.color = Lang.requireNotNull(color);
             return this;
         }
 
         public _Watermarker font(Font font) {
-            this.font = assertNotNull(font);
+            this.font = Lang.requireNotNull(font);
             return this;
         }
 
         public _Watermarker alpha(float alpha) {
-            this.alpha = N.assertAlpha(alpha);
+            this.alpha = N.requireAlpha(alpha);
             return this;
         }
 
@@ -376,11 +377,11 @@ public enum Img {
         private BufferedImage source;
 
         private _Load(InputStream is) {
-            this.is = assertNotNull(is);
+            this.is = Lang.requireNotNull(is);
         }
 
         private _Load(BufferedImage source) {
-            this.source = assertNotNull(source);
+            this.source = Lang.requireNotNull(source);
         }
 
         public _Resize resize(float scale) {
@@ -535,13 +536,13 @@ public enum Img {
         boolean keepRatio;
 
         public Resizer(int w, int h, boolean keepRatio) {
-            this.w = assertNonNegative(w);
-            this.h = assertNonNegative(h);
+            this.w = requireNonNegative(w);
+            this.h = requireNonNegative(h);
             this.keepRatio = keepRatio;
         }
 
         public Resizer(float scale) {
-            this.scale = assertNotNaN(scale);
+            this.scale = requireNotNaN(scale);
             this.keepRatio = true;
         }
 

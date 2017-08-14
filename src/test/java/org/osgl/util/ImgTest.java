@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
+import static org.osgl.util.N.XY;
+
 public class ImgTest {
 
     private static InputStream img1() {
@@ -19,18 +21,18 @@ public class ImgTest {
     }
 
     static void testCrop() {
-        Img.source(img1()).crop(N.XY(30, 30), N.XY(100, 100)).writeTo(new File("/tmp/img1_crop.gif"));
+        Img.source(img1()).crop(XY(30, 30), XY(100, 100)).writeTo(new File("/tmp/img1_crop.gif"));
     }
 
     static void testResize() {
-        Img.source(img1()).resize(N.XY(100, 200)).writeTo(new File("/tmp/img1_resize.png"));
+        Img.source(img1()).resize(XY(100, 200)).writeTo(new File("/tmp/img1_resize.png"));
     }
 
     static void testResizeKeepRatio() {
         Img.source(img1()).resize(100, 200).keepRatio().writeTo(new File("/tmp/img1_resize_keep_ratio.png"));
     }
 
-    private static void testResizeToZero() {
+    private static void testIllegalArguments() {
         try {
             Img.source(img2()).resize(0.0f).writeTo("/tmp/img2_resize_zero.png");
             E.unexpected("IllegalArgumentException expected");
@@ -121,7 +123,7 @@ public class ImgTest {
         testProcessJPEGfile();
         testGenerateTrackingPixel();
         testCustomizedProcessor();
-        testResizeToZero();
+        testIllegalArguments();
     }
 
 }

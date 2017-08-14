@@ -4,13 +4,6 @@ import org.osgl.$;
 
 import java.util.Comparator;
 
-/**
- * Created with IntelliJ IDEA.
- * User: luog
- * Date: 20/11/13
- * Time: 10:10 PM
- * To change this template use File | Settings | File Templates.
- */
 public interface ArraySearch<T> extends ArrayAlgorithm, $.Func5<T[], Integer, Integer, T, Comparator<T>, Integer> {
     /**
      * Search array region specified by {@code from} and {@code to} using

@@ -2887,12 +2887,12 @@ public class Lang implements Serializable {
         }
 
         public _ConvertStage defaultTo(Object defVal) {
-            this.defVal = assertNotNull(defVal);
+            this.defVal = requireNotNull(defVal);
             return this;
         }
 
         public _ConvertStage hint(Object hint) {
-            this.hint = assertNotNull(hint);
+            this.hint = requireNotNull(hint);
             return this;
         }
 
@@ -5729,7 +5729,7 @@ public class Lang implements Serializable {
     }
 
     /**
-     * Alias of {@link #assertNotNull(Object, Object)}
+     * Alias of {@link #requireNotNull(Object, Object)}
      *
      * @param t1 the first candidate
      * @param def1 the second candidate
@@ -5737,7 +5737,7 @@ public class Lang implements Serializable {
      * @return the result as described above
      */
     public static <T> T ifNullThen(T t1, T def1) {
-        return assertNotNull(t1, def1);
+        return requireNotNull(t1, def1);
     }
 
     /**
@@ -5752,22 +5752,22 @@ public class Lang implements Serializable {
      * @param <T> the return result type
      * @return the result as described above
      */
-    public static <T> T assertNotNull(T t1, T def1) {
+    public static <T> T requireNotNull(T t1, T def1) {
         if (null != t1) {
             return t1;
         }
-        return assertNotNull(def1);
+        return requireNotNull(def1);
     }
 
     /**
-     * Alias of {@link #assertNotNull(Object, Lang.F0)}
+     * Alias of {@link #requireNotNull(Object, Lang.F0)}
      * @param t1 the first candidate
      * @param def1 the function that when called will return the second candidate
      * @param <T> the return result type
      * @return the result as described above
      */
     public static <T> T ifNullThen(T t1, F0<T> def1) {
-        return assertNotNull(t1, def1);
+        return requireNotNull(t1, def1);
     }
 
     /**
@@ -5782,8 +5782,8 @@ public class Lang implements Serializable {
      * @param <T> the return result type
      * @return the result as described above
      */
-    public static <T> T assertNotNull(T t1, F0<T> def1) {
-        return (null == t1) ? assertNotNull(def1.apply()) : t1;
+    public static <T> T requireNotNull(T t1, F0<T> def1) {
+        return (null == t1) ? requireNotNull(def1.apply()) : t1;
     }
 
     /**
@@ -5800,14 +5800,14 @@ public class Lang implements Serializable {
      * @param <T> the return result type
      * @return the result as described above
      */
-    public static <T> T assertNotNull(T t1, T def1, T def2) {
+    public static <T> T requireNotNull(T t1, T def1, T def2) {
         if (null != t1) {
             return t1;
         }
         if (null != def1) {
             return def1;
         }
-        return assertNotNull(def2);
+        return requireNotNull(def2);
     }
 
     /**
@@ -5826,7 +5826,7 @@ public class Lang implements Serializable {
      * @param <T> the return result type
      * @return the result as described above
      */
-    public static <T> T assertNotNull(T t1, T def1, T def2, T def3) {
+    public static <T> T requireNotNull(T t1, T def1, T def2, T def3) {
         if (null != t1) {
             return t1;
         }
@@ -5836,7 +5836,7 @@ public class Lang implements Serializable {
         if (null != def2) {
             return def2;
         }
-        return assertNotNull(def3);
+        return requireNotNull(def3);
     }
 
     /**
@@ -5853,7 +5853,7 @@ public class Lang implements Serializable {
      * @param <T> the return result type
      * @return the result as described above
      */
-    public static <T> T assertNotNull(T t1, List<T> defs) {
+    public static <T> T requireNotNull(T t1, List<T> defs) {
         if (null != t1) {
             return t1;
         }
@@ -6006,7 +6006,7 @@ public class Lang implements Serializable {
      * @param <T> the generic type of the object
      * @return the object passed in if it is not null
      */
-    public static <T> T assertNotNull(T o) {
+    public static <T> T requireNotNull(T o) {
         E.NPE(o);
         return o;
     }

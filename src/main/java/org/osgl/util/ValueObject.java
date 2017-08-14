@@ -410,7 +410,7 @@ public class ValueObject implements Serializable {
     }
 
     public ValueObject(String s) {
-        sVal = $.assertNotNull(s);
+        sVal = $.requireNotNull(s);
         type = Type.STRING;
     }
 
@@ -473,7 +473,7 @@ public class ValueObject implements Serializable {
     }
 
     public String stringValue() {
-        return $.assertNotNull(sVal);
+        return $.requireNotNull(sVal);
     }
 
     public <T extends Enum> T enumValue() {

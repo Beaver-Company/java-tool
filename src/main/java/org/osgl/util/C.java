@@ -2159,7 +2159,7 @@ public class C {
             private K key;
 
             private _Builder(K key) {
-                this.key = $.assertNotNull(key);
+                this.key = $.requireNotNull(key);
             }
 
             public <BV> Map<K, BV> to(V val) {

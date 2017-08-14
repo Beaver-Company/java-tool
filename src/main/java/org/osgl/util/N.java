@@ -628,45 +628,45 @@ public class N {
      * The <code>double</code> value that is closer than any other to
      * <i>e</i>, the base of the natural logarithms.
      */
-    public static final double E = 2.7182818284590452354;
+    public static final double E = Math.E;
 
     /**
      * The <code>double</code> value that is closer than any other to
      * <i>pi</i>, the ratio of the circumference of a circle to its
      * diameter.
      */
-    public static final double PI = 3.14159265358979323846;
+    public static final double PI = Math.PI;
 
-    public static int assertPositive(int n) {
+    public static int requirePositive(int n) {
         illegalArgumentIf(n < 1, "positive int required");
         return n;
     }
 
-    public static float assertPositive(float n) {
+    public static float requirePositive(float n) {
         illegalArgumentIf(n <= 0.0f, "positive float required");
         return n;
     }
 
-    public static int assertNonNegative(int n) {
+    public static int requireNonNegative(int n) {
         illegalArgumentIf(n < 0, "non negative int required");
         return n;
     }
 
-    public static int assertNegative(int n) {
+    public static int requireNegative(int n) {
         illegalArgumentIf(n > -1, "negative int required");
         return n;
     }
 
-    public static class _IntAssert {
+    public static class _IntRequire {
         private int n;
-        private _IntAssert(int n) {
+        private _IntRequire(int n) {
             this.n = n;
         }
         public int positive() {
-            return assertPositive(n);
+            return requirePositive(n);
         }
         public int negative() {
-            return assertNegative(n);
+            return requireNegative(n);
         }
         public int equalTo(int x) {
             illegalArgumentIf(n == x, "n[%s] should be equal to %s", n, x);
@@ -712,8 +712,8 @@ public class N {
         }
     }
 
-    public static _IntAssert assert_(int n) {
-        return new _IntAssert(n);
+    public static _IntRequire require(int n) {
+        return new _IntRequire(n);
     }
 
     /**
@@ -722,19 +722,19 @@ public class N {
      * @return the float number if fall in image alpha float rage
      * @throws IllegalArgumentException if the number is beyond the range
      */
-    public static float assertAlpha(float f) {
+    public static float requireAlpha(float f) {
         illegalArgumentIf(f > 1 || f < 0, "f [%s] should be between 0 and 1 inclusive", f);
         return f;
     }
 
-    public static float assertNotNaN(float f) {
+    public static float requireNotNaN(float f) {
         illegalArgumentIf(Float.isNaN(f), "f shall not be NaN");
         return f;
     }
 
-    public static class _FloatAssert {
+    public static class _FloatRequire {
         private float f;
-        private _FloatAssert(float f) {
+        private _FloatRequire(float f) {
             this.f = f;
         }
     }

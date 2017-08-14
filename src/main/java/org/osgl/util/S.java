@@ -2,7 +2,9 @@ package org.osgl.util;
 
 import org.osgl.$;
 import org.osgl.Lang;
+import org.osgl.OsglConfig;
 import org.osgl.exception.NotAppliedException;
+import org.osgl.util.algo.StringReplace;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -329,7 +331,7 @@ public class S {
      * @return the string if it is not blank
      * @throws IllegalArgumentException if the string `s` is blank
      */
-    public static String assertNotBlank(String s) {
+    public static String requireNotBlank(String s) {
         E.illegalArgumentIf(isBlank(s));
         return s;
     }
@@ -343,7 +345,7 @@ public class S {
      * @return the string if it is not empty
      * @throws IllegalArgumentException if the string `s` is empty
      */
-    public static String assertNotEmpty(String s) {
+    public static String requireNotEmpty(String s) {
         E.illegalArgumentIf(isEmpty(s));
         return s;
     }
@@ -744,6 +746,8 @@ public class S {
         private String text;
         private String literal;
         private Pattern pattern;
+        private boolean jdk;
+        private StringReplace replacer = OsglConfig.DEF_STRING_REPLACE;
 
         private _Replace(String text, String literal) {
             this.text = string(text);
@@ -760,6 +764,11 @@ public class S {
             return this;
         }
 
+        public _Replace usingJdkRule() {
+            this.jdk = true;
+            return this;
+        }
+
         public String with(String replacement) {
             if (null != pattern) {
                 return pattern.matcher(text).replaceAll(replacement);
@@ -767,7 +776,13 @@ public class S {
                 if (text.length() < literal.length()) {
                     return text;
                 }
-                // TODO implement fast string literal replacement logic here
+                if (jdk) {
+                    return text.replace(literal, replacement);
+                }
+                char[] text = Unsafe.bufOf(this.text);
+                char[] target = Unsafe.bufOf(this.literal);
+                char[] replace = Unsafe.bufOf(replacement);
+                return Unsafe.stringOf(this.replacer.apply(text, target, replace));
             }
         }
     }
@@ -902,7 +917,7 @@ public class S {
         private boolean separateFix;
 
         private _IterableJoiner(Iterable<?> iterable) {
-            this.iterable = $.assertNotNull(iterable);
+            this.iterable = $.requireNotNull(iterable);
         }
 
         public _IterableJoiner by(String separator) {
@@ -1202,7 +1217,7 @@ public class S {
         private String toBeStripped;
 
         private _StripStringState(String s) {
-            toBeStripped = S.assertNotEmpty(s);
+            toBeStripped = S.requireNotEmpty(s);
         }
 
         public String of(String wrapper) {
@@ -2372,7 +2387,7 @@ public class S {
      * @param targetCount  count of the target string.
      * @param fromIndex    the index to begin searching from.
      */
-    static int indexOf(char[] source, int sourceOffset, int sourceCount,
+    public static int indexOf(char[] source, int sourceOffset, int sourceCount,
                        char[] target, int targetOffset, int targetCount,
                        int fromIndex) {
         if (fromIndex >= sourceCount) {
