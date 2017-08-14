@@ -9,7 +9,7 @@ import org.osgl.util.S;
 /**
  * Base class for implementing algorithm that perform replacement on {@link char[]}
  */
-public abstract class StringReplace implements $.Func3<char[], char[], char[], char[]> {
+public abstract class StringReplace implements $.Func4<char[], char[], char[], Integer, char[]> {
 
     /**
      * Apply the function to replace all target in text with replacement and return a
@@ -18,13 +18,14 @@ public abstract class StringReplace implements $.Func3<char[], char[], char[], c
      * @param text the text
      * @param target the target to search
      * @param replacement the replacement of target
+     * @param firstId the first index of targe inside text. If negative means not searched yet
      * @return the replaced result as described above
      * @throws NotAppliedException
      * @throws Lang.Break
      */
     @Override
-    public final char[] apply(char[] text, char[] target, char[] replacement) throws NotAppliedException, Lang.Break {
-        return replace(text, target, replacement);
+    public final char[] apply(char[] text, char[] target, char[] replacement, Integer firstId) throws NotAppliedException, Lang.Break {
+        return replace(text, target, replacement, firstId);
     }
 
     /**
@@ -32,15 +33,16 @@ public abstract class StringReplace implements $.Func3<char[], char[], char[], c
      * @param text the text in which search string will be replaced
      * @param target the target string to be replaced
      * @param replacement the replacement string
+     * @param firstId the first index of targe inside text. If negative means not searched yet
      * @return result of the replacement
      */
-    protected abstract char[] replace(char[] text, char[] target, char[] replacement);
+    public abstract char[] replace(char[] text, char[] target, char[] replacement, int firstId);
 
-    public static StringReplace wrap(final $.Func3<char[], char[], char[], char[]> replaceLogic) {
+    public static StringReplace wrap(final $.Func4<char[], char[], char[], Integer, char[]> replaceLogic) {
         return $.requireNotNull(replaceLogic) instanceof StringReplace ? (StringReplace) replaceLogic : new StringReplace() {
             @Override
-            protected char[] replace(char[] text, char[] target, char[] replacement) {
-                return replaceLogic.apply(text, target, replacement);
+            public char[] replace(char[] text, char[] target, char[] replacement, int firstId) {
+                return replaceLogic.apply(text, target, replacement, firstId);
             }
         };
     }
@@ -58,14 +60,14 @@ public abstract class StringReplace implements $.Func3<char[], char[], char[], c
         }
 
         @Override
-        protected char[] replace(char[] text, char[] target, char[] replacement) {
+        public char[] replace(char[] text, char[] target, char[] replacement, int firstId) {
             StringSearch searcher = this.searcher;
             S.Buffer buf;
             int textLen = text.length, targetLen = target.length, i = 0, j = 0;
             if (textLen == 0 || targetLen == 0) {
                 return text;
             }
-            i = searcher.search(text, target, 0);
+            i = firstId < 0 ? searcher.search(text, target, 0) : firstId;
             if (i < 0) {
                 return text;
             }

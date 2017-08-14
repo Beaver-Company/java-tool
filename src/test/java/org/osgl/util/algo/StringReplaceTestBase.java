@@ -39,6 +39,11 @@ public abstract class StringReplaceTestBase<LOGIC extends StringReplace> extends
         text("Some aaa to be replaced").target("aa").replacement("b").verify();
     }
 
+    @Test
+    public void testFirstIdSpecified() {
+        text("abc some xyz aaa").target("ome").replacement("alt").verify("abc some xyz aaa".indexOf("ome"));
+    }
+
     protected StringReplaceTestBase text(String text) {
         this.text = text.toCharArray();
         return this;
@@ -55,7 +60,11 @@ public abstract class StringReplaceTestBase<LOGIC extends StringReplace> extends
     }
 
     protected void verify() {
-        char[] replaced = replacer.replace(text, target, replacement);
+        verify(-1);
+    }
+
+    protected void verify(int firstId) {
+        char[] replaced = replacer.replace(text, target, replacement, firstId);
         String s = text == replaced ? String.valueOf(text) : String.valueOf(replaced);
         eq(String.valueOf(text).replace(String.valueOf(target), String.valueOf(replacement)), s);
     }
