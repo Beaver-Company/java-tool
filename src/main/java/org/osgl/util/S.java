@@ -744,14 +744,13 @@ public class S {
 
     public static class _Replace {
         private String text;
-        private String literal;
-        private Pattern pattern;
-        private boolean jdk;
+        protected String keyword;
+        protected Pattern pattern;
         private StringReplace replacer = OsglConfig.DEF_STRING_REPLACE;
 
-        private _Replace(String text, String literal) {
+        private _Replace(String text, String keyword) {
             this.text = text;
-            this.literal = string(literal);
+            this.keyword = keyword;
         }
 
         private _Replace(String text, Pattern pattern) {
@@ -760,12 +759,7 @@ public class S {
         }
 
         public _Replace usingRegEx() {
-            this.pattern = Pattern.compile(literal);
-            return this;
-        }
-
-        public _Replace usingJdkRule() {
-            this.jdk = true;
+            this.pattern = Pattern.compile(keyword);
             return this;
         }
 
@@ -774,26 +768,50 @@ public class S {
             return this;
         }
 
+        public String with($.Function<String, String> replacement) {
+            E.illegalStateIf(null != pattern, "Replace with function doesnot support regex search");
+            return with(replacement.apply(this.keyword));
+        }
+
         public String with(String replacement) {
             if (null != pattern) {
                 return pattern.matcher(text).replaceAll(replacement);
             } else {
-                if (text.length() < literal.length()) {
+                if (text.length() < keyword.length()) {
                     return text;
                 }
-                if (jdk) {
-                    return text.replace(literal, replacement);
-                }
-                int firstId = this.text.indexOf(this.literal);
+                int firstId = this.text.indexOf(this.keyword);
                 if (firstId < 0) {
                     return this.text;
                 }
                 char[] text = Unsafe.bufOf(this.text);
-                char[] target = this.literal.toCharArray();
+                char[] target = this.keyword.toCharArray();
                 char[] replace = replacement.toCharArray();
                 char[] result = this.replacer.replace(text, target, replace, firstId);
                 return (result == text) ? this.text : Unsafe.stringOf(result);
             }
+        }
+    }
+
+    public static class _WrapReplace extends _Replace {
+        public _WrapReplace(String text, String keyword) {
+            super(text, keyword);
+        }
+        public String with($.Tuple<String, String> wrapper) {
+            return with(F.wrapper(wrapper));
+        }
+
+        public String with(String left, String right) {
+            return with(F.wrapper(left, right));
+        }
+
+        public String with($.Function<String, String> replacement) {
+            E.illegalStateIf(null != pattern, "Replace with function doesnot support regex search");
+            return super.with(replacement.apply(this.keyword));
+        }
+
+        public String with(String wrapper) {
+            return with(wrapper, wrapper);
         }
     }
 
@@ -806,6 +824,16 @@ public class S {
         }
         public String with(char replacement) {
             return text.replace(toBeReplaced, replacement);
+        }
+    }
+
+    public static class _ReplaceStage {
+        private String keyword;
+        private _ReplaceStage(String keyword) {
+            this.keyword = keyword;
+        }
+        public _Replace in(String text) {
+            return new _Replace(text, keyword);
         }
     }
 
@@ -842,6 +870,14 @@ public class S {
 
     public static _Have take(String s) {
         return new _Have(s);
+    }
+
+    public static _ReplaceStage replace(Object keyword) {
+        return new _ReplaceStage(string(keyword));
+    }
+
+    public static _ReplaceStage replace(String keyword) {
+        return new _ReplaceStage(null == keyword ? "" : keyword);
     }
 
     public static String pathConcat(String prefix, char sep, String suffix) {
@@ -1297,6 +1333,10 @@ public class S {
 
         public String with(String left, String right) {
             return wrap(content, left, right);
+        }
+
+        public _WrapReplace in(String text) {
+            return new _WrapReplace(text, content);
         }
 
         @Override
@@ -2712,6 +2752,23 @@ public class S {
                     return S.newBuilder(prependix).append(s).toString();
                 }
             };
+        }
+
+        public static $.Transformer<String, String> wrapper(final String left, final String right) {
+            return new $.Transformer<String, String>() {
+                @Override
+                public String transform(String s) throws Lang.Break, NotAppliedException {
+                    return left + s + right;
+                }
+            };
+        }
+
+        public static $.Transformer<String, String> wrapper(String wrapper) {
+            return wrapper(wrapper, wrapper);
+        }
+
+        public static $.Transformer<String, String> wrapper(final $.Tuple<String, String> wrapper) {
+            return wrapper(wrapper.left(), wrapper.right());
         }
 
     }

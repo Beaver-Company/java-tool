@@ -35,7 +35,7 @@ public abstract class StringSearch implements $.Func3<char[], char[], Integer, I
     }
 
     /**
-     * Implement a simple string search algorithm
+     * Implement a simple string search algorithm using JDK `String.indexOf` algorithm
      */
     public static class SimpleStringSearch extends StringSearch {
         @Override

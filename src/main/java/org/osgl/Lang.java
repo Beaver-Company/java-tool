@@ -2188,8 +2188,8 @@ public class Lang implements Serializable {
     }
 
     /**
-     * Define a processor function which applied to one parameter and return the parameter instance after
-     * processing on the parameter
+     * Define a processor function which applied to one parameter and
+     * return the parameter instance after processing on the parameter
      *
      * @param <T> the paramete type
      */

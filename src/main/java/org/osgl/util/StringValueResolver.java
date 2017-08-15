@@ -120,13 +120,13 @@ public abstract class StringValueResolver<T> extends $.F1<String, T> {
         return this;
     }
 
-    public static <T> StringValueResolver<T> wrap(final $.Function<String, T> func, final Class<T> targetType) {
+    public static <TYPE> StringValueResolver<TYPE> wrap(final $.Function<String, TYPE> func, final Class<TYPE> targetType) {
         if (func instanceof StringValueResolver) {
             return (StringValueResolver) func;
         } else {
-            return new StringValueResolver<T>(targetType) {
+            return new StringValueResolver<TYPE>(targetType) {
                 @Override
-                public T resolve(String value) {
+                public TYPE resolve(String value) {
                     return func.apply(value);
                 }
             };

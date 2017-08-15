@@ -3,6 +3,8 @@ package org.osgl.util;
 import org.junit.Test;
 import org.osgl.$;
 
+import static org.osgl.util.S.F.wrapper;
+
 public class STest extends UtilTestBase {
     @Test
     public void testAppend() {
@@ -248,5 +250,35 @@ public class STest extends UtilTestBase {
         eq("(xyz)", S.ensure("xyz)").wrappedWith(S.PARENTHESES));
         eq("|abc|", S.ensure("|abc|").wrappedWith("|"));
         eq("abc.json", S.ensure("abc").endWith(".json"));
+    }
+
+    /**
+     * This only test the simple case for S replace API
+     *
+     * The more sophisticated replace test cases can be found in
+     * {@link org.osgl.util.algo.StringReplaceTestBase}
+     */
+    @Test
+    public void testReplace() {
+        final String text = "I am a good person";
+
+        eq("I am a good man",
+                text.replace("person", "man"));
+        eq("I am a good man",
+                S.have(text).replace("person").with("man"));
+        eq("I am a good man",
+                S.replace("person").in(text).with("man"));
+
+        eq("I am a **good** person",
+                text.replace("good", "**good**"));
+        eq("I am a **good** person",
+                S.have(text).replace("good").with(wrapper("**")));
+        eq("I am a **good** person",
+                S.wrap("good").in(text).with("**"));
+
+        eq("I am a [good] person",
+                S.have(text).replace("good").with(wrapper(S.BRACKETS)));
+        eq("I am a [good] person",
+                S.wrap("good").in(text).with(S.BRACKETS));
     }
 }
