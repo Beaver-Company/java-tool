@@ -231,6 +231,7 @@ public class STest extends UtilTestBase {
     @Test
     public void testIs() {
         no(S.is("abc").blank());
+        yes(S.is(null).empty());
         yes(S.is("").empty());
         no(S.is(" ").empty());
         yes(S.is(" ").blank());
@@ -244,11 +245,13 @@ public class STest extends UtilTestBase {
     public void testEnsure() {
         eq("[abc]", S.ensure("abc").wrappedWith(S.SQUARE_BRACKETS));
         eq("(xyz)", S.ensure("xyz").wrappedWith(S.PARENTHESES));
+        eq("xyz", S.ensure("[xyz]").strippedOff(S.BRACKETS));
         eq("(xyz)", S.ensure("xyz").wrappedWith($.Pair("(", ")")));
         eq("|abc|", S.ensure("abc").wrappedWith("|"));
         eq("[abc]", S.ensure("[abc").wrappedWith(S.SQUARE_BRACKETS));
         eq("(xyz)", S.ensure("xyz)").wrappedWith(S.PARENTHESES));
         eq("|abc|", S.ensure("|abc|").wrappedWith("|"));
+        eq("abc", S.ensure("|abc|").strippedOff("|"));
         eq("abc.json", S.ensure("abc").endWith(".json"));
     }
 
