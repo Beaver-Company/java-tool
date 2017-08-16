@@ -19,6 +19,8 @@ import static org.osgl.util.E.illegalArgumentIf;
  */
 public class N {
 
+    private static Random random = new Random();
+
     N() {
     }
 
@@ -571,10 +573,41 @@ public class N {
             }
             return new ByteRangeStep(times * n);
         }
+
     }
 
-    public static class XY extends $.T2<Integer, Integer> {
-        public XY(Integer x, Integer y) {
+    public static class Pair extends $.T2<Integer, Integer> {
+        public Pair(Integer _1, Integer _2) {
+            super(_1, _2);
+        }
+    }
+
+    public static class WH extends Dimension {
+        public WH(Integer width, Integer height) {
+            super(width, height);
+        }
+    }
+
+    public static class Dimension extends Pair {
+        public Dimension(Integer width, Integer height) {
+            super(width, height);
+        }
+        public int width() {
+            return left();
+        }
+        public int height() {
+            return right();
+        }
+        public int w() {
+            return width();
+        }
+        public int h() {
+            return height();
+        }
+    }
+
+    public static class Coordinate2D extends Pair {
+        public Coordinate2D(Integer x, Integer y) {
             super(x, y);
         }
         public int x() {
@@ -585,14 +618,22 @@ public class N {
         }
     }
 
-    public static class Coordinate2D extends XY {
-        public Coordinate2D(Integer x, Integer y) {
+    public static class XY extends Coordinate2D {
+        public XY(Integer x, Integer y) {
             super(x, y);
         }
     }
 
-    public static Coordinate2D XY(int x, int y) {
-        return new Coordinate2D(x, y);
+    public static XY xy(int x, int y) {
+        return new XY(x, y);
+    }
+
+    public static WH dimension(int width, int height) {
+        return new WH(width, height);
+    }
+
+    public static WH wh(int w, int h) {
+        return new WH(w, h);
     }
 
     private static Map<Class<? extends Number>, Type> _m;
@@ -934,7 +975,7 @@ public class N {
      * @return a random int value
      */
     public static int randInt() {
-        return new Random().nextInt();
+        return random.nextInt();
     }
 
     public static int randIntWithSymbol() {
@@ -947,7 +988,7 @@ public class N {
      * @return a random int value
      */
     public static int randInt(int max) {
-        return new Random().nextInt(max);
+        return random.nextInt(max);
     }
 
     public static int randIntWithSymbol(int max) {
@@ -955,7 +996,7 @@ public class N {
     }
 
     public static float randFloat() {
-        return new Random().nextFloat();
+        return random.nextFloat();
     }
 
     public static float randFloatWithSymbol() {
@@ -963,7 +1004,7 @@ public class N {
     }
 
     public static long randLong() {
-        return new Random().nextLong();
+        return random.nextLong();
     }
 
     public static long randLongWithSymbol() {
@@ -975,7 +1016,7 @@ public class N {
      * @return a random double value
      */
     public static double randDouble() {
-        return new Random().nextDouble();
+        return random.nextDouble();
     }
 
     public static double randDoubleWithSymbol() {
@@ -1050,7 +1091,11 @@ public class N {
         if (null == b) {
             return false;
         }
-        return (a.doubleValue() - b.doubleValue()) <= Double.MIN_NORMAL;
+        return abs(a.doubleValue() - b.doubleValue()) <= Double.MIN_NORMAL;
+    }
+
+    public static final boolean neq(Number a, Number b) {
+        return !eq(a, b);
     }
 
     public static final boolean lt(Number a, Number b) {
@@ -1467,6 +1512,6 @@ public class N {
     }
 
     private static int randSymbol() {
-        return new Random().nextInt(2) == 0 ? -1 : 1;
+        return randInt(2) == 0 ? -1 : 1;
     }
 }

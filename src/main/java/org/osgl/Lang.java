@@ -2549,13 +2549,32 @@ public class Lang implements Serializable {
     }
 
     /**
-     * A Producer function that apply to nothing and return a product
+     * A Provider is a function that apply to nothing and return an element
      *
-     * @param <PRODUCT> the product type
+     * @param <ELEMENT> the type of the returning element
      */
-    public static abstract class Producer<PRODUCT> extends Lang.F0<PRODUCT> {
+    public static abstract class Provider<ELEMENT> extends F0<ELEMENT> {
         @Override
-        public PRODUCT apply() throws NotAppliedException, Break {
+        public final ELEMENT apply() throws NotAppliedException, Break {
+            return get();
+        }
+
+        /**
+         * Get the element
+         * @return the element the provider provides
+         */
+        public abstract ELEMENT get();
+    }
+
+    /**
+     * A Producer is a provider that {@link Producer#produce()} product
+     *
+     * @param <PRODUCT> the generic type of the produce the producer produces
+     */
+    public static abstract class Producer<PRODUCT> extends Provider<PRODUCT> {
+
+        @Override
+        public final PRODUCT get() {
             return produce();
         }
 
