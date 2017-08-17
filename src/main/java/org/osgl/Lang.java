@@ -8711,6 +8711,17 @@ public class Lang implements Serializable {
         }
 
         /**
+         * Return a provider that when called will return
+         * the object specified
+         * @param obj the object to be returned when calling the returning function
+         * @param <T> the object type
+         * @return a provider function that returns the object specified
+         */
+        public static <T> $.Val<T> provides(final T obj) {
+            return val(obj);
+        }
+
+        /**
          * The type-safe version of {@link #IDENTITY}
          *
          * @param clz the class that restrict the type of &lt;T&gt;

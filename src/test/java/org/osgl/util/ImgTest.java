@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
+import static org.osgl.util.Img.concat;
+import static org.osgl.util.Img.source;
+
 public class ImgTest {
 
     private static InputStream img1() {
@@ -23,20 +26,21 @@ public class ImgTest {
     }
 
     static void testCrop() {
-        Img.source(img1()).crop().from(30, 30).to(100, 100).writeTo(new File("/tmp/img1_crop.gif"));
+        Img.crop(source(img1())).from(30, 30).to(100, 100).writeTo(new File("/tmp/img1_crop.gif"));
     }
 
     static void testResize() {
-        Img.source(img1()).resize(N.xy(100, 200)).writeTo(new File("/tmp/img1_resize.png"));
+        Img.resize(source(img1())).to(100, 200).writeTo(new File("/tmp/img1_resize.png"));
+        Img.resize(source(img1())).to(2.0f).writeTo(new File("/tmp/img1_resize_x2.png"));
     }
 
     static void testResizeKeepRatio() {
-        Img.source(img1()).resize(100, 200).keepRatio().writeTo(new File("/tmp/img1_resize_keep_ratio.png"));
+        source(img1()).resize(100, 200).keepRatio().writeTo(new File("/tmp/img1_resize_keep_ratio.png"));
     }
 
     private static void testIllegalArguments() {
         try {
-            Img.source(img2()).resize(0.0f).writeTo("/tmp/img2_resize_zero.png");
+            source(img2()).resize(0.0f).writeTo("/tmp/img2_resize_zero.png");
             E.unexpected("IllegalArgumentException expected");
         } catch (IllegalArgumentException e) {
             // pass
@@ -44,23 +48,23 @@ public class ImgTest {
     }
 
     static void testWatermarkWithDefSetting() {
-        Img.source(img1()).watermark("CONFIDENTIAL").writeTo("/tmp/img1_watermark_def.png");
+        source(img1()).watermark("CONFIDENTIAL").writeTo("/tmp/img1_watermark_def.png");
     }
 
     static void testWatermark() {
-        Img.source(img1()).watermark("CONFIDENTIAL").offsetY(-200).color(Color.DARK_GRAY).writeTo("/tmp/img1_watermark.png");
+        source(img1()).watermark("CONFIDENTIAL").offsetY(-200).color(Color.DARK_GRAY).writeTo("/tmp/img1_watermark.png");
     }
 
     private static void testCompress() {
-        Img.source(img1()).compress(0.01f).writeTo("/tmp/img1_compress.jpeg");
+        source(img1()).compress(0.01f).writeTo("/tmp/img1_compress.jpeg");
     }
 
     private static void testCopy() {
-        Img.source(img1()).copy().writeTo("/tmp/img1_copy.jpeg");
+        source(img1()).copy().writeTo("/tmp/img1_copy.jpeg");
     }
 
     private static void testPipeline() {
-        Img.source(img1())
+        source(img1())
                 .resize(300, 400)
                 .pipeline()
                 .crop(50, 50, 250, 350)
@@ -71,11 +75,11 @@ public class ImgTest {
 
 
     private static void testResizeByScale() {
-        Img.source(img2()).resize(0.5f).writeTo("/tmp/img2_resize_scale.png");
+        source(img2()).resize(0.5f).writeTo("/tmp/img2_resize_scale.png");
     }
 
     private static void testProcessJPEGfile() {
-        Img.source(img2())
+        source(img2())
                 .resize(640, 480)
                 .pipeline()
                 .crop(50, 50, -50, -50)
@@ -89,8 +93,8 @@ public class ImgTest {
     }
 
     private static void testFlip() {
-        Img.source(img1()).flip().writeTo("/tmp/img1_flip_h.png");
-        Img.source(img1()).flipVertial().writeTo("/tmp/img1_flip_v.png");
+        source(img1()).flip().writeTo("/tmp/img1_flip_h.png");
+        source(img1()).flipVertial().writeTo("/tmp/img1_flip_v.png");
     }
 
     private static class Sunglass extends Img.Processor {
@@ -113,7 +117,7 @@ public class ImgTest {
         // style A
         new Sunglass(0.7f).process(img2()).pipeline().resize(0.5f).writeTo("/tmp/img2_sunglass_style_a.jpg");
         // style B
-        Img.source(img2()).resize(0.3f).pipeline(new Sunglass()).writeTo("/tmp/img2_sunglass_style_b.png");
+        source(img2()).resize(0.3f).pipeline(new Sunglass()).writeTo("/tmp/img2_sunglass_style_b.png");
     }
 
     private static class FluentSunglass extends Img.Processor<FluentSunglass, FluentSunglass.Stage> {
@@ -156,43 +160,47 @@ public class ImgTest {
     }
 
     private static void testCustomizedFluentProcessor() {
-        Img.source(img2())
+        source(img2())
                 .resize(0.3f)
                 .pipeline(FluentSunglass.class)
                 .lighter()
                 .writeTo("/tmp/img2_f_sunglass_lighter.png");
 
-        Img.source(img2())
+        source(img2())
                 .resize(0.3f)
                 .pipeline(FluentSunglass.class)
-                .darker()
+                .dark()
                 .writeTo("/tmp/img2_f_sunglass_darker.png");
     }
 
 
     private static void randomPixels() {
-        Img.source(Img.F.randomPixels(400, 200)).blur().writeTo("/tmp/img_random_pixels.png");
+        source(Img.F.randomPixels(400, 200)).blur().writeTo("/tmp/img_random_pixels.png");
     }
 
     private static void testBlur() {
-        Img.source(img1()).blur().writeTo("/tmp/img1_blur_default.png");
-        Img.source(img2()).blur(10).writeTo("/tmp/img2_blur_10.jpg");
-        Img.source(img2()).blur(2).writeTo("/tmp/img2_blur_2.jpg");
-        Img.source(img3()).blur(5).writeTo("/tmp/img3_blur_5.jpg");
+        source(img1()).blur().writeTo("/tmp/img1_blur_default.png");
+        source(img2()).blur(10).writeTo("/tmp/img2_blur_10.jpg");
+        source(img2()).blur(2).writeTo("/tmp/img2_blur_2.jpg");
+        source(img3()).blur(5).writeTo("/tmp/img3_blur_5.jpg");
     }
 
     private static void testConcatenate() {
-        Img.source(img2()).appendWith(Img.source(img3())).writeTo("/tmp/img_concat_2_3.png");
-        Img.source(img2()).appendTo(Img.source(img3())).writeTo("/tmp/img_concat_3_2.png");
+        source(img2()).appendWith(source(img3())).writeTo("/tmp/img_concat_2_3.png");
+        source(img2()).appendTo(source(img3())).writeTo("/tmp/img_concat_3_2.png");
 
-        Img.source(img2()).appendWith(Img.source(img1()))
+        source(img2()).appendWith(source(img1()))
                 .noScaleFix()
                 .vertically()
                 .writeTo("/tmp/img_concat_2_1.png");
 
-        Img.source(img3()).appendWith(Img.source(img1()))
+        source(img3()).appendWith(source(img1()))
                 .shinkToSmall()
                 .writeTo("/tmp/img_concat_3_1.png");
+
+        concat(source(img1()), source(img2())).appendWith(source(img3())).vertically().writeTo("/tmp/img_concat_123");
+
+        concat(source(img2())).with(source(img3())).vertically().appendWith(source(img1())).writeTo("/tmp/img_concat_231");
     }
 
     public static void main(String[] args) {

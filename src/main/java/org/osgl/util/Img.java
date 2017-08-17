@@ -562,12 +562,16 @@ public enum Img {
             return source;
         }
 
+        public Resizer.Stage resize() {
+            return new Resizer.Stage(source);
+        }
+
         public Resizer.Stage resize(float scale) {
             return new Resizer.Stage(source).scale(scale);
         }
 
         public Resizer.Stage resize(int w, int h) {
-            return new Resizer.Stage(source).widthAndHeight(w, h);
+            return new Resizer.Stage(source).dimension(w, h);
         }
 
         public Resizer.Stage resize($.Tuple<Integer, Integer> dimension) {
@@ -588,6 +592,10 @@ public enum Img {
 
         public Cropper.Stage crop($.Tuple<Integer, Integer> leftTop, $.Tuple<Integer, Integer> rightBottom) {
             return crop(leftTop._1, leftTop._2, rightBottom._1, rightBottom._2);
+        }
+
+        public WaterMarker.Stage watermark() {
+            return new WaterMarker.Stage(source);
         }
 
         public WaterMarker.Stage watermark(String text) {
@@ -626,16 +634,16 @@ public enum Img {
             return processor.createStage();
         }
 
-        public Concatenater.Stage appendWith($.Provider<BufferedImage> secondImange) {
-            return new Concatenater.Stage(secondImange.apply(), source);
+        public Concatenater.Stage appendWith($.Func0<BufferedImage> secondImange) {
+            return new Concatenater.Stage(source).with(secondImange);
         }
 
-        public Concatenater.Stage appendTo($.Provider<BufferedImage> firstImage) {
+        public Concatenater.Stage appendTo($.Func0<BufferedImage> firstImage) {
             return appendWith(firstImage).reverse();
         }
 
         public Concatenater.Stage appendWith(BufferedImage secondImange) {
-            return new Concatenater.Stage(secondImange, source);
+            return new Concatenater.Stage(source).with(F.source(secondImange));
         }
 
         public Concatenater.Stage appendTo(BufferedImage firstImage) {
@@ -658,6 +666,34 @@ public enum Img {
 
     public static _Load source(BufferedImage image) {
         return new ProcessorStage<>(image).pipeline();
+    }
+
+    public static Resizer.Stage resize($.Func0<BufferedImage> imageProvider) {
+        return source(imageProvider).resize();
+    }
+
+    public static Cropper.Stage crop($.Func0<BufferedImage> imageProvider) {
+        return source(imageProvider).crop();
+    }
+
+    public static Flip.Stage flip($.Func0<BufferedImage> imageProvider) {
+        return source(imageProvider).flip();
+    }
+
+    public static Blur.Stage blur($.Func0<BufferedImage> imageProvider) {
+        return source(imageProvider).blur();
+    }
+
+    public static WaterMarker.Stage watermark($.Func0<BufferedImage> imageProvider) {
+        return source(imageProvider).watermark();
+    }
+
+    public static Concatenater.Stage concat($.Func0<BufferedImage> image1) {
+        return new Concatenater.Stage(image1.apply());
+    }
+
+    public static Concatenater.Stage concat($.Func0<BufferedImage> image1, $.Func0<BufferedImage> image2) {
+        return source(image1).appendWith(image2);
     }
 
     /**
@@ -766,14 +802,38 @@ public enum Img {
                 super(source, new Resizer());
             }
 
-            Stage widthAndHeight(int w, int h) {
+            Stage dimension(int w, int h) {
                 processor.w = requireNonNegative(w);
                 processor.h = requireNonNegative(h);
                 return this;
             }
 
+            Stage dimension($.Tuple<Integer, Integer> dimension) {
+                return to(dimension);
+            }
+
+            Stage dimension(Dimension dimension) {
+                return dimension(dimension.width, dimension.height);
+            }
+
+            Stage to(int w, int h) {
+                return dimension(w, h);
+            }
+
+            Stage to($.Tuple<Integer, Integer> dimension) {
+                return to(dimension.left(), dimension.right());
+            }
+
+            Stage to(Dimension dimension) {
+                return to(dimension.width, dimension.height);
+            }
+
+            Stage to(float scale) {
+                return scale(scale);
+            }
+
             Stage scale(float scale) {
-                processor.scale = requireNotNaN(scale);
+                processor.scale = requirePositive(scale);
                 return this;
             }
 
@@ -1127,9 +1187,9 @@ public enum Img {
     public static class Concatenater extends BinarySourceProcessor<Concatenater, Concatenater.Stage> {
         public static class Stage extends ProcessorStage<Stage, Concatenater> {
 
-            protected Stage(BufferedImage secondSource, BufferedImage source) {
+            protected Stage(BufferedImage source) {
                 super(source);
-                this.processor = new Concatenater(secondSource);
+                this.processor = new Concatenater();
             }
 
             public Stage dir(Direction dir) {
@@ -1177,6 +1237,19 @@ public enum Img {
                 return this;
             }
 
+            public Stage with($.Func0<BufferedImage> secondImage) {
+                this.processor.secondSource(secondImage.apply());
+                return this;
+            }
+
+            public Stage appendWith($.Func0<BufferedImage> anotherOne) {
+                return Img.concat(this, anotherOne);
+            }
+
+            public Stage appendTo($.Func0<BufferedImage> anotherOne) {
+                return Img.concat(anotherOne, this);
+            }
+
         }
 
         /**
@@ -1199,6 +1272,8 @@ public enum Img {
         Color background = COLOR_TRANSPARENT;
 
         boolean reversed = false;
+
+        private Concatenater() {}
 
         Concatenater(BufferedImage secondImage) {
             this.secondSource(secondImage);
@@ -1326,6 +1401,28 @@ public enum Img {
                     return b;
                 }
             };
+        }
+
+        public static $.Provider<BufferedImage> source(final InputStream is) {
+            return new $.Provider<BufferedImage>() {
+                @Override
+                public BufferedImage get() {
+                    return read(is);
+                }
+            };
+        }
+
+        public static $.Provider<BufferedImage> source(final File file) {
+            return new $.Provider<BufferedImage>() {
+                @Override
+                public BufferedImage get() {
+                    return read(file);
+                }
+            };
+        }
+
+        public static $.Val<BufferedImage> source(final BufferedImage image) {
+            return $.F.provides(image);
         }
     }
 
