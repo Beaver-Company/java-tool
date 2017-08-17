@@ -6315,6 +6315,7 @@ public class Lang implements Serializable {
                 if (!testMethodParamType(pts, p2, 1)) {
                     continue;
                 }
+                ct.setAccessible(true);
                 return ct.newInstance(p1, p2);
             }
             throw new UnexpectedNewInstanceException("constructor not found");

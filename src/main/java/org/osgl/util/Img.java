@@ -1,7 +1,6 @@
 package org.osgl.util;
 
 import org.osgl.$;
-import org.osgl.util.Img.BinarySourceProcessor.ScaleFix;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -18,7 +17,9 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.URL;
+import java.util.List;
 
 import static org.osgl.Lang.requireNotNull;
 import static org.osgl.util.E.*;
@@ -33,6 +34,13 @@ import static org.osgl.util.S.requireNotBlank;
  */
 public enum Img {
     ;
+
+    private static Processor COPIER = new Processor() {
+        @Override
+        protected BufferedImage run() {
+            return source;
+        }
+    };
 
     /**
      * The default image MIME type when not specified
@@ -52,7 +60,7 @@ public enum Img {
     /**
      * Byte array of a tracking pixel image in gif format
      */
-    public static final byte[] TRACKING_PIXEL_BYTES = new _ProcessorStage(F.TRACKING_PIXEL).toByteArray(GIF_MIME_TYPE);
+    public static final byte[] TRACKING_PIXEL_BYTES = new ProcessorStage(F.TRACKING_PIXEL).toByteArray(GIF_MIME_TYPE);
 
     /**
      * Base64 string of a tracking pixel image in gif format
@@ -94,7 +102,7 @@ public enum Img {
      * Base class for image operator function which provides source width, height, ratio parameters
      * on demand
      */
-    public abstract static class Processor extends $.Producer<java.awt.image.BufferedImage> {
+    public abstract static class Processor<PROCESSOR extends Processor<PROCESSOR, STAGE>, STAGE extends ProcessorStage<STAGE, PROCESSOR>> extends $.Producer<java.awt.image.BufferedImage> {
         /**
          * The source image
          */
@@ -122,7 +130,37 @@ public enum Img {
          */
         protected Graphics2D g;
 
+        private Class<STAGE> stageClass;
+
         protected Processor() {
+            exploreStageClass();
+        }
+
+        /**
+         * Create a builder for this processor.
+         *
+         * To provide better fluent coding experience, sub class can overwrite this
+         * function to provide specified builder instance instead of a general
+         * `ProcessorBuilder` as provided here
+         *
+         * @return a builder for this processor
+         */
+        protected final STAGE createStage() {
+            return createStage(get());
+        }
+
+        /**
+         * Create a builder for this processor.
+         *
+         * To provide better fluent coding experience, sub class can overwrite this
+         * function to provide specified builder instance instead of a general
+         * `ProcessorBuilder` as provided here
+         *
+         * @param source the source image
+         * @return a builder for this processor
+         */
+        protected STAGE createStage(BufferedImage source) {
+            return null == stageClass ? (STAGE) new ProcessorStage<>(source, (PROCESSOR) this) : $.newInstance(stageClass, source, this).source(source);
         }
 
         @Override
@@ -163,12 +201,12 @@ public enum Img {
             return this;
         }
 
-        public _ProcessorStage process(InputStream is) {
-            return new _ProcessorStage(read(is)).transform(this);
+        public STAGE process(InputStream is) {
+            return createStage(read(is));
         }
 
-        public _ProcessorStage process(BufferedImage source) {
-            return new _ProcessorStage(source).transform(this);
+        public STAGE process(BufferedImage source) {
+            return createStage(source);
         }
 
         /**
@@ -230,12 +268,24 @@ public enum Img {
         protected void setTargetSpec(int w, int h, boolean withAlphaChannel) {
             target = new BufferedImage(w, h, withAlphaChannel ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
         }
+
+        private void exploreStageClass() {
+            try {
+                List<Type> types = Generics.typeParamImplementations(getClass(), Processor.class);
+                if (types.size() > 1) {
+                    Type stageType = types.get(1);
+                    stageClass = Generics.classOf(stageType);
+                }
+            } catch (RuntimeException e) {
+                stageClass = null;
+            }
+        }
     }
 
     /**
      * The base class that process two image sources and produce result image
      */
-    public abstract static class BinarySourceProcessor extends Processor {
+    public abstract static class BinarySourceProcessor<PROCESSOR extends BinarySourceProcessor<PROCESSOR, STAGE>, STAGE extends ProcessorStage<STAGE, PROCESSOR>> extends Processor<PROCESSOR, STAGE> {
 
         /**
          * How to handle two image sources scale mismatch
@@ -320,55 +370,90 @@ public enum Img {
     }
 
 
-    public static class _ProcessorStage<BUILDER extends _ProcessorStage, PROCESSOR extends Processor> extends $.Provider<BufferedImage> {
+    public static class ProcessorStage<STAGE extends ProcessorStage<STAGE, PROCESSOR>, PROCESSOR extends Processor<PROCESSOR, STAGE>> extends $.Provider<BufferedImage> {
+        /**
+         * The image source to be processed
+         */
         BufferedImage source;
+        /**
+         * The image target as a result of processing. Note if {@link #processor} is not provided
+         * then it will use {@link #source} directly as the target
+         */
         volatile BufferedImage target;
-        PROCESSOR worker;
+        /**
+         * The processor that apply a certain logic on source
+         * and generates the target
+         */
+        PROCESSOR processor;
+        /**
+         * Define the compression quality of the target image
+         */
         float compressionQuality = Float.NaN;
 
+        private ProcessorStage($.Func0<BufferedImage> source) {
+            this(source.apply(), (PROCESSOR) COPIER);
+        }
+
+        private ProcessorStage(BufferedImage source) {
+            this(source, (PROCESSOR) COPIER);
+        }
+
         /**
-         * Construct a _Processor using a function that when applied will
-         * return the source image for the processor
+         * Construct a ProcessorBuilder with an image source provider
          *
-         * @param source the function that generate a BufferedImage instance
+         * @param source the function that provides the image source
          */
-        public _ProcessorStage($.Func0<BufferedImage> source) {
-            this.source = requireNotNull(source.apply());
+        public ProcessorStage($.Func0<BufferedImage> source, PROCESSOR processor) {
+            this(source.apply(), processor);
         }
 
-        private _ProcessorStage(BufferedImage source) {
+        /**
+         * Construct a ProcessorBuilder with image source specified
+         *
+         * @param source the image source to be processed
+         */
+        public ProcessorStage(BufferedImage source, PROCESSOR processor) {
             this.source = requireNotNull(source);
+            this.processor = requireNotNull(processor);
         }
 
-        protected _ProcessorStage() {
-        }
-
+        /**
+         * Returns the the target image as a result of processing or source image if no {@link #processor} is provided
+         *
+         * @return the target image
+         */
         @Override
         public BufferedImage get() {
             return target();
         }
 
-        public _ProcessorStage transform(Processor operator) {
-            requireNotNull(operator);
-            if (null == this.worker) {
-                this.worker = (PROCESSOR) operator;
-                return me();
-            } else {
-                return pipeline().transform(operator);
-            }
+        /**
+         * Pipeline the target image as an input (source) image to to another processor
+         *
+         * @param processor the next processor
+         * @param <B>       the processor builder type
+         * @param <P>       the processor type
+         * @return a {@link ProcessBuilder} for the processor specified
+         */
+        public <B extends ProcessorStage<B, P>, P extends Processor<P, B>> B pipeline(P processor) {
+            return processor.createStage(get());
         }
 
-        public BUILDER compressionQuality(float compressionQuality) {
+        public <B extends ProcessorStage<B, P>, P extends Processor<P, B>> B pipeline(Class<? extends P> processorClass) {
+            return $.newInstance(processorClass).createStage(get());
+        }
+
+        public STAGE compressionQuality(float compressionQuality) {
             this.compressionQuality = N.requireAlpha(compressionQuality);
             return me();
         }
 
-        public BUILDER source(InputStream is) {
+        public STAGE source(InputStream is) {
             this.source = read(is);
             return me();
         }
 
-        public BUILDER source(BufferedImage source) {
+        public STAGE source(BufferedImage source) {
             this.source = requireNotNull(source);
             return me();
         }
@@ -448,171 +533,15 @@ public enum Img {
 
         private synchronized void doJob() {
             preTransform();
-            target = null == worker ? source : worker.source(source).produce();
+            target = null == processor ? source : processor.source(source).produce();
         }
 
         protected void preTransform() {
         }
 
-        private BUILDER me() {
+        private STAGE me() {
             return $.cast(this);
         }
-    }
-
-    public static class _Resize extends _ProcessorStage<_Resize, Resizer> {
-
-        private _Resize(int w, int h, BufferedImage source) {
-            super(source);
-            this.worker = resizer(w, h, Float.NaN, false);
-        }
-
-        private _Resize(float scale, BufferedImage source) {
-            super(source);
-            this.worker = resizer(0, 0, requirePositive(scale), true);
-        }
-
-        public _Resize keepRatio() {
-            this.worker.keepRatio = true;
-            return this;
-        }
-
-        private Resizer resizer(int w, int h, float scale, boolean keepRatio) {
-            return Float.isNaN(scale) ? new Resizer(w, h, keepRatio) : new Resizer(scale);
-        }
-    }
-
-    public static class _Crop extends _ProcessorStage<_Crop, Cropper> {
-
-        private _Crop(BufferedImage source) {
-            super(source);
-        }
-
-        private _Crop(int x1, int y1, int x2, int y2, BufferedImage source) {
-            super(source);
-            this.worker = new Cropper(x1, y1, x2, y2);
-        }
-
-        public _Crop from(int x, int y) {
-            this.worker.x1 = x;
-            this.worker.y1 = y;
-            return this;
-        }
-
-        public _Crop to(int x, int y) {
-            this.worker.x2 = x;
-            this.worker.y2 = y;
-            return this;
-        }
-
-        public _Crop from($.Tuple<Integer, Integer> leftTop) {
-            return from(leftTop._1, leftTop._2);
-        }
-    }
-
-    public static class _Watermarker extends _ProcessorStage<_Watermarker, WaterMarker> {
-
-        private _Watermarker(String text, BufferedImage source) {
-            super(source);
-            this.worker = new WaterMarker(requireNotBlank(text));
-        }
-
-        public _Watermarker color(Color color) {
-            this.worker.color = requireNotNull(color);
-            return this;
-        }
-
-        public _Watermarker font(Font font) {
-            this.worker.font = requireNotNull(font);
-            return this;
-        }
-
-        public _Watermarker alpha(float alpha) {
-            this.worker.alpha = N.requireAlpha(alpha);
-            return this;
-        }
-
-        public _Watermarker offset(int offsetX, int offsetY) {
-            this.worker.offsetX = offsetX;
-            this.worker.offsetY = offsetY;
-            return this;
-        }
-
-        public _Watermarker offsetY(int offsetY) {
-            this.worker.offsetY = offsetY;
-            return this;
-        }
-
-        public _Watermarker offsetX(int offsetX) {
-            this.worker.offsetX = offsetX;
-            return this;
-        }
-    }
-
-    public static class _Blur extends _ProcessorStage<_Blur, Blur> {
-
-        private _Blur(BufferedImage source) {
-            this(Blur.DEFAULT_LEVEL, source);
-        }
-
-        private _Blur(int level, BufferedImage source) {
-            super(source);
-            this.worker = new Blur(level);
-        }
-
-    }
-
-    public static class _Concatenate extends _ProcessorStage<_Concatenate, Concatenater> {
-
-        protected _Concatenate(BufferedImage secondSource, BufferedImage source) {
-            super(source);
-            this.worker = new Concatenater(secondSource);
-        }
-
-        public _Concatenate dir(Direction dir) {
-            this.worker.dir = requireNotNull(dir);
-            return this;
-        }
-
-        public _Concatenate horizontally() {
-            this.worker.dir = Direction.HORIZONTAL;
-            return this;
-        }
-
-        public _Concatenate vertically() {
-            this.worker.dir = Direction.VERTICAL;
-            return this;
-        }
-
-        public _Concatenate shinkToSmall() {
-            this.worker.scaleFix = ScaleFix.SHRINK_TO_MIN;
-            return this;
-        }
-
-        public _Concatenate scaleToMax() {
-            this.worker.scaleFix = ScaleFix.SCALE_TO_MAX;
-            return this;
-        }
-
-        public _Concatenate noScaleFix() {
-            this.worker.scaleFix = ScaleFix.NO_FIX;
-            return this;
-        }
-
-        public _Concatenate scaleFix(ScaleFix scaleFix) {
-            this.worker.scaleFix = requireNotNull(scaleFix);
-            return this;
-        }
-
-        public _Concatenate background(Color backgroundColor) {
-            this.worker.background = requireNotNull(backgroundColor);
-            return this;
-        }
-
-        public _Concatenate reverse() {
-            this.worker.reversed = !this.worker.reversed;
-            return this;
-        }
-
     }
 
 
@@ -633,79 +562,83 @@ public enum Img {
             return source;
         }
 
-        public _Resize resize(float scale) {
-            return new _Resize(scale, source);
+        public Resizer.Stage resize(float scale) {
+            return new Resizer.Stage(source).scale(scale);
         }
 
-        public _Resize resize(int w, int h) {
-            return new _Resize(w, h, source);
+        public Resizer.Stage resize(int w, int h) {
+            return new Resizer.Stage(source).widthAndHeight(w, h);
         }
 
-        public _Resize resize($.Tuple<Integer, Integer> dimension) {
-            return new _Resize(dimension.left(), dimension.right(), source);
+        public Resizer.Stage resize($.Tuple<Integer, Integer> dimension) {
+            return resize(dimension.left(), dimension.right());
         }
 
-        public _Resize resize(Dimension dimension) {
-            return new _Resize(dimension.width, dimension.height, source);
+        public Resizer.Stage resize(Dimension dimension) {
+            return resize(dimension.width, dimension.height);
         }
 
-        public _Crop crop(int x1, int y1, int x2, int y2) {
-            return new _Crop(x1, y1, x2, y2, source);
+        public Cropper.Stage crop() {
+            return new Cropper.Stage(source);
         }
 
-        public _Crop crop($.Tuple<Integer, Integer> leftTop, $.Tuple<Integer, Integer> rightBottom) {
+        public Cropper.Stage crop(int x1, int y1, int x2, int y2) {
+            return new Cropper.Stage(source).from(x1, y1).to(x2, y2);
+        }
+
+        public Cropper.Stage crop($.Tuple<Integer, Integer> leftTop, $.Tuple<Integer, Integer> rightBottom) {
             return crop(leftTop._1, leftTop._2, rightBottom._1, rightBottom._2);
         }
 
-        public _Watermarker watermark(String text) {
-            return new _Watermarker(text, source);
+        public WaterMarker.Stage watermark(String text) {
+            return new WaterMarker.Stage(source).text(text);
         }
 
-        public _Blur blur() {
-            return new _Blur(source);
+        public Blur.Stage blur() {
+            return new Blur.Stage(source);
         }
 
-        public _Blur blur(int level) {
-            return new _Blur(level, source);
+        public Blur.Stage blur(int level) {
+            return new Blur.Stage(source).level(level);
         }
 
-        public _ProcessorStage flip() {
+        public Flip.Stage flip() {
             return flip(Direction.HORIZONTAL);
         }
 
-        public _ProcessorStage flipVertial() {
+        public Flip.Stage flipVertial() {
             return flip(Direction.VERTICAL);
         }
 
-        public _ProcessorStage flip(Direction dir) {
-            return new _ProcessorStage(source).transform(new Flip(dir));
+        public Flip.Stage flip(Direction dir) {
+            return new Flip.Stage(source).dir(dir);
         }
 
-        public _ProcessorStage compress(float compressionQuality) {
-            return new _ProcessorStage(source).compressionQuality(compressionQuality).transform(COPIER);
+        public ProcessorStage compress(float compressionQuality) {
+            return new ProcessorStage(source).compressionQuality(compressionQuality).pipeline(COPIER);
         }
 
-        public _ProcessorStage copy() {
-            return new _ProcessorStage(source).transform(COPIER);
+        public ProcessorStage copy() {
+            return new ProcessorStage(source).pipeline(COPIER);
         }
 
-        public _ProcessorStage transform(Processor processor) {
-            return new _ProcessorStage(source).transform(processor);
+        public ProcessorStage processor(Processor processor) {
+            return processor.createStage();
         }
 
-        public _Concatenate appendWith($.Provider<BufferedImage> secondImange) {
-            return new _Concatenate(secondImange.apply(), source);
+        public Concatenater.Stage appendWith($.Provider<BufferedImage> secondImange) {
+            return new Concatenater.Stage(secondImange.apply(), source);
         }
 
-        public _Concatenate appendTo($.Provider<BufferedImage> firstImage) {
+        public Concatenater.Stage appendTo($.Provider<BufferedImage> firstImage) {
             return appendWith(firstImage).reverse();
         }
 
-        public _Concatenate appendWith(BufferedImage secondImange) {
-            return new _Concatenate(secondImange, source);
+        public Concatenater.Stage appendWith(BufferedImage secondImange) {
+            return new Concatenater.Stage(secondImange, source);
         }
 
-        public _Concatenate appendTo(BufferedImage firstImage) {
+        public Concatenater.Stage appendTo(BufferedImage firstImage) {
             return appendWith(firstImage).reverse();
         }
 
@@ -720,11 +653,11 @@ public enum Img {
     }
 
     public static _Load source($.Func0<BufferedImage> imageProducer) {
-        return new _ProcessorStage<>(imageProducer).pipeline();
+        return new ProcessorStage<>(imageProducer).pipeline();
     }
 
     public static _Load source(BufferedImage image) {
-        return new _ProcessorStage<>(image).pipeline();
+        return new ProcessorStage<>(image).pipeline();
     }
 
     /**
@@ -822,21 +755,56 @@ public enum Img {
     /**
      * Resize an image
      */
-    private static class Resizer extends Processor {
+    public static class Resizer extends Processor<Resizer, Resizer.Stage> {
+
+        public static class Stage extends ProcessorStage<Stage, Resizer> {
+            Stage(BufferedImage source, Resizer processor) {
+                super(source, processor);
+            }
+
+            Stage(BufferedImage source) {
+                super(source, new Resizer());
+            }
+
+            Stage widthAndHeight(int w, int h) {
+                processor.w = requireNonNegative(w);
+                processor.h = requireNonNegative(h);
+                return this;
+            }
+
+            Stage scale(float scale) {
+                processor.scale = requireNotNaN(scale);
+                return this;
+            }
+
+            Stage keepRatio() {
+                processor.keepRatio = true;
+                return this;
+            }
+        }
+
         int w;
         int h;
         float scale = Float.NaN;
         boolean keepRatio;
 
-        public Resizer(int w, int h, boolean keepRatio) {
+        Resizer() {
+        }
+
+        Resizer(int w, int h, boolean keepRatio) {
             this.w = requireNonNegative(w);
             this.h = requireNonNegative(h);
             this.keepRatio = keepRatio;
         }
 
-        public Resizer(float scale) {
+        Resizer(float scale) {
             this.scale = requireNotNaN(scale);
             this.keepRatio = true;
+        }
+
+        @Override
+        protected Stage createStage(BufferedImage source) {
+            return new Stage(source, this);
         }
 
         @Override
@@ -892,18 +860,41 @@ public enum Img {
         }
     }
 
-    private static class Cropper extends Processor {
+    public static class Cropper extends Processor<Cropper, Cropper.Stage> {
+
+        public static class Stage extends ProcessorStage<Cropper.Stage, Cropper> {
+            Stage(BufferedImage source, Cropper processor) {
+                super(source, processor);
+            }
+
+            Stage(BufferedImage source) {
+                super(source, new Cropper());
+            }
+
+            Stage from(int x, int y) {
+                processor.x1 = x;
+                processor.y1 = y;
+                return this;
+            }
+
+            Stage to(int x, int y) {
+                processor.x2 = x;
+                processor.y2 = y;
+                return this;
+            }
+        }
 
         private int x1;
         private int y1;
         private int x2;
         private int y2;
 
-        Cropper(int x1, int y1, int x2, int y2) {
-            this.x1 = x1;
-            this.y1 = y1;
-            this.x2 = x2;
-            this.y2 = y2;
+        Cropper() {
+        }
+
+        @Override
+        protected Stage createStage(BufferedImage source) {
+            return new Stage(source, this);
         }
 
         @Override
@@ -936,11 +927,41 @@ public enum Img {
         }
     }
 
-    private static class Flip extends Processor {
-        Direction dir;
+    public static class Flip extends Processor<Flip, Flip.Stage> {
 
-        Flip(Direction dir) {
-            this.dir = requireNotNull(dir);
+        public static class Stage extends ProcessorStage<Flip.Stage, Flip> {
+            Stage(BufferedImage source, Flip processor) {
+                super(source, processor);
+            }
+
+            Stage(BufferedImage source) {
+                super(source, new Flip());
+            }
+
+            Flip.Stage vertically() {
+                processor.dir = Direction.VERTICAL;
+                return this;
+            }
+
+            Flip.Stage horizontally() {
+                processor.dir = Direction.HORIZONTAL;
+                return this;
+            }
+
+            Flip.Stage dir(Direction dir) {
+                processor.dir = requireNotNull(dir);
+                return this;
+            }
+        }
+
+        Direction dir = Direction.HORIZONTAL;
+
+        Flip() {
+        }
+
+        @Override
+        protected Stage createStage(BufferedImage source) {
+            return new Stage(source, this);
         }
 
         @Override
@@ -956,13 +977,38 @@ public enum Img {
     }
 
 
-    private static class Blur extends Processor {
+    private static class Blur extends Processor<Blur, Blur.Stage> {
+
+        static class Stage extends ProcessorStage<Stage, Blur> {
+            public Stage(BufferedImage source) {
+                super(source, new Blur());
+            }
+
+            public Stage(BufferedImage source, Blur processor) {
+                super(source, processor);
+            }
+
+            Stage level(int level) {
+                processor.setLevel(level);
+                return this;
+            }
+        }
+
         static final int DEFAULT_LEVEL = 3;
 
         float[] matrix;
         int level;
 
-        Blur(int level) {
+        Blur() {
+            setLevel(DEFAULT_LEVEL);
+        }
+
+        @Override
+        protected Stage createStage(BufferedImage source) {
+            return new Stage(source, this);
+        }
+
+        void setLevel(int level) {
             this.level = requirePositive(level);
             int max = level * level;
             matrix = new float[requirePositive(max)];
@@ -981,7 +1027,54 @@ public enum Img {
         }
     }
 
-    private static class WaterMarker extends Processor {
+    public static class WaterMarker extends Processor<WaterMarker, WaterMarker.Stage> {
+
+        public static class Stage extends ProcessorStage<Stage, WaterMarker> {
+            public Stage(BufferedImage source) {
+                super(source, new WaterMarker());
+            }
+
+            public Stage(BufferedImage source, WaterMarker processor) {
+                super(source, processor);
+            }
+
+            public Stage text(String text) {
+                processor.text = requireNotBlank(text);
+                return this;
+            }
+
+            public Stage color(Color color) {
+                processor.color = requireNotNull(color);
+                return this;
+            }
+
+            public Stage font(Font font) {
+                processor.font = requireNotNull(font);
+                return this;
+            }
+
+            public Stage alpha(float alpha) {
+                processor.alpha = requireAlpha(alpha);
+                return this;
+            }
+
+            public Stage offset(int offsetX, int offsetY) {
+                processor.offsetX = offsetX;
+                processor.offsetY = offsetY;
+                return this;
+            }
+
+            public Stage offsetY(int offsetY) {
+                this.processor.offsetY = offsetY;
+                return this;
+            }
+
+            public Stage offsetX(int offsetX) {
+                this.processor.offsetX = offsetX;
+                return this;
+            }
+
+        }
 
         Color color = Color.LIGHT_GRAY;
         Font font = new Font("Arial", Font.BOLD, 28);
@@ -989,6 +1082,9 @@ public enum Img {
         String text;
         int offsetX;
         int offsetY;
+
+        WaterMarker() {
+        }
 
         WaterMarker(String text) {
             this.text = text;
@@ -1001,6 +1097,11 @@ public enum Img {
             this.color = color;
             this.font = font;
             this.alpha = alpha;
+        }
+
+        @Override
+        protected Stage createStage(BufferedImage source) {
+            return new Stage(source, this);
         }
 
         @Override
@@ -1023,7 +1124,60 @@ public enum Img {
 
     }
 
-    private static class Concatenater extends BinarySourceProcessor {
+    public static class Concatenater extends BinarySourceProcessor<Concatenater, Concatenater.Stage> {
+        public static class Stage extends ProcessorStage<Stage, Concatenater> {
+
+            protected Stage(BufferedImage secondSource, BufferedImage source) {
+                super(source);
+                this.processor = new Concatenater(secondSource);
+            }
+
+            public Stage dir(Direction dir) {
+                this.processor.dir = requireNotNull(dir);
+                return this;
+            }
+
+            public Stage horizontally() {
+                this.processor.dir = Direction.HORIZONTAL;
+                return this;
+            }
+
+            public Stage vertically() {
+                this.processor.dir = Direction.VERTICAL;
+                return this;
+            }
+
+            public Stage shinkToSmall() {
+                this.processor.scaleFix = ScaleFix.SHRINK_TO_MIN;
+                return this;
+            }
+
+            public Stage scaleToMax() {
+                this.processor.scaleFix = ScaleFix.SCALE_TO_MAX;
+                return this;
+            }
+
+            public Stage noScaleFix() {
+                this.processor.scaleFix = ScaleFix.NO_FIX;
+                return this;
+            }
+
+            public Stage scaleFix(ScaleFix scaleFix) {
+                this.processor.scaleFix = requireNotNull(scaleFix);
+                return this;
+            }
+
+            public Stage background(Color backgroundColor) {
+                this.processor.background = requireNotNull(backgroundColor);
+                return this;
+            }
+
+            public Stage reverse() {
+                this.processor.reversed = !this.processor.reversed;
+                return this;
+            }
+
+        }
 
         /**
          * Define the direction to concatenate two image sources
@@ -1101,13 +1255,6 @@ public enum Img {
         int b = N.randInt(256);
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
-
-    private static Processor COPIER = new Processor() {
-        @Override
-        protected BufferedImage run() {
-            return source;
-        }
-    };
 
     /**
      * The namespace for functions

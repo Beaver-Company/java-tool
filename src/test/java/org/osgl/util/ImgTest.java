@@ -23,7 +23,7 @@ public class ImgTest {
     }
 
     static void testCrop() {
-        Img.source(img1()).crop(N.xy(30, 30), N.xy(100, 100)).writeTo(new File("/tmp/img1_crop.gif"));
+        Img.source(img1()).crop().from(30, 30).to(100, 100).writeTo(new File("/tmp/img1_crop.gif"));
     }
 
     static void testResize() {
@@ -113,8 +113,62 @@ public class ImgTest {
         // style A
         new Sunglass(0.7f).process(img2()).pipeline().resize(0.5f).writeTo("/tmp/img2_sunglass_style_a.jpg");
         // style B
-        Img.source(img2()).resize(0.3f).transform(new Sunglass()).writeTo("/tmp/img2_sunglass_style_b.png");
+        Img.source(img2()).resize(0.3f).pipeline(new Sunglass()).writeTo("/tmp/img2_sunglass_style_b.png");
     }
+
+    private static class FluentSunglass extends Img.Processor<FluentSunglass, FluentSunglass.Stage> {
+        static class Stage extends Img.ProcessorStage<Stage, FluentSunglass> {
+            public Stage(BufferedImage source, FluentSunglass processor) {
+                super(source, processor);
+            }
+            public Stage alpha(float alpha) {
+                processor.alpha = alpha;
+                return this;
+            }
+
+            public Stage dark() {
+                return alpha(0.3f);
+            }
+
+            public Stage light() {
+                return alpha(0.7f);
+            }
+
+            public Stage darker() {
+                return alpha(0.1f);
+            }
+
+            public Stage lighter() {
+                return alpha(0.9f);
+            }
+        }
+
+        float alpha;
+
+        public FluentSunglass() {
+            super();
+        }
+
+        @Override
+        protected BufferedImage run() {
+            return new Sunglass(alpha).source(source).run();
+        }
+    }
+
+    private static void testCustomizedFluentProcessor() {
+        Img.source(img2())
+                .resize(0.3f)
+                .pipeline(FluentSunglass.class)
+                .lighter()
+                .writeTo("/tmp/img2_f_sunglass_lighter.png");
+
+        Img.source(img2())
+                .resize(0.3f)
+                .pipeline(FluentSunglass.class)
+                .darker()
+                .writeTo("/tmp/img2_f_sunglass_darker.png");
+    }
+
 
     private static void randomPixels() {
         Img.source(Img.F.randomPixels(400, 200)).blur().writeTo("/tmp/img_random_pixels.png");
@@ -142,6 +196,7 @@ public class ImgTest {
     }
 
     public static void main(String[] args) {
+        testCustomizedFluentProcessor();
         testConcatenate();
         testResize();
         testResizeByScale();
