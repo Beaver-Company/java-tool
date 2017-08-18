@@ -387,7 +387,7 @@ public class IO {
     /**
      * Load properties from a file
      * @param file the properties file
-     * @return the properties loaded from the file specified
+     * @return the properties loaded from the file specified or `null` if exception encountered
      */
     public static Properties loadProperties(File file) {
         return loadProperties(IO.is(file));
@@ -396,14 +396,14 @@ public class IO {
     /**
      * Load properties from an inputStream
      * @param inputStream the input stream to property source
-     * @return the properties loaded from the input stream specified
+     * @return the properties loaded from the input stream specified or `null` if exception encountered
      */
     public static Properties loadProperties(InputStream inputStream) {
         Properties prop = new Properties();
         try {
             prop.load(inputStream);
         } catch (IOException e) {
-            throw E.ioException(e);
+            return null;
         } finally {
             IO.close(inputStream);
         }
@@ -413,14 +413,14 @@ public class IO {
     /**
      * Load properties from an inputStream
      * @param reader the reader to property source
-     * @return the properties loaded from the reader specified
+     * @return the properties loaded from the reader specified or `null` if exception encountered
      */
     public static Properties loadProperties(Reader reader) {
         Properties prop = new Properties();
         try {
             prop.load(reader);
         } catch (IOException e) {
-            throw E.ioException(e);
+            return null;
         } finally {
             IO.close(reader);
         }
@@ -428,9 +428,18 @@ public class IO {
     }
 
     /**
+     * Load properties from an URL
+     * @param url the URL to read the properties
+     * @return the properties loaded or `null` if exception encountered
+     */
+    public static Properties loadProperties(URL url) {
+        return loadProperties(is(url));
+    }
+
+    /**
      * Load properties from a string content
      * @param content the content of a properties file
-     * @return the properties loaded
+     * @return the properties loaded or `null` if exception encountered
      */
     public static Properties loadProperties(String content) {
         return loadProperties(new StringReader(content));
