@@ -467,11 +467,11 @@ public enum Img {
         }
 
         public void writeTo(File file, String mimeType) {
-            writeTo(IO.os(file), mimeType);
+            writeTo(IO.outputStream(file), mimeType);
         }
 
         public void writeTo(File file) {
-            writeTo(IO.os(file), mimeType(file));
+            writeTo(IO.outputStream(file), mimeType(file));
         }
 
         public void writeTo(OutputStream os, String mimeType) {
@@ -657,7 +657,7 @@ public enum Img {
     }
 
     public static _Load source(File file) {
-        return new _Load(IO.is(file));
+        return new _Load(IO.inputStream(file));
     }
 
     public static _Load source($.Func0<BufferedImage> imageProducer) {
@@ -703,7 +703,7 @@ public enum Img {
      * @return The base64 encoded value
      */
     public static String toBase64(File image) throws IOException {
-        return toBase64(IO.is(image), mimeType(image));
+        return toBase64(IO.inputStream(image), mimeType(image));
     }
 
     /**

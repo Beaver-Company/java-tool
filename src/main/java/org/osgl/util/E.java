@@ -115,8 +115,22 @@ public class E {
         throw new UnexpectedIOException(cause);
     }
 
+    public static UnexpectedIOException wrap(IOException e) {
+        throw new UnexpectedException(e);
+    }
+
     public static UnexpectedIOException ioException(String msg, Object... args) {
         throw new UnexpectedIOException(msg, args);
+    }
+
+    public static void ioExceptionIf(boolean test, String msg, Object... args) {
+        if (test) {
+            throw ioException(msg, args);
+        }
+    }
+
+    public static void ioExceptionIfNot(boolean test, String msg, Object... args) {
+        ioExceptionIf(!test, msg, args);
     }
     
     public static UnexpectedEncodingException encodingException(UnsupportedEncodingException cause) {
@@ -205,11 +219,19 @@ public class E {
         }
     }
 
+    public static void unsupportedIfNot(boolean test) {
+        unsupportedIf(!test);
+    }
+
     public static void unsupportedIf(boolean test, String msg, Object ... args) {
         if (test) {
             msg = S.fmt(msg, args);
             throw new UnsupportedException(msg);
         }
+    }
+
+    public static void unsupportedIfNot(boolean test, String msg, Object... args) {
+        unsupportedIf(!test, msg, args);
     }
 
     public static void illegalArgumentIf(boolean test) {

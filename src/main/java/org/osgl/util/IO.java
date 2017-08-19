@@ -29,12 +29,15 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static org.osgl.Lang.requireNotNull;
 
 /**
  * IO utilities
@@ -121,7 +124,7 @@ public class IO {
     public static File parent(File file) {
         return file.getParentFile();
     }
-    
+
     public static File tmpFile() {
         return tmpFile(S.random(3), null, null);
     }
@@ -145,15 +148,17 @@ public class IO {
      * This API is obsolete. Please use {@link #baos()} instead
      *
      * Returns a byte array output stream
+     *
      * @return an output stream
      */
     @Deprecated
-    public static OutputStream os() {
+    public static OutputStream outputStream() {
         return baos();
     }
 
     /**
      * Returns a byte array output stream
+     *
      * @return an output stream
      */
     public static ByteArrayOutputStream baos() {
@@ -162,14 +167,16 @@ public class IO {
 
     /**
      * Alias of {@link #BLACK_HOLE}
+     *
      * @return {@link #BLACK_HOLE}
      */
-    public static OutputStream nullOs() {
+    public static OutputStream nullOutputStream() {
         return NULL_OS;
     }
 
     /**
      * Returns an output stream that anything write into it disappear (lost)
+     *
      * @return a black hole output stream
      */
     public static OutputStream blackHole() {
@@ -178,10 +185,11 @@ public class IO {
 
     /**
      * Returns a file output stream
+     *
      * @param file the file to which the returned output stream can be used to write to
      * @return an output stream that can be used to write to file specified
      */
-    public static OutputStream os(File file) {
+    public static OutputStream outputStream(File file) {
         try {
             return new FileOutputStream(file);
         } catch (FileNotFoundException e) {
@@ -211,6 +219,7 @@ public class IO {
 
     /**
      * Returns a string writer
+     *
      * @return an writer that write to string
      */
     public static Writer writer() {
@@ -218,7 +227,27 @@ public class IO {
     }
 
     /**
+     * Convert an output stream into Writer using default charset
+     * @param output the output stream
+     * @return a writer backed by the outputstream
+     */
+    public static Writer writer(OutputStream output) {
+        return new OutputStreamWriter(output);
+    }
+
+    /**
+     * Convert an output stream into Writer with charset specified
+     * @param output the output stream
+     * @param charset the charset
+     * @return the writer
+     */
+    public static Writer writer(OutputStream output, Charset charset) {
+        return new OutputStreamWriter(output, charset);
+    }
+
+    /**
      * Returns a file writer
+     *
      * @param file the file to be written
      * @return a writer
      */
@@ -232,19 +261,21 @@ public class IO {
 
     /**
      * Returns an empty input stream
+     *
      * @return an empty input stream
      */
-    public static InputStream is() {
+    public static InputStream inputStream() {
         byte[] ba = {};
         return new ByteArrayInputStream(ba);
     }
 
     /**
      * Returns a file input stream
+     *
      * @param file the file to be read
-     * @return  inputstream that read the file
+     * @return inputstream that read the file
      */
-    public static InputStream is(File file) {
+    public static InputStream inputStream(File file) {
         // workaround http://stackoverflow.com/questions/36880692/java-file-does-not-exists-but-file-getabsolutefile-exists
         if (!file.exists()) {
             file = file.getAbsoluteFile();
@@ -259,21 +290,22 @@ public class IO {
         }
     }
 
-    public static InputStream is(byte[] ba) {
+    public static InputStream inputStream(byte[] ba) {
         return new ByteArrayInputStream(ba);
     }
 
     /**
      * Returns an input stream from a string which will be encoded with
      * CharSet.defaultCharset()
+     *
      * @param content the content to be read
      * @return input stream instance that read the content
      */
-    public static InputStream is(String content) {
-        return is(content.getBytes());
+    public static InputStream inputStream(String content) {
+        return inputStream(content.getBytes());
     }
 
-    public static InputStream is(URL url) {
+    public static InputStream inputStream(URL url) {
         try {
             return url.openStream();
         } catch (IOException e) {
@@ -283,6 +315,7 @@ public class IO {
 
     /**
      * Returns an empty reader
+     *
      * @return a reader that reads empty string ""
      */
     public static Reader reader() {
@@ -291,10 +324,11 @@ public class IO {
 
     /**
      * Returns a file reader
+     *
      * @param file the file to be read
      * @return a reader that reads the file specified
      */
-    public static Reader reader(File file) {
+    public static FileReader reader(File file) {
         try {
             return new FileReader(file);
         } catch (IOException e) {
@@ -302,14 +336,49 @@ public class IO {
         }
     }
 
-    public static Reader reader(byte[] ba) {
-        return new StringReader(new String(ba));
+    /**
+     * Create a reader from byte array with default charset
+     * @param input the byte array
+     * @return the reader
+     */
+    public static StringReader reader(byte[] input) {
+        return new StringReader(new String(input));
     }
 
-    public static Reader reader(InputStream is) {
-        return new InputStreamReader(is);
+    /**
+     * Create a reader from byte array with charset specified
+     * @param input the byte array
+     * @param charset the charset to encode byte array to String
+     * @return the reader
+     */
+    public static StringReader reader(byte[] input, Charset charset) {
+        return new StringReader(new String(input, charset));
     }
 
+    /**
+     * Convert an input stream into a reader using default charset
+     * @param input the input stream
+     * @return the Reader
+     */
+    public static Reader reader(InputStream input) {
+        return new InputStreamReader(input);
+    }
+
+    /**
+     * Convert an input stream into a reader with charset specified
+     * @param input the input stream
+     * @param charset the charset
+     * @return the reader
+     */
+    public static Reader reader(InputStream input, Charset charset) {
+        return new InputStreamReader(input, charset);
+    }
+
+    /**
+     * Get a reader from a URL
+     * @param url the URL
+     * @return the reader reads the URL input stream
+     */
     public static Reader reader(URL url) {
         try {
             return reader(url.openStream());
@@ -320,7 +389,8 @@ public class IO {
 
     /**
      * Returns a string reader from a content specified
-     * @param content  the content to be read
+     *
+     * @param content the content to be read
      * @return a string reader instance
      */
     public static Reader reader(String content) {
@@ -329,7 +399,7 @@ public class IO {
 
     public static BufferedOutputStream buffered(OutputStream os) {
         if (os instanceof BufferedOutputStream) {
-            return (BufferedOutputStream)os;
+            return (BufferedOutputStream) os;
         } else {
             return new BufferedOutputStream(os);
         }
@@ -337,7 +407,7 @@ public class IO {
 
     public static BufferedInputStream buffered(InputStream is) {
         if (is instanceof BufferedInputStream) {
-            return (BufferedInputStream)is;
+            return (BufferedInputStream) is;
         } else {
             return new BufferedInputStream(is);
         }
@@ -345,7 +415,7 @@ public class IO {
 
     public static BufferedWriter buffered(Writer w) {
         if (w instanceof BufferedWriter) {
-            return (BufferedWriter)w;
+            return (BufferedWriter) w;
         } else {
             return new BufferedWriter(w);
         }
@@ -353,7 +423,7 @@ public class IO {
 
     public static BufferedReader buffered(Reader r) {
         if (r instanceof BufferedReader) {
-            return (BufferedReader)r;
+            return (BufferedReader) r;
         } else {
             return new BufferedReader(r);
         }
@@ -362,7 +432,7 @@ public class IO {
     public static void delete(File file) {
         delete(file, false);
     }
-    
+
     public static void delete(File f, boolean deleteChildren) {
         if (null == f || !f.exists()) {
             return;
@@ -386,15 +456,17 @@ public class IO {
 
     /**
      * Load properties from a file
+     *
      * @param file the properties file
      * @return the properties loaded from the file specified or `null` if exception encountered
      */
     public static Properties loadProperties(File file) {
-        return loadProperties(IO.is(file));
+        return loadProperties(IO.inputStream(file));
     }
 
     /**
      * Load properties from an inputStream
+     *
      * @param inputStream the input stream to property source
      * @return the properties loaded from the input stream specified or `null` if exception encountered
      */
@@ -412,6 +484,7 @@ public class IO {
 
     /**
      * Load properties from an inputStream
+     *
      * @param reader the reader to property source
      * @return the properties loaded from the reader specified or `null` if exception encountered
      */
@@ -429,15 +502,17 @@ public class IO {
 
     /**
      * Load properties from an URL
+     *
      * @param url the URL to read the properties
      * @return the properties loaded or `null` if exception encountered
      */
     public static Properties loadProperties(URL url) {
-        return loadProperties(is(url));
+        return loadProperties(inputStream(url));
     }
 
     /**
      * Load properties from a string content
+     *
      * @param content the content of a properties file
      * @return the properties loaded or `null` if exception encountered
      */
@@ -447,6 +522,7 @@ public class IO {
 
     /**
      * Read binary content of a file (warning does not use on large file !)
+     *
      * @param file The file te read
      * @return The binary data
      */
@@ -479,7 +555,7 @@ public class IO {
     /**
      * Read file content to a String
      *
-     * @param url The url resource to read
+     * @param url      The url resource to read
      * @param encoding encoding used to read the file into string content
      * @return The String content
      */
@@ -504,7 +580,7 @@ public class IO {
     /**
      * Read file content to a String
      *
-     * @param file The file to read
+     * @param file     The file to read
      * @param encoding encoding used to read the file into string content
      * @return The String content
      */
@@ -654,29 +730,66 @@ public class IO {
      *
      * @param content The content to write
      * @param file    The file to write
-     * @param encoding encoding used to write the content to file
+     * @param charset charset name
      */
-    public static void writeContent(CharSequence content, File file, String encoding) {
+    public static void writeContent(CharSequence content, File file, String charset) {
         OutputStream os = null;
         try {
             os = new FileOutputStream(file);
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, encoding));
+            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(os, charset));
             printWriter.println(content);
             printWriter.flush();
             os.flush();
         } catch (IOException e) {
-            throw E.unexpected(e);
+            throw E.ioException(e);
         } finally {
             close(os);
         }
     }
 
-    public static void writeContent(CharSequence content, Writer writer) {
+    /**
+     * Write string content to an output stream.
+     *
+     * This method relies on {@link #writeContent(CharSequence, Writer)}
+     *
+     * @param content the content
+     * @param os      the outputstream
+     */
+    public static int writeContent(CharSequence content, OutputStream os) {
+        return writeContent(content, new PrintWriter(os));
+    }
+
+    /**
+     * Write string content to an output stream with encoding specified
+     *
+     * @param content the content
+     * @param os      the output stream
+     * @param charset charset name
+     */
+    public static void writeContent(CharSequence content, OutputStream os, String charset) {
+        try {
+            writeContent(content, new PrintWriter(new OutputStreamWriter(os, charset)));
+        } catch (UnsupportedEncodingException e) {
+            throw E.ioException(e);
+        }
+    }
+
+
+    /**
+     * Write string content to a writer
+     *
+     * Note this will print the content plus a `line.separator` e.g. `\n`
+     *
+     * @param content the content to write
+     * @param writer  the writer
+     */
+    public static int writeContent(CharSequence content, Writer writer) {
         try {
             PrintWriter printWriter = new PrintWriter(writer);
             printWriter.println(content);
             printWriter.flush();
             writer.flush();
+            return content.length();
         } catch (IOException e) {
             throw E.ioException(e);
         } finally {
@@ -686,7 +799,7 @@ public class IO {
 
     /**
      * Copy content from input stream to output stream without closing the output stream
-     * 
+     *
      * @param is input stream
      * @param os output stream
      * @return number of bytes appended
@@ -694,7 +807,7 @@ public class IO {
     public static int append(InputStream is, OutputStream os) {
         return copy(is, os, false);
     }
-    
+
     public static int copy(InputStream is, OutputStream os) {
         return copy(is, os, true);
     }
@@ -703,40 +816,256 @@ public class IO {
      * Copy an stream to another one. It close the input stream anyway.
      *
      * If the param closeOs is true then close the output stream
-     * @param is input stream
-     * @param os output stream
-     * @param closeOs specify whether it shall close output stream after operation
+     *
+     * @param input      input stream
+     * @param output      output stream
+     * @param closeOutput specify whether it shall close output stream after operation
      * @return number of bytes copied
      */
-    public static int copy(InputStream is, OutputStream os, boolean closeOs) {
+    public static int copy(InputStream input, OutputStream output, boolean closeOutput) {
         try {
             int read, total = 0;
             byte[] buffer = new byte[8096];
-            while ((read = is.read(buffer)) > 0) {
-                os.write(buffer, 0, read);
+            while ((read = input.read(buffer)) > 0) {
+                output.write(buffer, 0, read);
                 total += read;
             }
             return total;
-        } catch(IOException e) {
-            throw E.ioException(e);
+        } catch (IOException e) {
+            throw E.wrap(e);
         } finally {
-            close(is);
-            if (closeOs) {
-                close(os);
+            close(input);
+            if (closeOutput) {
+                close(output);
             }
         }
     }
 
     /**
+     * Copy chars from input reader into output writer. Close input and output at the end of the
+     * operation
+     * @param input the input reader
+     * @param output the output writer
+     * @return the number of chars been copied
+     */
+    public static int copy(Reader input, Writer output) {
+        return copy(input, output, true);
+    }
+
+    /**
+     * Copy chars from input reader into output writer. It will close reader anyway
+     *
+     * @param input the input reader
+     * @param output the output writer
+     * @param closeOutput specify if it shall close output writer in the end
+     * @return the number of chars been copied
+     */
+    public static int copy(Reader input, Writer output, boolean closeOutput) {
+        char[] buffer = new char[1024];
+        int count = 0;
+        int n;
+        try {
+            while (-1 != (n = input.read(buffer))) {
+                output.write(buffer, 0, n);
+                count += n;
+            }
+        } catch (IOException e) {
+            throw E.wrap(e);
+        } finally {
+            close(input);
+            if (closeOutput) {
+                close(output);
+            }
+        }
+        return count;
+    }
+
+    /**
+     * An API stage supports fluent coding with IO writing.
+     *
+     * A general way to use this stage:
+     *
+     * ```java
+     * IO.write(byteArray).to(outputStream);
+     * IO.write(textString).to(writer);
+     * IO.write(inputSteam).to(file);
+     * IO.write(reader).withCharset("utf-8").to(outputstream);
+     * ...
+     * ```
+     */
+    public static class _WriteStage {
+        private InputStream is;
+        private byte[] ba;
+        private CharSequence text;
+        private File file;
+        private Reader reader;
+        private Charset charset = Charset.defaultCharset();
+
+        private _WriteStage(InputStream is) {
+            this.is = requireNotNull(is);
+        }
+
+        private _WriteStage(Reader reader) {
+            this.reader = requireNotNull(reader);
+        }
+
+        private _WriteStage(byte[] ba) {
+            this.ba = requireNotNull(ba);
+        }
+
+        private _WriteStage(CharSequence text) {
+            this.text = requireNotNull(text);
+        }
+
+        private _WriteStage(File file) {
+            this.file = requireNotNull(file);
+        }
+
+        /**
+         * set charset of this write stage
+         * @param charset the charset must not be null
+         * @return this stage instance
+         */
+        public _WriteStage with(Charset charset) {
+            this.charset = requireNotNull(charset);
+            return this;
+        }
+
+        /**
+         * Set charset of this write stage
+         * @param charset the charset string, must not be null
+         * @return this stage instance
+         */
+        public _WriteStage withCharset(String charset) {
+            this.charset = Charset.forName(charset);
+            return this;
+        }
+
+        /**
+         * Write this stage source to output stream
+         * @param target the target output stream
+         * @return the number of bytes been written
+         */
+        public long to(OutputStream target) {
+            if (null != is) {
+                return write(is, target);
+            } else if (null != reader) {
+                return write(reader, writer(target, charset));
+            } else if (null != ba) {
+                return write(ba, target);
+            } else if (null != text) {
+                return writeContent(text, target);
+            } else {
+                E.unsupportedIf(file.isDirectory(), "cannot write directory into an output stream");
+                return write(inputStream(file), target);
+            }
+        }
+
+        /**
+         * Write this stage source to a writer target
+         * @param target the writer target
+         * @return number of chars been written
+         */
+        public long to(Writer target) {
+            if (null != is) {
+                return write(reader(is, charset), target);
+            } else if (null != reader) {
+                return write(reader, target);
+            } else if (null != ba) {
+                return write(reader(ba), target);
+            } else if (null != text) {
+                return writeContent(text, target);
+            } else {
+                E.unsupportedIf(file.isDirectory(), "cannot write directory into an output stream");
+                return write(reader(file), target);
+            }
+        }
+
+        /**
+         * Write this stage source to a file target
+         * @param file the file target
+         * @return number of bytes been written
+         * @see #copy(File, File)
+         */
+        public long to(File file) {
+            if (null != this.file) {
+                return copy(this.file, file);
+            }
+            return to(outputStream(file));
+        }
+    }
+
+    /**
+     * Create a {@link _WriteStage write stage} using input stream
+     * @param source the input stream
+     * @return a write stage
+     */
+    public static _WriteStage write(InputStream source) {
+        return new _WriteStage(source);
+    }
+
+    /**
+     * Alias of {@link #write(InputStream)}
+     *
+     * @param source the input stream
+     * @return a write stage
+     */
+    public static _WriteStage copy(InputStream source) {
+        return write(source);
+    }
+
+    /**
+     * Create a {@link _WriteStage write stage} using byte array
+     * @param source the byte array
+     * @return a write stage
+     */
+    public static _WriteStage write(byte[] source) {
+        return new _WriteStage(source);
+    }
+
+    /**
+     * Create a {@link _WriteStage write stage} with text content
+     * @param source the text source
+     * @return a write stage
+     */
+    public static _WriteStage write(CharSequence source) {
+        return new _WriteStage(source);
+    }
+
+    /**
+     * Create a {@link _WriteStage write stage} using file
+     * @param source the file source
+     * @return a write stage
+     */
+    public static _WriteStage write(File source) {
+        return new _WriteStage(source);
+    }
+
+    /**
+     * Alias of {@link #write(File)}
+     *
+     * @param source the file source
+     * @return a write stage
+     */
+    public static _WriteStage copy(File source) {
+        return write(source);
+    }
+
+    /**
      * Alias of {@link #copy(java.io.InputStream, java.io.OutputStream)}
+     *
      * @param is input stream
      * @param os output stream
      */
-    public static int write(InputStream is, OutputStream os) {
+    public static long write(InputStream is, OutputStream os) {
         return copy(is, os);
     }
-    
-    public static int write(InputStream is, File f) {
+
+    public static long write(Reader reader, Writer writer) {
+        return copy(reader, writer);
+    }
+
+    public static long write(InputStream is, File f) {
         try {
             return copy(is, new BufferedOutputStream(new FileOutputStream(f)));
         } catch (FileNotFoundException e) {
@@ -746,12 +1075,13 @@ public class IO {
 
     /**
      * Write binary data to a file
+     *
      * @param data The binary data to write
      * @param file The file to write
      */
-    public static void write(byte[] data, File file) {
+    public static long write(byte[] data, File file) {
         try {
-            write(new ByteArrayInputStream(data), new BufferedOutputStream(new FileOutputStream(file)));
+            return write(new ByteArrayInputStream(data), new BufferedOutputStream(new FileOutputStream(file)));
         } catch (FileNotFoundException e) {
             throw E.ioException(e);
         }
@@ -759,46 +1089,56 @@ public class IO {
 
     /**
      * Write binary data to an output steam
+     *
      * @param data the binary data to write
-     * @param os the output stream
+     * @param os   the output stream
      */
-    public static void write(byte[] data, OutputStream os) {
-        write(new ByteArrayInputStream(data), os);
+    public static long write(byte[] data, OutputStream os) {
+        return write(new ByteArrayInputStream(data), os);
     }
 
-    // If target does not exist, it will be created.
-    public static void copyDirectory(File source, File target) {
+    /**
+     * Copy source file to target file.
+     *
+     * If source file is a directory, then
+     * * If target file is not a directory raise {@link org.osgl.exception.UnsupportedException}
+     * * If cannot create target dir, it will raise {@link org.osgl.exception.UnexpectedIOException}
+     * * Recursively copy all files and dirs into target dir
+     *
+     * If source file is a file, then
+     * * if target file is a directory then write into the new file with the same name of source file in the directory
+     * * otherwise write into the the file directly
+     *
+     * @param source the source file
+     * @param target the target file
+     * @return total bytes been copied
+     * @throws org.osgl.exception.UnexpectedIOException if any IO exception encountered
+     */
+    public static long copy(File source, File target) {
+        if (S.eq(source.getAbsolutePath(), target.getAbsolutePath())) {
+            return 0;
+        }
         if (source.isDirectory()) {
-            if (!target.exists()) {
-                target.mkdir();
+            E.unsupportedIfNot(target.isDirectory(), "Cannot copy a directory into a file");
+            E.ioExceptionIfNot((target.exists() || target.mkdirs()), "Cannot create target dir");
+            File[] files = source.listFiles();
+            if (null == files) {
+                return 0;
             }
-            for (String child: source.list()) {
-                copyDirectory(new File(source, child), new File(target, child));
+            long copied = 0;
+            for (File file : files) {
+                copied += copy(file, new File(target, file.getName()));
             }
+            return copied;
         } else {
+            if (target.isDirectory()) {
+                E.ioExceptionIfNot(target.exists() || target.mkdirs(), "Cannot create target dir");
+                target = new File(target, source.getName());
+            }
             try {
-                write(new FileInputStream(source),  new FileOutputStream(target));
+                return write(new FileInputStream(source), new FileOutputStream(target));
             } catch (IOException e) {
-                if (target.isDirectory()) {
-                    if (!target.exists()) {
-                        if (!target.mkdirs()) {
-                            throw E.ioException("cannot copy [%s] to [%s]", source, target);
-                        }
-                    }
-                    target = new File(target, source.getName());
-                } else {
-                    File targetFolder = target.getParentFile();
-                    if (!targetFolder.exists()) {
-                        if (!targetFolder.mkdirs()) {
-                            throw E.ioException("cannot copy [%s] to [%s]", source, target);
-                        }
-                    }
-                }
-                try {
-                    write(new FileInputStream(source), new FileOutputStream(target));
-                } catch (IOException e0) {
-                    throw E.ioException(e0);
-                }
+                throw E.ioException(e);
             }
         }
     }
@@ -807,7 +1147,7 @@ public class IO {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ZipOutputStream zos = new ZipOutputStream(baos);
         try {
-            for (ISObject obj: objects) {
+            for (ISObject obj : objects) {
                 ZipEntry entry = new ZipEntry(obj.getAttribute(SObject.ATTR_FILE_NAME));
                 InputStream is = obj.asInputStream();
                 zos.putNextEntry(entry);
@@ -859,19 +1199,19 @@ public class IO {
         public static <T> $.Function<?, T> println() {
             return PRINTLN;
         }
-        
+
         public static $.Function PRINTLN = print("", "\n", System.out);
 
         public static <T> $.Function<?, T> print() {
             return PRINT;
         }
-        
+
         public static $.Function PRINT = print("", "", System.out);
-        
+
         public static <T> $.Function<T, ?> print(String prefix, String suffix) {
             return print(prefix, suffix, System.out);
         }
-        
+
         public static <T> $.Function<T, ?> print(String prefix, String suffix, PrintStream ps) {
             return new $.F4<T, String, String, PrintStream, Void>() {
                 @Override
