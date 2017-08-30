@@ -6,6 +6,7 @@ import org.osgl.OsglConfig;
 import org.osgl.exception.NotAppliedException;
 import org.osgl.util.algo.StringReplace;
 
+import java.io.File;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
@@ -20,111 +21,188 @@ import static java.lang.Character.highSurrogate;
 import static java.lang.Character.lowSurrogate;
 
 /**
- * String utilities
+ * An namespace for String relevant utility methods
  */
 public class S {
 
-    /**
-     * The invisible separator used by program: "\u0000"
-     */
-    public static final String HSEP = "\u0000";
+    S() {}
 
-    /**
-     * A commonly used separator: [,;:\\s]+
-     */
-    public static final String COMMON_SEP = "[,;:\\s]+";
+    // ---- CONSTANTS DEFINITION ----
 
     /**
      * An empty string array constant
      */
     public static final String[] EMPTY_ARRAY = new String[0];
 
+    /**
+     * An invisible separator: `"\u0000"`
+     */
+    public static final String HSEP = "\u0000";
+
+    /**
+     * Alias of {@link #HSEP}
+     */
+    public static final String HIDDEN_SEP = HSEP;
+
+    /**
+     * The invisible separator char `'\u0000'`
+     */
+    public static final char HSEP_CHAR = '\u0000';
+
+    /**
+     * Alias of {@link #HSEP_CHAR}
+     */
+    public static final char HIDDEN_SEP_CHAR = HSEP_CHAR;
+
+    /**
+     * A commonly used separator: `[,;:\\s]+`
+     */
+    public static final String COMMON_SEP = "[,;:\\s]+";
+
+    /**
+     * A precompiled {@link Pattern} of {@link #COMMON_SEP}
+     */
+    public static final Pattern COMMON_SEP_PATTERN = Pattern.compile(COMMON_SEP);
+
+    /**
+     * The {@link File#separator}
+     */
+    public static final String FILE_SEP = File.separator;
+
+    /**
+     * The {@link File#separatorChar}
+     */
+    public static final char FILE_SEP_CHAR = File.separatorChar;
+
+    /**
+     * The {@link File#pathSeparator}
+     */
+    public static final String PATH_SEP = File.pathSeparator;
+
+    /**
+     * The {@link File#pathSeparatorChar
+     */
+    public static final char PATH_SEP_CHAR = File.pathSeparatorChar;
+
+    /**
+     * A pair of parentheses: `(` and `)`
+     */
     public static final Pair PARENTHESES = pair("(", ")");
 
+    /**
+     * A pair of brackets: `[` and `]`
+     */
     public static final Pair BRACKETS = pair("[", "]");
 
+    /**
+     * Alias of {@link #BRACKETS}
+     */
     public static final Pair SQUARE_BRACKETS = BRACKETS;
 
+    /**
+     * A pair of braces: `{` and `}`
+     */
     public static final Pair BRACES = pair("{", "}");
 
+    /**
+     * Alias of {@link #BRACES}
+     */
     public static final Pair CURLY_BRACES = BRACES;
 
+    /**
+     * A pair of angle brackets: `<` and `>`
+     */
     public static final Pair DIAMOND = pair("<", ">");
 
+    /**
+     * Alias of {@link #DIAMOND}
+     */
     public static final Pair ANGLE_BRACKETS = DIAMOND;
 
+    /**
+     * A pair of single angle quotation mark: `‹` (`u2039`) and `›` (`u203a`)
+     */
     public static final Pair SINGLE_ANGLE_QUOTATION_MARK = pair("‹", "›");
 
+    /**
+     * A pair of double angle quotation mark: `\u00ab` (`u00ab`) and `\u00bb` (`u00bb`)
+     */
     public static final Pair DOUBLE_ANGLE_QUOTATION_MARK = pair("«", "»");
 
+    /**
+     * A pair of 书名号 (ShuMingHao, a Chevron-like symbol): `\u300a` (`u300a`) and `\u300b` (`u300b`)
+     */
     public static final Pair 书名号 = pair("《", "》");
 
+    /**
+     * Alias of {@link #书名号}
+     */
     public static final Pair SHU_MING_HAO = 书名号;
 
-    public static String fmt(String tmpl) {
-        return string(tmpl);
+    // ---- EOF CONSTANTS DEFINITION ----
+
+    /**
+     * Returns the template or `""` if template is `null`
+     * @param template a string
+     * @return the template or `""` if template is `null`
+     */
+    public static String fmt(String template) {
+        return string(template);
     }
 
     /**
      * A handy alias for {@link String#format(String, Object...)}
      *
-     * @param tmpl the message template
+     * @param template the message format template
      * @param args the message arguments
-     * @return the formatted string
+     * @return the formatted string or `""` if template is `null`
      */
-    public static String fmt(String tmpl, Object... args) {
-        if (0 == args.length) return tmpl;
-        return String.format(tmpl, args);
+    public static String fmt(String template, Object... args) {
+        if (0 == args.length) return template;
+        if (null == template) return "";
+        return String.format(template, args);
     }
 
-    public static String msgFmt(String tmpl) {
-        return S.string(tmpl);
+    /**
+     * Returns the template or `""` if template is `null`
+     * @param template a string
+     * @return the template or `""` if template is `null`
+     */
+    public static String msgFmt(String template) {
+        return S.string(template);
     }
 
     /**
      * A handy alias for {@link MessageFormat#format(String, Object...)}
      *
-     * @param tmpl the message template
+     * @param template the message template
      * @param args the message arguments
-     * @return the formatted string
+     * @return the formatted string or `""` if template is `null`
      */
-    public static String msgFmt(String tmpl, Object... args) {
-        if (0 == args.length) return tmpl;
-        return MessageFormat.format(tmpl, args);
+    public static String msgFmt(String template, Object... args) {
+        if (0 == args.length) return template;
+        if (null == template) return "";
+        return MessageFormat.format(template, args);
     }
 
     /**
      * alias of {@link #empty(String)}
      *
      * @param s the string to be checked
-     * @return true if `s` is `null` or `empty`
+     * @return `true` if the string is `null` or empty
      */
     public static boolean isEmpty(String s) {
         return empty(s);
     }
 
     /**
-     * Determine if a string is empty or null
+     * Check if a string is empty `""` or `null`
      *
      * @param s the string to be checked
-     * @return true if the string is null or empty (no spaces)
+     * @return `true` if the string is `null` or empty
      */
     public static boolean empty(String s) {
         return (null == s || 0 == s.length());
-    }
-
-    /**
-     * Determine if a string is all blank or empty or null.
-     *
-     * The way to determine if a string is all blank is to call
-     * {@link String#trim()} and compare the result with an empty
-     * string
-     *
-     * @param s the string to be checked
-     * @return true if the string is null or empty or all blanks
-     */
-    public static boolean blank(String s) {
-        return (null == s || 0 == s.trim().length());
     }
 
     /**
@@ -138,42 +216,56 @@ public class S {
     }
 
     /**
+     * Check if a string is blank or empty or `null`.
+     *
+     * The way to check if a string is blank is to call
+     * {@link String#trim()} and compare the result with
+     * an empty string
+     *
+     * @param s the string to be checked
+     * @return `true` if the string is `null` or empty or blank
+     */
+    public static boolean blank(String s) {
+        return (null == s || 0 == s.trim().length());
+    }
+
+    /**
      * alias of {@link #notEmpty(String)}
      *
      * @param s the string to be checked
-     * @return true if <code>s</code> is <code>null</code> or empty
+     * @return true if the string is neither `null` nor empty
      */
     public static boolean isNotEmpty(String s) {
         return notEmpty(s);
     }
 
     /**
-     * Antonym of {@link #empty(String)}
+     * Returns negative of {@link #empty(String)} call
      *
      * @param s the string to be checked
-     * @return true if <code>s</code> is not <code>null</code> or empty
+     * @return true if the string is neither `null` nor empty
      */
     public static boolean notEmpty(String s) {
         return !empty(s);
     }
 
     /**
-     * Antonym of {@link #blank(String)}
+     * Alias of {@link #notBlank(String)}
      *
      * @param s the string to be checked
-     * @return true if <code>s</code> is not <code>null</code> or empty or all in blank
+     * @return true if the string is not `null` and contains any chars that are not blank space
      */
-    public static boolean notBlank(String s) {
+    public static boolean isNotBlank(String s) {
         return !blank(s);
     }
 
     /**
-     * Antonym of {@link #blank(String)}
+     * Returns negative of {@link #blank(String)} call
      *
      * @param s the string to be checked
-     * @return true if <code>s</code> is not <code>null</code> or empty or all in blank
+     * @return true if the string is not `null` and contains any chars that are not blank space
      */
-    public static boolean isNotBlank(String s) {
+    public static boolean notBlank(String s) {
         return !blank(s);
     }
 
@@ -4944,5 +5036,10 @@ public class S {
 
     public static Val val(String s) {
         return new Val(s);
+    }
+
+    public static void main(String[] args) {
+        System.out.println("\u2039");
+        System.out.println(SINGLE_ANGLE_QUOTATION_MARK.right());
     }
 }

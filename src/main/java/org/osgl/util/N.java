@@ -11,13 +11,43 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.osgl.Lang.requireNotNull;
 import static org.osgl.util.E.illegalArgumentIf;
 
 /**
- * The namespace under which number relevant structures, functions and logics are
- * defined
+ * The namespace of number relevant utilities, functions and constants
  */
 public class N {
+
+    /**
+     * An empty `byte[]`
+     */
+    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+    /**
+     * An empty `short[]`
+     */
+    public static final short[] EMPTY_SHORT_ARRAY = new short[0];
+
+    /**
+     * An empty `int[]`
+     */
+    public static final int[] EMPTY_INT_ARRAY = new int[0];
+
+    /**
+     * An empty `float[]`
+     */
+    public static final float[] EMPTY_FLOAT_ARRAY = new float[0];
+
+    /**
+     * An empty `long[]`
+     */
+    public static final long[] EMPTY_LONG_ARRAY = new long[0];
+
+    /**
+     * An empty `double[]`
+     */
+    public static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
 
     private static Random random = new Random();
 
@@ -683,6 +713,11 @@ public class N {
         return n;
     }
 
+    public static int requirePositive(int n, String err, Object ... errArgs) {
+        illegalArgumentIf(n < 1, err, errArgs);
+        return n;
+    }
+
     public static float requirePositive(float n) {
         illegalArgumentIf(n <= 0.0f, "positive float required");
         return n;
@@ -706,8 +741,14 @@ public class N {
         public int positive() {
             return requirePositive(n);
         }
+        public int positive(String err, Object ... errArgs) {
+            return requirePositive(n, err, errArgs);
+        }
         public int negative() {
             return requireNegative(n);
+        }
+        public int nonNegative() {
+            return requireNonNegative(n);
         }
         public int equalTo(int x) {
             illegalArgumentIf(n == x, "n[%s] should be equal to %s", n, x);
@@ -835,6 +876,117 @@ public class N {
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
+    }
+
+    public static class _IsStr {
+        private String s;
+        private _IsStr(String s) {
+            this.s = S.string(s);
+        }
+        public boolean integer() {
+            return isInt(s);
+        }
+        public boolean number() {
+            return isNumeric(s);
+        }
+    }
+
+    public static _IsStr is(String s) {
+        return new _IsStr(s);
+    }
+
+    public static class _IsInt {
+        int n;
+        private _IsInt(int n) {
+            this.n = n;
+        }
+        public boolean negative() {
+            return 0 > n;
+        }
+        public boolean positive() {
+            return 0 < n;
+        }
+        public boolean zero() {
+            return 0 == n;
+        }
+        public boolean perfectSquare() {
+            return isPerfectSquare(n);
+        }
+    }
+
+    public static _IsInt is(int n) {
+        return new _IsInt(n);
+    }
+
+    public static class _IsLong {
+        long n;
+        private _IsLong(long n) {
+            this.n = n;
+        }
+        public boolean negative() {
+            return 0 > n;
+        }
+        public boolean positive() {
+            return 0 < n;
+        }
+        public boolean zero() {
+            return 0 == n;
+        }
+        public boolean perfectSquare() {
+            return isPerfectSquare(n);
+        }
+    }
+
+    public static _IsLong is(long n) {
+        return new _IsLong(n);
+    }
+
+    public static class _IsBigInteger {
+        private BigInteger n;
+
+        private _IsBigInteger(BigInteger n) {
+            this.n = n;
+        }
+
+        public boolean negative() {
+            return 0 > n.signum();
+        }
+
+        public boolean positive() {
+            return 0 < n.signum();
+        }
+
+        public boolean zero() {
+            return 0 == n.signum();
+        }
+    }
+
+    public static _IsBigInteger is(BigInteger n) {
+        return new _IsBigInteger(requireNotNull(n));
+    }
+
+    public static class _IsBigDecimal {
+        private BigDecimal n;
+
+        private _IsBigDecimal(BigDecimal n) {
+            this.n = n;
+        }
+
+        public boolean negative() {
+            return 0 > n.signum();
+        }
+
+        public boolean positive() {
+            return 0 < n.signum();
+        }
+
+        public boolean zero() {
+            return 0 == n.signum();
+        }
+    }
+
+    public static _IsBigDecimal is(BigDecimal n) {
+        return new _IsBigDecimal(requireNotNull(n));
     }
 
     /**

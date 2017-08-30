@@ -3,9 +3,22 @@ package org.osgl.util;
 import org.junit.Test;
 import org.osgl.$;
 
+import java.io.File;
+import java.util.regex.Pattern;
+
 import static org.osgl.util.S.F.wrapper;
 
 public class STest extends UtilTestBase {
+
+    @Test
+    public void testConstantsDefinition() {
+        eq(new String[0], S.EMPTY_ARRAY);
+        eq("\u0000", S.HSEP);
+        eq(Pattern.compile("[,;:\\s]+"), S.COMMON_SEP_PATTERN);
+        eq(File.separator, S.FILE_SEP);
+        eq(File.pathSeparator, S.PATH_SEP);
+    }
+
     @Test
     public void testAppend() {
         eq(S.str("a").append("b"), S.str("ab"));

@@ -235,7 +235,8 @@
     <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
     <maven.test.skip>false</maven.test.skip>
     <junit-benchmarks.version>0.7.2</junit-benchmarks.version>
-    <fastjson.version>1.2.33</fastjson.version>
+    <osgl-ut.version>1.0.0-BETA-1</osgl-ut.version>
+    <fastjson.version>1.2.37</fastjson.version>
   </properties>
 
   <licenses>
@@ -289,9 +290,9 @@
   <dependencies>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <groupId>org.osgl</groupId>
+      <artifactId>osgl-ut</artifactId>
+      <version>${osgl-ut.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -336,17 +337,6 @@
       <id>release</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.3</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
-          </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
