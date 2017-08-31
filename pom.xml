@@ -20,6 +20,12 @@
 * #26 Add method to generate Map from List
 * #11 Make API accept Visitor be real Visitor
 
+1.4.2
+* #35 Add Header style to `Keyword`
+
+1.4.1
+* #30 $.invokeMethod shall handle `InvocationTargetException` properly
+
 1.4.0
 * #25 Add alias to Osgl Tuple types
 * #24 Add more getter method to Osgl tuple types

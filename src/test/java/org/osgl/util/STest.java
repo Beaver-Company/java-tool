@@ -1,12 +1,11 @@
 package org.osgl.util;
 
+import static org.osgl.util.S.F.wrapper;
+
 import org.junit.Test;
 import org.osgl.$;
 
 import java.io.File;
-import java.util.regex.Pattern;
-
-import static org.osgl.util.S.F.wrapper;
 
 public class STest extends UtilTestBase {
 
@@ -14,7 +13,7 @@ public class STest extends UtilTestBase {
     public void testConstantsDefinition() {
         eq(new String[0], S.EMPTY_ARRAY);
         eq("\u0000", S.HSEP);
-        eq(Pattern.compile("[,;:\\s]+"), S.COMMON_SEP_PATTERN);
+        eq("[,;:\\s]+", S.COMMON_SEP_PATTERN.pattern());
         eq(File.separator, S.FILE_SEP);
         eq(File.pathSeparator, S.PATH_SEP);
     }
